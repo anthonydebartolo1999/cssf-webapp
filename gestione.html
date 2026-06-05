@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#161412" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="CSSF Staff" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>CSSF Staff | Gestione</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="manifest" href="manifest-staff.webmanifest?v=20260605-staff" />
+    <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="gestione" class="staff-app">
+    <div class="app-shell">
+      <header class="topbar staff-topbar">
+        <a class="brand-mini brand-button" href="gestione.html" data-view-link="gestione" aria-label="CSSF Staff home">
+          <img src="icons/logo-photoroom.png?v=20260605-logo" alt="" />
+          <strong>CSSF STAFF</strong>
+        </a>
+        <nav class="site-nav" aria-label="Navigazione staff">
+          <a href="#prenotazioni">Prenotazioni</a>
+          <a href="#voti">Voti</a>
+          <a href="#statistiche">Statistiche</a>
+          <span class="staff-public-tools"><button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">🔔</button><a href="index.html">Web app pubblica</a><button class="install-button" id="installButton" type="button" hidden>Installa staff</button></span>
+        </nav>
+      </header>
+      <main>
+        <section class="staff-section" id="staff" aria-labelledby="staff-title">
+          <div class="view-hero staff-hero">
+            <div>
+              <span class="section-label">Area gestione</span>
+              <h2 id="staff-title">Regia organizzatori</h2>
+              <p>Prenotazioni, voti e statistiche in un unico quadro operativo.</p>
+            </div>
+            <div class="staff-hero-status" aria-label="Stato gestionale">
+              <span>CSSF Staff</span>
+              <strong>Operativo</strong>
+            </div>
+          </div>
+          <section class="admin-login-panel" id="adminLoginPanel" aria-label="Accesso admin">
+            <div class="login-copy">
+              <span class="section-label">Accesso riservato</span>
+              <h2>Entra nella gestione</h2>
+              <p>Accedi con l'account staff Supabase per leggere e gestire prenotazioni, voti e strumenti operativi.</p>
+            </div>
+            <form id="adminLoginForm">
+              <label>Email staff <input name="email" type="email" autocomplete="username" placeholder="staff@cosenza..." /></label>
+              <label>Password <input name="password" type="password" autocomplete="current-password" /></label>
+              <details class="staff-fallback">
+                <summary>Accesso locale di emergenza</summary>
+                <label>PIN admin <input name="pin" type="password" inputmode="numeric" autocomplete="off" /></label>
+              </details>
+              <button class="primary-action" type="submit">Accedi</button>
+              <p class="auth-status" id="staffAuthStatus">Sessione staff non attiva.</p>
+            </form>
+          </section>
+          <div id="staffWorkspace" hidden>
+            <nav class="staff-command-grid" aria-label="Collegamenti gestione">
+              <a href="#prenotazioni"><span>01</span><strong>Prenotazioni</strong><small>Richieste e riepilogo</small></a>
+              <a href="#voti"><span>02</span><strong>Voti</strong><small>Classifiche e dettaglio nominativi</small></a>
+              <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>Analytics e conversioni</small></a>
+            </nav>
+            <section class="staff-work-area staff-area-bookings" id="prenotazioni" aria-labelledby="staff-bookings-title">
+              <div class="staff-area-heading"><div><span class="section-label">Prenotazioni</span><h2 id="staff-bookings-title">Richieste tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2></div><div class="staff-actions compact"><button class="ghost-link strong" id="copyReportButton" type="button">Copia report</button><button class="ghost-link strong" id="exportCsvButton" type="button">Esporta CSV</button><button class="ghost-link" id="adminLogoutButton" type="button">Logout</button></div></div>
+              <div class="booking-layout">
+                <article class="reservations-panel">
+                  <div class="reservations-heading">
+                    <div><span class="section-label">Richieste</span><h2>Richieste tavoli</h2></div>
+                    <div class="filters">
+                      <input id="searchInput" type="search" placeholder="Cerca nome, telefono, note" />
+                      <select id="dayFilter">
+                        <option value="all">Tutti i giorni</option>
+                        <option value="2026-06-26">26 giugno</option>
+                        <option value="2026-06-27">27 giugno</option>
+                        <option value="2026-06-28">28 giugno</option>
+                      </select>
+                      <select id="statusFilter">
+                        <option value="all">Tutti gli stati</option>
+                        <option value="pending">Da confermare</option>
+                        <option value="confirmed">Confermata</option>
+                        <option value="waiting">Lista attesa</option>
+                        <option value="cancelled">Annullata</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Cliente</th><th>Giorno</th><th>Turno</th><th>Persone</th><th>Tavoli</th><th>Stato</th><th>Azioni</th></tr></thead>
+                      <tbody id="reservationsTable"></tbody>
+                    </table>
+                  </div>
+                  <div class="empty-state" id="emptyState">Nessuna prenotazione trovata.</div>
+                </article>
+              </div>
+            </section>
+            <section class="staff-votes-panel staff-work-area staff-area-votes" id="voti" aria-labelledby="staff-votes-title">
+              <div class="reservations-heading">
+                <div><span class="section-label">Voti live</span><h2 id="staff-votes-title">Classifica votazioni <span class="staff-count-badge gold" id="metricVotes">0</span></h2></div>
+                <button class="ghost-link strong" id="clearVotesButton" type="button">Svuota voti test</button>
+              </div>
+              <div class="leaderboard-tabs" id="staffVoteTabs"></div>
+              <div class="staff-vote-layout">
+                <article class="leaderboard-panel compact"><div class="leaderboard-list" id="staffVoteLeaderboard"></div></article>
+                <article class="staff-vote-detail">
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Ora</th><th>Nome</th><th>Categoria</th><th>Stand</th></tr></thead>
+                      <tbody id="staffVotesTable"></tbody>
+                    </table>
+                  </div>
+                  <div class="empty-state" id="emptyStaffVotes">Nessun voto registrato.</div>
+                </article>
+              </div>
+            </section>
+            <section class="staff-work-area staff-area-stats" id="statistiche" aria-labelledby="staff-stats-title">
+              <div class="staff-area-heading"><div><span class="section-label">Statistiche</span><h2 id="staff-stats-title">Andamento web app <span class="staff-count-badge olive"><span id="metricTrucks">0</span> stand</span></h2></div></div>
+              <div class="analytics-chart-grid">
+                <article class="analytics-chart-card analytics-chart-card-wide">
+                  <div class="chart-heading">
+                    <div><span class="section-label">Permanenza</span><h3>Tempo medio in web app</h3></div>
+                    <strong id="metricAvgDuration">0s</strong>
+                  </div>
+                  <div class="analytics-line-chart" id="durationTrendChart"></div>
+                </article>
+                <article class="analytics-chart-card">
+                  <div class="chart-heading">
+                    <div><span class="section-label">Visite</span><h3>Sezioni viste</h3></div>
+                    <strong id="metricSectionViews">0</strong>
+                  </div>
+                  <div class="analytics-column-chart" id="sectionBarChart"></div>
+                </article>
+                <article class="analytics-chart-card">
+                  <div class="chart-heading">
+                    <div><span class="section-label">Click</span><h3>Sezioni cliccate</h3></div>
+                    <strong id="metricClicks">0</strong>
+                  </div>
+                  <div class="analytics-horizontal-chart" id="clickBarChart"></div>
+                </article>
+                <article class="analytics-chart-card analytics-session-card">
+                  <div class="chart-heading">
+                    <div><span class="section-label">Traffico</span><h3>Sessioni tracciate</h3></div>
+                    <strong id="metricSessions">0</strong>
+                  </div>
+                  <div class="analytics-mix-bars" id="eventMixBars"></div>
+                </article>
+              </div>
+              <div class="analytics-grid">
+                <article class="analytics-panel"><h3>Sezioni piu visitate</h3><div id="sectionStatsList"></div></article>
+                <article class="analytics-panel"><h3>Sezioni piu cliccate</h3><div id="clickStatsList"></div></article>
+                <article class="analytics-panel"><h3>Permanenza sessioni</h3><div id="durationStatsList"></div></article>
+              </div>
+              <div class="staff-actions"><button class="ghost-link strong" id="exportAnalyticsButton" type="button">Esporta analytics</button><button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button></div>
+            </section>
+          </div>
+        </section>
+      </main>
+      <footer class="app-footer" aria-label="Crediti"><span>&copy; 2026 Cosenza Super Street Food</span><span>Gestione staff</span></footer>
+    </div>
+    <template id="reservationRowTemplate"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></template>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js?v=20260605-pwa-v142"></script>
+  </body>
+</html>

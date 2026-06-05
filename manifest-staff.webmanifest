@@ -1,0 +1,58 @@
+{
+  "name": "CSSF Staff",
+  "short_name": "CSSF Staff",
+  "description": "Gestione prenotazioni, stand e statistiche per Cosenza Super Street Food.",
+  "id": "./gestione.html",
+  "start_url": "./gestione.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fffaf3",
+  "theme_color": "#161412",
+  "lang": "it",
+  "categories": ["productivity", "food", "events"],
+  "icons": [
+    {
+      "src": "icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Metriche",
+      "short_name": "Metriche",
+      "description": "Apri il quadro metriche staff.",
+      "url": "./gestione.html#metriche",
+      "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Prenotazioni",
+      "short_name": "Prenotazioni",
+      "description": "Apri la gestione prenotazioni.",
+      "url": "./gestione.html#prenotazioni",
+      "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Stand",
+      "short_name": "Stand",
+      "description": "Apri la gestione stand.",
+      "url": "./gestione.html#stand",
+      "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Statistiche",
+      "short_name": "Statistiche",
+      "description": "Apri le statistiche operative.",
+      "url": "./gestione.html#statistiche",
+      "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

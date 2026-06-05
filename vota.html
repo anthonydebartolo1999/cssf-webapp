@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#161412" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="CSSF" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Cosenza Super Street Food | Vota</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="manifest" href="manifest.webmanifest?v=20260605-icon2" />
+    <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
+    <link rel="stylesheet" href="styles.css?v=78" />
+  </head>
+  <body data-page="vota">
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand-mini brand-button" href="index.html" data-view-link="home" aria-label="Cosenza Super Street Food home"><img src="icons/logo-photoroom.png?v=20260605-logo" alt="" /><strong>COSENZASUPERSTREETFOOD</strong></a>
+        <nav class="site-nav" aria-label="Navigazione principale">
+          <a href="index.html" data-view-link="home">Home</a><a href="mappa.html" data-view-link="mappa">Mappa</a><a href="truck.html" data-view-link="truck">Stand</a><a href="vota.html" data-view-link="vota">Vota</a><a href="prenota.html" data-view-link="prenota">Prenota</a><a href="programma.html" data-view-link="programma">Programma</a><a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
+        </nav>
+        <div class="topbar-actions"><button class="install-button" id="installButton" type="button" hidden>Installa app</button><a class="ghost-link" href="https://www.instagram.com/cosenzasuperstreetfood/" target="_blank" rel="noreferrer">Instagram</a></div>
+      </header>
+      <main>
+        <section class="vote-section" id="vota" aria-labelledby="vota-title">
+          <div class="view-hero"><span class="section-label">Classifiche live</span><h2 id="vota-title">Vota il tuo stand preferito</h2><p>Ogni voto alimenta le classifiche live: top street food, panini, tradizione, dolci e drink.</p></div>
+          <div class="vote-layout">
+            <form class="vote-form" id="voteForm">
+              <label>Categoria<select id="voteCategory" name="category"><option value="top-street-food">Top Street Food</option><option value="top-panino">Miglior Panino</option><option value="top-tradizione">Miglior Tradizione</option><option value="top-dessert">Miglior Dolce</option><option value="top-drink">Miglior Drink</option></select></label>
+              <label>Stand<select id="voteTruck" name="truckId"></select></label>
+              <label>Nome<input name="voter" type="text" placeholder="Il tuo nome" required /></label>
+              <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
+              <button class="primary-action" type="submit">Invia voto</button>
+            </form>
+            <article class="leaderboard-panel"><div class="panel-heading compact"><div><span class="section-label">Leaderboard</span><h2>Classifica community</h2></div></div><div class="leaderboard-tabs" id="leaderboardTabs"></div><div class="leaderboard-list" id="leaderboardList"></div></article>
+          </div>
+        </section>
+      </main>
+      <footer class="app-footer" aria-label="Crediti"><span>&copy; 2026 Cosenza Super Street Food</span><span><a href="privacy.html">Privacy</a></span><span>Designed &amp; Developed by Anthony De Bartolo</span></footer>
+    </div>
+    <div class="consent-banner" id="consentBanner" hidden><div><strong>Cookie e statistiche</strong><p>Usiamo solo statistiche locali e anonime per migliorare la web app dell'evento. Leggi l'<a href="privacy.html">informativa privacy</a>.</p></div><div class="consent-actions"><button class="ghost-link" id="rejectAnalyticsButton" type="button">Rifiuta</button><button class="primary-action" id="acceptAnalyticsButton" type="button">Accetta</button></div></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js?v=20260605-pwa-v142"></script>
+  </body>
+</html>
