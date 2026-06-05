@@ -32,7 +32,7 @@
     <link rel="manifest" href="manifest.webmanifest?v=20260605-icon2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=78" />
+    <link rel="stylesheet" href="styles.css?v=20260605-pwa-v146" />
   </head>
   <body data-page="home">
     <div class="app-shell">
@@ -109,6 +109,55 @@
       </div>
     </div>
 
-    <script src="app.js?v=20260605-pwa-v142"></script>
+    <script>
+      (() => {
+        const eventStart = new Date("2026-06-26T19:00:00+02:00").getTime();
+        const countdownStart = new Date("2026-05-29T00:00:00+02:00").getTime();
+        const setText = (id, value) => {
+          const element = document.getElementById(id);
+          if (element) element.textContent = value;
+        };
+        const tick = () => {
+          const now = Date.now();
+          const safeDistance = Math.max(0, eventStart - now);
+          const totalSeconds = Math.floor(safeDistance / 1000);
+          const days = Math.floor(totalSeconds / 86400);
+          const hours = Math.floor((totalSeconds % 86400) / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+          const progress = Math.min(100, Math.max(0, ((now - countdownStart) / (eventStart - countdownStart)) * 100));
+
+          setText("countdownDays", String(days));
+          setText("countdownHours", String(hours).padStart(2, "0"));
+          setText("countdownMinutes", String(minutes).padStart(2, "0"));
+          setText("countdownSeconds", String(seconds).padStart(2, "0"));
+
+          const fill = document.getElementById("countdownProgressFill");
+          const burger = document.getElementById("countdownBurger");
+          const flag = document.getElementById("countdownFlag");
+          const progressWrap = fill?.parentElement;
+          if (!fill || !burger || !progressWrap) return;
+
+          const computedProgress = window.getComputedStyle(progressWrap);
+          const trackLeft = Number.parseFloat(computedProgress.getPropertyValue("--progress-track-left")) || 28;
+          const trackRight = Number.parseFloat(computedProgress.getPropertyValue("--progress-track-right")) || 58;
+          const progressWidth = progressWrap.clientWidth || 0;
+          const trackWidth = Math.max(0, progressWidth - trackLeft - trackRight);
+          const progressFillWidth = trackWidth * (progress / 100);
+          const progressLeft = progressWidth ? trackLeft + progressFillWidth : trackLeft;
+          const left = `${progressLeft.toFixed(2)}px`;
+
+          progressWrap.style.setProperty("--burger-progress", `${progress.toFixed(3)}%`);
+          progressWrap.style.setProperty("--burger-progress-ratio", String(progress / 100));
+          progressWrap.style.setProperty("--burger-progress-width", `${progressFillWidth.toFixed(2)}px`);
+          progressWrap.style.setProperty("--burger-firefly-left", left);
+          burger.style.left = left;
+          if (flag) flag.style.opacity = "1";
+        };
+        tick();
+        window.setInterval(tick, 1000);
+      })();
+    </script>
+    <script src="app.js?v=20260605-pwa-v146"></script>
   </body>
 </html>

@@ -7,14 +7,15 @@ const ANALYTICS_STORAGE_KEY = "cssf-analytics-v1";
 const ANALYTICS_CONSENT_KEY = "cssf-analytics-consent-v1";
 const PRIVACY_BANNER_SEEN_KEY = "cssf-privacy-banner-seen-v1";
 const ADMIN_SESSION_KEY = "cssf-admin-session-v1";
+const SERVICE_WORKER_ACTIVE_VERSION_KEY = "cssf-service-worker-active-version";
 const CAPACITY_KEY = "cssf-capacity-v2";
 const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const ADMIN_FALLBACK_PIN = "2606";
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v142";
-const SERVICE_WORKER_VERSION = "20260605-pwa-v142";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v146";
+const SERVICE_WORKER_VERSION = "20260605-pwa-v146";
 const SERVICE_WORKER_URL = `./service-worker.js?v=${SERVICE_WORKER_VERSION}`;
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
@@ -380,6 +381,7 @@ let voteLeaderboardRows = [];
 let remoteVoteLeaderboardSynced = false;
 let knownRemoteReservationIds = new Set(reservations.map((reservation) => reservation.id));
 let remoteReservationsSynced = false;
+let serviceWorkerReloading = false;
 sessionStorage.setItem("cssf-session-id", sessionId);
 
 redirectLegacyHashRoute();
@@ -2510,6 +2512,15 @@ function registerServiceWorker() {
     updateInstallUi();
     return;
   }
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (serviceWorkerReloading) return;
+    const activeVersion = sessionStorage.getItem(SERVICE_WORKER_ACTIVE_VERSION_KEY);
+    sessionStorage.setItem(SERVICE_WORKER_ACTIVE_VERSION_KEY, SERVICE_WORKER_VERSION);
+    if (activeVersion === SERVICE_WORKER_VERSION) return;
+    serviceWorkerReloading = true;
+    window.location.reload();
+  });
 
   window.addEventListener("load", async () => {
     try {
