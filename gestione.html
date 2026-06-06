@@ -15,10 +15,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
-    <link rel="manifest" href="manifest-staff.webmanifest?v=20260605-staff" />
+    <link rel="manifest" href="manifest-staff.webmanifest?v=20260606-staff-v2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260605-pwa-v146" />
+    <link rel="stylesheet" href="styles.css?v=20260606-pwa-v152" />
   </head>
   <body data-page="gestione" class="staff-app">
     <div class="app-shell">
@@ -56,10 +56,6 @@
             <form id="adminLoginForm">
               <label>Email staff <input name="email" type="email" autocomplete="username" placeholder="staff@cosenza..." /></label>
               <label>Password <input name="password" type="password" autocomplete="current-password" /></label>
-              <details class="staff-fallback">
-                <summary>Accesso locale di emergenza</summary>
-                <label>PIN admin <input name="pin" type="password" inputmode="numeric" autocomplete="off" /></label>
-              </details>
               <button class="primary-action" type="submit">Accedi</button>
               <p class="auth-status" id="staffAuthStatus">Sessione staff non attiva.</p>
             </form>
@@ -168,6 +164,6 @@
     </div>
     <template id="reservationRowTemplate"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></template>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260605-pwa-v146"></script>
+    <script src="app.js?v=20260606-pwa-v152"></script>
   </body>
 </html>

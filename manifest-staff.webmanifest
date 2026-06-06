@@ -1,7 +1,7 @@
 {
   "name": "CSSF Staff",
   "short_name": "CSSF Staff",
-  "description": "Gestione prenotazioni, stand e statistiche per Cosenza Super Street Food.",
+  "description": "Gestione prenotazioni, voti e statistiche per Cosenza Super Street Food.",
   "id": "./gestione.html",
   "start_url": "./gestione.html",
   "scope": "./",
@@ -27,24 +27,17 @@
   ],
   "shortcuts": [
     {
-      "name": "Metriche",
-      "short_name": "Metriche",
-      "description": "Apri il quadro metriche staff.",
-      "url": "./gestione.html#metriche",
-      "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
-    },
-    {
       "name": "Prenotazioni",
-      "short_name": "Prenotazioni",
+      "short_name": "Prenota",
       "description": "Apri la gestione prenotazioni.",
       "url": "./gestione.html#prenotazioni",
       "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Stand",
-      "short_name": "Stand",
-      "description": "Apri la gestione stand.",
-      "url": "./gestione.html#stand",
+      "name": "Voti",
+      "short_name": "Voti",
+      "description": "Apri classifiche e dettagli votazioni.",
+      "url": "./gestione.html#voti",
       "icons": [{ "src": "icons/app-icon-192.png", "sizes": "192x192" }]
     },
     {

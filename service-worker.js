@@ -1,4 +1,4 @@
-const CACHE_NAME = "cssf-pwa-v146";
+const CACHE_NAME = "cssf-pwa-v152";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());

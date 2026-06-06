@@ -58,6 +58,33 @@ create index if not exists votes_created_at_idx on public.votes (created_at desc
 create index if not exists votes_category_idx on public.votes (category);
 create index if not exists votes_truck_id_idx on public.votes (truck_id);
 
+create table if not exists public.reviews (
+  id text primary key,
+  created_at timestamptz not null default now(),
+  reviewer text not null,
+  rating integer not null check (rating between 1 and 5),
+  title text not null,
+  body text not null
+);
+
+create index if not exists reviews_created_at_idx on public.reviews (created_at desc);
+create index if not exists reviews_rating_idx on public.reviews (rating);
+
+create table if not exists public.analytics_events (
+  id text primary key,
+  created_at timestamptz not null default now(),
+  type text not null check (type in ('visit', 'section_view', 'click', 'form_submit', 'conversion', 'consent', 'admin')),
+  label text not null,
+  section text,
+  session_id text not null,
+  details jsonb not null default '{}'::jsonb
+);
+
+create index if not exists analytics_events_created_at_idx on public.analytics_events (created_at desc);
+create index if not exists analytics_events_type_idx on public.analytics_events (type);
+create index if not exists analytics_events_section_idx on public.analytics_events (section);
+create index if not exists analytics_events_session_id_idx on public.analytics_events (session_id);
+
 create or replace view public.vote_leaderboard as
 select
   category,
@@ -65,6 +92,15 @@ select
   count(*)::integer as vote_count
 from public.votes
 group by category, truck_id;
+
+create or replace view public.reservation_slot_usage as
+select
+  day,
+  slot,
+  coalesce(sum(guests) filter (where status in ('pending', 'confirmed')), 0)::integer as used_guests,
+  count(*) filter (where status in ('pending', 'confirmed'))::integer as active_reservations
+from public.reservations
+group by day, slot;
 
 create table if not exists public.staff_members (
   user_id uuid primary key references auth.users (id) on delete cascade,
@@ -112,6 +148,8 @@ for each row execute function public.set_updated_at();
 alter table public.reservations enable row level security;
 alter table public.trucks enable row level security;
 alter table public.votes enable row level security;
+alter table public.reviews enable row level security;
+alter table public.analytics_events enable row level security;
 
 grant insert on public.reservations to anon;
 grant select, update, delete on public.reservations to authenticated;
@@ -121,7 +159,12 @@ revoke select on public.votes from anon;
 grant insert on public.votes to anon;
 grant select, insert on public.votes to authenticated;
 grant delete on public.votes to authenticated;
+grant select, insert on public.reviews to anon, authenticated;
+grant delete on public.reviews to authenticated;
+grant insert on public.analytics_events to anon, authenticated;
+grant select, delete on public.analytics_events to authenticated;
 grant select on public.vote_leaderboard to anon, authenticated;
+grant select on public.reservation_slot_usage to anon, authenticated;
 grant select on public.staff_members to authenticated;
 grant execute on function public.is_staff(uuid) to authenticated;
 
@@ -238,6 +281,58 @@ for delete
 to authenticated
 using (public.is_staff());
 
+drop policy if exists "Public can read reviews" on public.reviews;
+create policy "Public can read reviews"
+on public.reviews
+for select
+to anon, authenticated
+using (true);
+
+drop policy if exists "Public can create reviews" on public.reviews;
+create policy "Public can create reviews"
+on public.reviews
+for insert
+to anon, authenticated
+with check (
+  rating between 1 and 5
+  and char_length(trim(reviewer)) between 1 and 80
+  and char_length(trim(title)) between 2 and 120
+  and char_length(trim(body)) between 10 and 800
+);
+
+drop policy if exists "Staff can delete reviews" on public.reviews;
+create policy "Staff can delete reviews"
+on public.reviews
+for delete
+to authenticated
+using (public.is_staff());
+
+drop policy if exists "Public can create analytics events" on public.analytics_events;
+create policy "Public can create analytics events"
+on public.analytics_events
+for insert
+to anon, authenticated
+with check (
+  type in ('visit', 'section_view', 'click', 'form_submit', 'conversion', 'consent', 'admin')
+  and char_length(trim(label)) between 1 and 180
+  and char_length(trim(coalesce(section, 'app'))) between 1 and 80
+  and char_length(trim(session_id)) between 8 and 80
+);
+
+drop policy if exists "Staff can read analytics events" on public.analytics_events;
+create policy "Staff can read analytics events"
+on public.analytics_events
+for select
+to authenticated
+using (public.is_staff());
+
+drop policy if exists "Staff can delete analytics events" on public.analytics_events;
+create policy "Staff can delete analytics events"
+on public.analytics_events
+for delete
+to authenticated
+using (public.is_staff());
+
 insert into public.trucks (id, code, name, category, zone, menu, color, status, x, y, map_positions)
 values
   ('stand-afterlife', 'S01', 'Afterlife', 'cocktail', 'Area drink', 'Cocktail freschi e gustosi per accompagnare le serate.', '#7c3aed', 'open', 52.3, 16.1, null),
@@ -256,12 +351,6 @@ values
   ('stand-willy-crak', 'S14', 'Willy Crak', 'brace', 'Area brace', 'Arrosticini, caciocavallo impiccato e novita con bistecca di pecora.', '#b45309', 'open', 10.7, 30.6, null),
   ('stand-zia-ne', 'S15', 'Zia Ne', 'pizza', 'Area pizza', 'Pizza a portafoglio e gustose frittatine di pasta.', '#e11d48', 'open', 56.3, 61, null)
 on conflict (id) do nothing;
-
--- Temporary local/demo policies if you want gestione.html to read/update before staff auth exists.
--- Do not use these on the public production domain.
--- create policy "Demo anon can read reservations" on public.reservations for select to anon using (true);
--- create policy "Demo anon can update reservations" on public.reservations for update to anon using (true) with check (status in ('pending', 'confirmed', 'waiting', 'cancelled'));
--- create policy "Demo anon can delete reservations" on public.reservations for delete to anon using (true);
 
 do $$
 begin
@@ -282,6 +371,22 @@ $$;
 do $$
 begin
   alter publication supabase_realtime add table public.votes;
+exception
+  when duplicate_object then null;
+end;
+$$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.reviews;
+exception
+  when duplicate_object then null;
+end;
+$$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.analytics_events;
 exception
   when duplicate_object then null;
 end;

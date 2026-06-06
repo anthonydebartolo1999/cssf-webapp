@@ -6,23 +6,22 @@ const VOTE_STORAGE_KEY = "cssf-votes-v1";
 const ANALYTICS_STORAGE_KEY = "cssf-analytics-v1";
 const ANALYTICS_CONSENT_KEY = "cssf-analytics-consent-v1";
 const PRIVACY_BANNER_SEEN_KEY = "cssf-privacy-banner-seen-v1";
-const ADMIN_SESSION_KEY = "cssf-admin-session-v1";
-const SERVICE_WORKER_ACTIVE_VERSION_KEY = "cssf-service-worker-active-version";
-const CAPACITY_KEY = "cssf-capacity-v2";
+const SERVICE_WORKER_RESET_KEY = "cssf-service-worker-reset-v1";
 const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
-const ADMIN_FALLBACK_PIN = "2606";
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v146";
-const SERVICE_WORKER_VERSION = "20260605-pwa-v146";
-const SERVICE_WORKER_URL = `./service-worker.js?v=${SERVICE_WORKER_VERSION}`;
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v152";
+const SERVICE_WORKER_VERSION = "20260606-pwa-v152";
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
 const SUPABASE_RESERVATIONS_TABLE = "reservations";
 const SUPABASE_TRUCKS_TABLE = "trucks";
 const SUPABASE_VOTES_TABLE = "votes";
+const SUPABASE_REVIEWS_TABLE = "reviews";
+const SUPABASE_ANALYTICS_TABLE = "analytics_events";
 const SUPABASE_VOTE_LEADERBOARD_VIEW = "vote_leaderboard";
+const SUPABASE_RESERVATION_SLOT_USAGE_VIEW = "reservation_slot_usage";
 
 const eventStart = new Date("2026-06-26T19:00:00+02:00");
 const countdownStart = new Date("2026-05-29T00:00:00+02:00");
@@ -363,7 +362,7 @@ let reviews = loadReviews();
 let trucks = loadTrucks();
 let votes = loadVotes();
 let analyticsEvents = loadAnalyticsEvents();
-let capacityPerSlot = Number(localStorage.getItem(CAPACITY_KEY)) || DEFAULT_CAPACITY_PER_SLOT;
+let capacityPerSlot = DEFAULT_CAPACITY_PER_SLOT;
 let deferredInstallPrompt = null;
 let selectedTruckId = sessionStorage.getItem("cssf-selected-truck") || trucks[0]?.id || "";
 let activeLeaderboardCategory = voteCategories[0].value;
@@ -373,6 +372,8 @@ let supabaseClient = createSupabaseClient();
 let reservationsRealtimeChannel = null;
 let trucksRealtimeChannel = null;
 let votesRealtimeChannel = null;
+let reviewsRealtimeChannel = null;
+let analyticsRealtimeChannel = null;
 let staffSession = null;
 let lastReservationRemoteError = "";
 let lastTruckRemoteError = "";
@@ -381,7 +382,9 @@ let voteLeaderboardRows = [];
 let remoteVoteLeaderboardSynced = false;
 let knownRemoteReservationIds = new Set(reservations.map((reservation) => reservation.id));
 let remoteReservationsSynced = false;
-let serviceWorkerReloading = false;
+let reservationSlotUsage = new Map();
+let remoteReservationSlotUsageSynced = false;
+let reservationSlotUsageRefreshTimer = null;
 sessionStorage.setItem("cssf-session-id", sessionId);
 
 redirectLegacyHashRoute();
@@ -438,6 +441,8 @@ cleanupLegacyCaches();
 setupSupabaseReservations();
 setupSupabaseTrucks();
 setupSupabaseVotes();
+setupSupabaseReviews();
+setupSupabaseAnalytics();
 
 function bindEvent(element, eventName, handler) {
   element?.addEventListener(eventName, handler);
@@ -457,7 +462,7 @@ async function cleanupLegacyCaches() {
 
   try {
     const keys = await caches.keys();
-    const legacyKeys = keys.filter((key) => key.startsWith("cssf-pwa-") && key !== ACTIVE_PWA_CACHE_NAME);
+    const legacyKeys = keys.filter((key) => key.startsWith("cssf-pwa-"));
     await Promise.all(legacyKeys.map((key) => caches.delete(key)));
   } catch {}
 }
@@ -501,12 +506,19 @@ async function handleBookingSubmit(event) {
     tables: suggestTables(guests),
   };
 
+  const remoteSaved = await saveReservationRemote(reservation);
+  if (!remoteSaved) {
+    showToast(`Prenotazione non inviata: ${lastReservationRemoteError || "Supabase non raggiungibile"}. Riprova.`);
+    return;
+  }
+
   reservations.unshift(reservation);
   saveReservations();
-  const remoteSaved = await saveReservationRemote(reservation);
+  incrementReservationSlotUsage(day, slot, guests);
   bookingForm.reset();
   bookingForm.guests.value = 4;
   render();
+  refreshReservationSlotUsageFromRemote();
   trackEvent("conversion", "prenotazione inviata", { section: "prenota", code: reservation.id });
 
   const remainingSeats = status === "waiting" ? available : Math.max(0, available - guests);
@@ -514,14 +526,10 @@ async function handleBookingSubmit(event) {
     status === "waiting"
       ? "Turno pieno: richiesta inserita in lista attesa."
       : `Richiesta registrata: restano ${remainingSeats} posti disponibili.`;
-  showToast(
-    remoteSaved
-      ? `${message} Codice ${reservation.id}`
-      : `${message} Codice ${reservation.id}. Backend non collegato: ${lastReservationRemoteError || "salvata solo localmente"}`,
-  );
+  showToast(`${message} Codice ${reservation.id}`);
 }
 
-function handleReviewSubmit(event) {
+async function handleReviewSubmit(event) {
   event.preventDefault();
 
   const formData = new FormData(reviewForm);
@@ -534,12 +542,18 @@ function handleReviewSubmit(event) {
     body: cleanText(formData.get("body")),
   };
 
+  const remoteSaved = await saveReviewRemote(review);
+  if (!remoteSaved) {
+    showToast("Recensione non pubblicata: Supabase non raggiungibile. Riprova.");
+    return;
+  }
+
   reviews.unshift(review);
   saveReviews();
   reviewForm.reset();
   renderReviews();
   trackEvent("conversion", "recensione pubblicata", { section: "recensioni", rating: review.rating });
-  showToast("Recensione pubblicata localmente.");
+  showToast("Recensione pubblicata.");
 }
 
 async function handleVoteSubmit(event) {
@@ -562,23 +576,26 @@ async function handleVoteSubmit(event) {
     voter: cleanText(formData.get("voter")),
   };
 
+  const remoteSaved = await saveVoteRemote(vote);
+  if (!remoteSaved) {
+    showToast(`Voto non inviato: ${lastVoteRemoteError || "Supabase non raggiungibile"}. Riprova.`);
+    return;
+  }
+
   votes.unshift(vote);
   saveVotes();
   selectedTruckId = truckId;
   activeLeaderboardCategory = String(formData.get("category"));
+  remoteVoteLeaderboardSynced = false;
   voteForm.reset();
   render();
-  const remoteSaved = await saveVoteRemote(vote);
+  refreshVoteLeaderboardFromRemote();
   trackEvent("conversion", "voto inviato", {
     section: "vota",
     category: String(formData.get("category")),
     truckId,
   });
-  showToast(
-    remoteSaved
-      ? `Voto registrato per ${truck.name}.`
-      : `Voto registrato localmente: ${lastVoteRemoteError || "backend non disponibile"}.`,
-  );
+  showToast(`Voto registrato per ${truck.name}.`);
 }
 
 async function handleTruckFormSubmit(event) {
@@ -601,23 +618,23 @@ async function handleTruckFormSubmit(event) {
     y: clampNumber(Number(formData.get("y")), 12, 88),
   };
 
+  const remoteSaved = await saveTruckRemote(truck);
+  if (!remoteSaved) {
+    showToast(`Stand non salvato: ${lastTruckRemoteError || "Supabase non raggiungibile"}.`);
+    return;
+  }
+
   if (existing) {
     trucks = trucks.map((item) => (item.id === existing.id ? truck : item));
   } else {
     trucks.push(truck);
   }
-
   selectedTruckId = id;
   saveTrucks();
   resetTruckForm();
   render();
-  const remoteSaved = await saveTruckRemote(truck);
   trackEvent("admin", "stand salvato", { truckId: id });
-  showToast(
-    remoteSaved
-      ? "Stand salvato e sincronizzato."
-      : `Stand salvato localmente: ${lastTruckRemoteError || "backend non disponibile"}.`,
-  );
+  showToast("Stand salvato e sincronizzato.");
 }
 
 function handleCapacityChange() {
@@ -625,7 +642,6 @@ function handleCapacityChange() {
 
   capacityPerSlot = clampNumber(Number(capacityInput.value), SEATS_PER_TABLE, DEFAULT_CAPACITY_PER_SLOT);
   capacityInput.value = capacityPerSlot;
-  localStorage.setItem(CAPACITY_KEY, String(capacityPerSlot));
   render();
 }
 
@@ -671,11 +687,15 @@ async function setupSupabaseReservations() {
     return;
   }
 
-  await refreshReservationsFromRemote();
+  if (!bookingForm && !slotsGrid && !availabilityReadout) return;
+
+  await refreshReservationSlotUsageFromRemote();
+  startReservationSlotUsagePolling();
 }
 
 async function setupSupabaseTrucks() {
   if (!supabaseClient) return;
+  if (!festivalMap && !selectedTruckCard && !truckGrid && !voteTruck && !leaderboardList && !staffVoteLeaderboard && !truckAdminTable) return;
 
   await refreshTrucksFromRemote();
   subscribeToTruckChanges();
@@ -683,6 +703,7 @@ async function setupSupabaseTrucks() {
 
 async function setupSupabaseVotes() {
   if (!supabaseClient) return;
+  if (!voteForm && !leaderboardList && !staffVoteLeaderboard && !staffVotesTable && !clearVotesButton) return;
 
   if (staffSession) {
     await refreshVotesFromRemote();
@@ -690,6 +711,21 @@ async function setupSupabaseVotes() {
     await refreshVoteLeaderboardFromRemote();
   }
   subscribeToVoteChanges();
+}
+
+async function setupSupabaseReviews() {
+  if (!supabaseClient) return;
+  if (!reviewForm && !reviewsList) return;
+
+  await refreshReviewsFromRemote();
+  subscribeToReviewChanges();
+}
+
+async function setupSupabaseAnalytics() {
+  if (!supabaseClient || !isStaffPage() || !staffSession) return;
+
+  await refreshAnalyticsFromRemote();
+  subscribeToAnalyticsChanges();
 }
 
 async function refreshReservationsFromRemote() {
@@ -708,6 +744,7 @@ async function refreshReservationsFromRemote() {
       announceNewRemoteReservations(remoteReservations);
     }
     reservations = remoteReservations;
+    syncReservationSlotUsageFromReservations(remoteReservations);
     knownRemoteReservationIds = new Set(reservations.map((reservation) => reservation.id));
     remoteReservationsSynced = true;
     saveReservations();
@@ -718,6 +755,52 @@ async function refreshReservationsFromRemote() {
   }
 }
 
+async function refreshReservationSlotUsageFromRemote() {
+  if (!supabaseClient) return false;
+
+  try {
+    const { data, error } = await supabaseClient.from(SUPABASE_RESERVATION_SLOT_USAGE_VIEW).select("*");
+    if (error || !Array.isArray(data)) return false;
+
+    reservationSlotUsage = new Map(
+      data.map((row) => [getSlotUsageKey(row.day, row.slot), Number(row.used_guests) || 0]),
+    );
+    remoteReservationSlotUsageSynced = true;
+    render();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function startReservationSlotUsagePolling() {
+  if (reservationSlotUsageRefreshTimer || isStaffPage()) return;
+  reservationSlotUsageRefreshTimer = window.setInterval(refreshReservationSlotUsageFromRemote, 45000);
+}
+
+function syncReservationSlotUsageFromReservations(rows) {
+  const usage = new Map();
+  rows
+    .filter((reservation) => activeStatuses.has(reservation.status))
+    .forEach((reservation) => {
+      const key = getSlotUsageKey(reservation.day, reservation.slot);
+      usage.set(key, (usage.get(key) || 0) + Number(reservation.guests || 0));
+    });
+  reservationSlotUsage = usage;
+  remoteReservationSlotUsageSynced = true;
+}
+
+function incrementReservationSlotUsage(day, slot, guests) {
+  if (!remoteReservationSlotUsageSynced) return;
+
+  const key = getSlotUsageKey(day, slot);
+  reservationSlotUsage.set(key, (reservationSlotUsage.get(key) || 0) + Number(guests || 0));
+}
+
+function getSlotUsageKey(day, slot) {
+  return `${day}::${slot}`;
+}
+
 function subscribeToReservationChanges() {
   if (!supabaseClient || reservationsRealtimeChannel) return;
 
@@ -726,7 +809,7 @@ function subscribeToReservationChanges() {
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: SUPABASE_RESERVATIONS_TABLE },
-      () => refreshReservationsFromRemote(),
+      () => (isStaffPage() && staffSession ? refreshReservationsFromRemote() : refreshReservationSlotUsageFromRemote()),
     )
     .subscribe();
 }
@@ -823,6 +906,69 @@ function subscribeToVoteChanges() {
     .subscribe();
 }
 
+async function refreshReviewsFromRemote() {
+  if (!supabaseClient) return false;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_REVIEWS_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !Array.isArray(data)) return false;
+
+    reviews = data.map(mapReviewFromRemote);
+    saveReviews();
+    renderReviews();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function subscribeToReviewChanges() {
+  if (!supabaseClient || reviewsRealtimeChannel) return;
+
+  reviewsRealtimeChannel = supabaseClient
+    .channel("cssf-reviews-realtime")
+    .on("postgres_changes", { event: "*", schema: "public", table: SUPABASE_REVIEWS_TABLE }, () =>
+      refreshReviewsFromRemote(),
+    )
+    .subscribe();
+}
+
+async function refreshAnalyticsFromRemote() {
+  if (!supabaseClient || !staffSession) return false;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_ANALYTICS_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(MAX_ANALYTICS_EVENTS);
+
+    if (error || !Array.isArray(data)) return false;
+
+    analyticsEvents = data.map(mapAnalyticsEventFromRemote);
+    saveAnalyticsEvents();
+    renderAnalyticsDashboard();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function subscribeToAnalyticsChanges() {
+  if (!supabaseClient || analyticsRealtimeChannel || !staffSession) return;
+
+  analyticsRealtimeChannel = supabaseClient
+    .channel("cssf-analytics-realtime")
+    .on("postgres_changes", { event: "*", schema: "public", table: SUPABASE_ANALYTICS_TABLE }, () =>
+      refreshAnalyticsFromRemote(),
+    )
+    .subscribe();
+}
+
 async function initializeStaffAuth() {
   if (!isStaffPage()) {
     renderAdminAccess();
@@ -831,7 +977,7 @@ async function initializeStaffAuth() {
 
   if (!supabaseClient?.auth) {
     renderAdminAccess();
-    setStaffAuthStatus("Supabase non disponibile: usa solo il fallback locale.");
+    setStaffAuthStatus("Supabase non disponibile: controlla connessione e script CDN.");
     return;
   }
 
@@ -848,8 +994,10 @@ async function initializeStaffAuth() {
     if (staffSession) {
       refreshReservationsFromRemote();
       refreshVotesFromRemote();
+      refreshAnalyticsFromRemote();
       subscribeToReservationChanges();
       subscribeToVoteChanges();
+      subscribeToAnalyticsChanges();
     }
   });
 
@@ -857,8 +1005,10 @@ async function initializeStaffAuth() {
   if (staffSession) {
     await refreshReservationsFromRemote();
     await refreshVotesFromRemote();
+    await refreshAnalyticsFromRemote();
     subscribeToReservationChanges();
     subscribeToVoteChanges();
+    subscribeToAnalyticsChanges();
   }
 }
 
@@ -1339,6 +1489,12 @@ async function deleteTruck(id) {
   const confirmed = window.confirm(`Eliminare ${truck.name}? Verranno rimossi anche i voti associati.`);
   if (!confirmed) return;
 
+  const remoteDeleted = await deleteTruckRemote(id);
+  if (!remoteDeleted) {
+    showToast("Stand non eliminato: Supabase non raggiungibile.");
+    return;
+  }
+
   trucks = trucks.filter((item) => item.id !== id);
   votes = votes.filter((vote) => vote.truckId !== id);
   selectedTruckId = trucks[0]?.id || "";
@@ -1346,8 +1502,7 @@ async function deleteTruck(id) {
   saveVotes();
   resetTruckForm();
   render();
-  const remoteDeleted = await deleteTruckRemote(id);
-  showToast(remoteDeleted ? "Stand eliminato e sincronizzato." : "Stand eliminato localmente.");
+  showToast("Stand eliminato e sincronizzato.");
 }
 
 function resetTruckForm() {
@@ -1364,44 +1519,35 @@ async function handleAdminLogin(event) {
   const formData = new FormData(adminLoginForm);
   const email = cleanText(formData.get("email"));
   const password = String(formData.get("password") || "");
-  const pin = String(formData.get("pin") || "").trim();
 
-  if (email && password) {
-    if (!supabaseClient?.auth) {
-      showToast("Supabase Auth non disponibile.");
-      return;
-    }
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error || !data?.session) {
-      showToast("Credenziali staff non corrette.");
-      setStaffAuthStatus("Accesso non riuscito: controlla email e password.");
-      return;
-    }
-
-    staffSession = data.session;
-    sessionStorage.setItem(ADMIN_SESSION_KEY, "supabase");
-    adminLoginForm.reset();
-    renderAdminAccess();
-    await refreshReservationsFromRemote();
-    await refreshVotesFromRemote();
-    subscribeToReservationChanges();
-    subscribeToVoteChanges();
-    showToast("Accesso staff effettuato.");
-    return;
-  }
-
-  if (pin !== ADMIN_FALLBACK_PIN) {
-    showToast("Inserisci email/password staff oppure il PIN locale corretto.");
+  if (!email || !password) {
+    showToast("Inserisci email e password staff.");
     setStaffAuthStatus("Sessione staff non attiva.");
     return;
   }
 
-  sessionStorage.setItem(ADMIN_SESSION_KEY, "fallback");
+  if (!supabaseClient?.auth) {
+    showToast("Supabase Auth non disponibile.");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error || !data?.session) {
+    showToast("Credenziali staff non corrette.");
+    setStaffAuthStatus("Accesso non riuscito: controlla email e password.");
+    return;
+  }
+
+  staffSession = data.session;
   adminLoginForm.reset();
   renderAdminAccess();
-  renderAnalyticsDashboard();
-  showToast("Accesso locale effettuato. Le prenotazioni Supabase richiedono login staff.");
+  await refreshReservationsFromRemote();
+  await refreshVotesFromRemote();
+  await refreshAnalyticsFromRemote();
+  subscribeToReservationChanges();
+  subscribeToVoteChanges();
+  subscribeToAnalyticsChanges();
+  showToast("Accesso staff effettuato.");
 }
 
 async function handleAdminLogout() {
@@ -1410,7 +1556,6 @@ async function handleAdminLogout() {
   }
 
   staffSession = null;
-  sessionStorage.removeItem(ADMIN_SESSION_KEY);
   refreshVoteLeaderboardFromRemote();
   renderAdminAccess();
   showToast("Sessione admin chiusa.");
@@ -1431,15 +1576,13 @@ function renderAdminAccess() {
 
   if (staffSession) {
     setStaffAuthStatus(`Sessione Supabase attiva: ${staffSession.user?.email || "staff"}.`);
-  } else if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "fallback") {
-    setStaffAuthStatus("Accesso locale attivo: dati Supabase non leggibili senza login staff.");
   } else {
     setStaffAuthStatus("Sessione staff non attiva.");
   }
 }
 
 function isAdminAuthenticated() {
-  return Boolean(staffSession) || sessionStorage.getItem(ADMIN_SESSION_KEY) === "fallback";
+  return Boolean(staffSession);
 }
 
 function isStaffPage() {
@@ -1611,6 +1754,7 @@ function trackEvent(type, label, details = {}) {
   analyticsEvents.unshift(event);
   analyticsEvents = analyticsEvents.slice(0, MAX_ANALYTICS_EVENTS);
   saveAnalyticsEvents();
+  saveAnalyticsEventRemote(event);
   renderAnalyticsDashboard();
 }
 
@@ -1623,10 +1767,10 @@ function renderAnalyticsDashboard() {
   const sectionStats = getTopStats(sectionViews, "label");
   const clickSectionStats = getTopStats(clicks, "section");
   const durationStats = getSessionDurationStats();
-  document.querySelector("#metricAvgDuration").textContent = formatDuration(durationStats.averageMs);
-  document.querySelector("#metricSessions").textContent = String(sessions.size);
-  document.querySelector("#metricSectionViews").textContent = String(sectionViews.length);
-  document.querySelector("#metricClicks").textContent = String(clicks.length);
+  setTextContent("#metricAvgDuration", formatDuration(durationStats.averageMs));
+  setTextContent("#metricSessions", String(sessions.size));
+  setTextContent("#metricSectionViews", String(sectionViews.length));
+  setTextContent("#metricClicks", String(clicks.length));
   renderEventMix(sectionStats);
   renderDurationTrendChart(durationStats.rows);
   renderColumnChart("#sectionBarChart", sectionStats, "Nessuna sezione visitata.");
@@ -1763,6 +1907,7 @@ function renderHorizontalChart(selector, rows, emptyText) {
 
 function renderStatsList(selector, rows, emptyText) {
   const element = document.querySelector(selector);
+  if (!element) return;
   element.innerHTML = "";
 
   if (!rows.length) {
@@ -1927,9 +2072,25 @@ function exportAnalyticsCsv() {
   showToast("Analytics esportati.");
 }
 
-function clearAnalyticsEvents() {
-  const confirmed = window.confirm("Svuotare tutti gli eventi analytics salvati in questo browser?");
+async function clearAnalyticsEvents() {
+  const confirmed = window.confirm("Svuotare tutti gli eventi analytics salvati su Supabase?");
   if (!confirmed) return;
+
+  if (!supabaseClient || !staffSession) {
+    showToast("Accedi con Supabase per svuotare gli analytics.");
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.from(SUPABASE_ANALYTICS_TABLE).delete().neq("id", "");
+    if (error) {
+      showToast(`Supabase non ha cancellato gli analytics: ${error.message || "policy non valida"}.`);
+      return;
+    }
+  } catch {
+    showToast("Supabase non raggiungibile: analytics non cancellati.");
+    return;
+  }
 
   analyticsEvents = [];
   saveAnalyticsEvents();
@@ -1943,14 +2104,8 @@ async function clearVotesRemote() {
   const confirmed = window.confirm("Svuotare tutti i voti registrati? Usa questa azione solo per cancellare test.");
   if (!confirmed) return;
 
-  votes = [];
-  voteLeaderboardRows = [];
-  remoteVoteLeaderboardSynced = false;
-  saveVotes();
-  render();
-
   if (!supabaseClient || !staffSession) {
-    showToast("Voti svuotati localmente. Per Supabase serve login staff.");
+    showToast("Accedi con Supabase per svuotare i voti.");
     return;
   }
 
@@ -1961,10 +2116,15 @@ async function clearVotesRemote() {
       return;
     }
 
+    votes = [];
+    voteLeaderboardRows = [];
+    remoteVoteLeaderboardSynced = false;
+    saveVotes();
+    render();
     await refreshVotesFromRemote();
     showToast("Voti svuotati.");
   } catch {
-    showToast("Supabase non raggiungibile: voti svuotati solo localmente.");
+    showToast("Supabase non raggiungibile: voti non cancellati.");
   }
 }
 
@@ -2029,6 +2189,11 @@ function setCountdownValue(selector, value) {
   element.classList.remove("rolling");
   void element.offsetWidth;
   element.classList.add("rolling");
+}
+
+function setTextContent(selector, value) {
+  const element = document.querySelector(selector);
+  if (element) element.textContent = value;
 }
 
 function updateMetrics() {
@@ -2219,14 +2384,25 @@ function createStatusSelect(reservation) {
   });
 
   select.addEventListener("change", async () => {
-    reservation.status = select.value;
+    const previousStatus = reservation.status;
+    const nextStatus = select.value;
+    reservation.status = nextStatus;
+    select.disabled = true;
+    const remoteSaved = await updateReservationStatusRemote(reservation);
+    select.disabled = false;
+
+    if (!remoteSaved) {
+      reservation.status = previousStatus;
+      select.value = previousStatus;
+      select.dataset.status = previousStatus;
+      showToast("Stato non aggiornato: Supabase non raggiungibile.");
+      return;
+    }
+
     select.dataset.status = select.value;
     saveReservations();
     render();
-    const remoteSaved = await updateReservationStatusRemote(reservation);
-    if (!remoteSaved) {
-      showToast("Stato aggiornato localmente: backend non disponibile.");
-    }
+    showToast("Stato aggiornato.");
   });
 
   return select;
@@ -2242,33 +2418,10 @@ function getReservationPriority(reservation) {
 function handleSharedStorageUpdate(event) {
   if (!event.key) return;
 
-  const watchedKeys = new Set([
-    STORAGE_KEY,
-    LEGACY_STORAGE_KEY,
-    REVIEW_STORAGE_KEY,
-    TRUCK_STORAGE_KEY,
-    VOTE_STORAGE_KEY,
-    ANALYTICS_STORAGE_KEY,
-    ANALYTICS_CONSENT_KEY,
-    CAPACITY_KEY,
-  ]);
-
-  if (!watchedKeys.has(event.key)) return;
-
-  reservations = loadReservations();
-  reviews = loadReviews();
-  trucks = loadTrucks();
-  votes = loadVotes();
-  analyticsEvents = loadAnalyticsEvents();
-  capacityPerSlot = Number(localStorage.getItem(CAPACITY_KEY)) || DEFAULT_CAPACITY_PER_SLOT;
-
-  if (capacityInput) {
-    capacityInput.value = capacityPerSlot;
-  }
+  if (![ANALYTICS_CONSENT_KEY, PRIVACY_BANNER_SEEN_KEY].includes(event.key)) return;
 
   render();
   renderReviews();
-  renderLeaderboardTabs();
   renderAdminAccess();
 }
 
@@ -2294,11 +2447,16 @@ function createActions(reservation) {
   remove.className = "small-button danger";
   remove.textContent = "Elimina";
   remove.addEventListener("click", async () => {
+    const remoteDeleted = await deleteReservationRemote(reservation.id);
+    if (!remoteDeleted) {
+      showToast("Prenotazione non eliminata: Supabase non raggiungibile.");
+      return;
+    }
+
     reservations = reservations.filter((item) => item.id !== reservation.id);
     saveReservations();
     render();
-    const remoteDeleted = await deleteReservationRemote(reservation.id);
-    showToast(remoteDeleted ? "Prenotazione eliminata." : "Prenotazione eliminata localmente.");
+    showToast("Prenotazione eliminata.");
   });
 
   wrapper.append(whatsapp, copy, remove);
@@ -2340,6 +2498,16 @@ function updateAvailabilityReadout() {
 }
 
 function getUsedSeats(day, slot) {
+  const localUsedSeats = getLocalUsedSeats(day, slot);
+
+  if (!staffSession && remoteReservationSlotUsageSynced) {
+    return Math.max(reservationSlotUsage.get(getSlotUsageKey(day, slot)) || 0, localUsedSeats);
+  }
+
+  return localUsedSeats;
+}
+
+function getLocalUsedSeats(day, slot) {
   return reservations
     .filter((item) => item.day === day && item.slot === slot && activeStatuses.has(item.status))
     .reduce((sum, item) => sum + Number(item.guests), 0);
@@ -2491,7 +2659,7 @@ async function handleInstallClick() {
   }
 
   if (!isInstallSecureContext()) {
-    showToast("Per installarla apri il sito da HTTPS o localhost.");
+    showToast("Per installarla apri il sito pubblicato in HTTPS.");
     return;
   }
 
@@ -2513,23 +2681,19 @@ function registerServiceWorker() {
     return;
   }
 
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (serviceWorkerReloading) return;
-    const activeVersion = sessionStorage.getItem(SERVICE_WORKER_ACTIVE_VERSION_KEY);
-    sessionStorage.setItem(SERVICE_WORKER_ACTIVE_VERSION_KEY, SERVICE_WORKER_VERSION);
-    if (activeVersion === SERVICE_WORKER_VERSION) return;
-    serviceWorkerReloading = true;
-    window.location.reload();
-  });
-
   window.addEventListener("load", async () => {
     try {
-      const registration = await navigator.serviceWorker.register(SERVICE_WORKER_URL);
-      registration.update().catch(() => {});
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+      await cleanupLegacyCaches();
+      if (navigator.serviceWorker.controller && sessionStorage.getItem(SERVICE_WORKER_RESET_KEY) !== SERVICE_WORKER_VERSION) {
+        sessionStorage.setItem(SERVICE_WORKER_RESET_KEY, SERVICE_WORKER_VERSION);
+        window.location.reload();
+        return;
+      }
       updateInstallUi();
     } catch {
-      setInstallHint("Offline non attivo in questa modalita.");
-      showToast("Offline non attivo in questa modalita.");
+      updateInstallUi();
     }
   });
 }
@@ -2546,7 +2710,7 @@ function updateInstallUi() {
   if (!isInstallSecureContext()) {
     installButton.hidden = false;
     installButton.textContent = "Come installare";
-    setInstallHint("Per installarla usa il sito da HTTPS o localhost.");
+    setInstallHint("Per installarla usa il sito pubblicato in HTTPS.");
     return;
   }
 
@@ -2579,11 +2743,7 @@ function setInstallHint(message) {
 }
 
 function isInstallSecureContext() {
-  return (
-    window.isSecureContext ||
-    window.location.protocol === "https:" ||
-    ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname)
-  );
+  return window.location.protocol === "https:";
 }
 
 function isStandaloneMode() {
@@ -2601,17 +2761,10 @@ function isSafariBrowser() {
 }
 
 function loadReservations() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY) || "[]";
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function saveReservations() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(reservations));
 }
 
 async function saveReservationRemote(reservation) {
@@ -2704,31 +2857,50 @@ function mapReservationFromRemote(row) {
 }
 
 function loadReviews() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(REVIEW_STORAGE_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function saveReviews() {
-  localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviews));
 }
 
-function loadTrucks() {
+async function saveReviewRemote(review) {
+  if (!supabaseClient) return false;
+
   try {
-    const stored = localStorage.getItem(TRUCK_STORAGE_KEY);
-    if (!stored) return cloneDefaultTrucks();
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) && parsed.length ? mergeWithDefaultTrucks(parsed) : cloneDefaultTrucks();
+    const { error } = await supabaseClient.from(SUPABASE_REVIEWS_TABLE).insert(mapReviewToRemote(review));
+    return !error;
   } catch {
-    return cloneDefaultTrucks();
+    return false;
   }
 }
 
+function mapReviewToRemote(review) {
+  return {
+    id: review.id,
+    created_at: review.createdAt,
+    reviewer: review.reviewer,
+    rating: review.rating,
+    title: review.title,
+    body: review.body,
+  };
+}
+
+function mapReviewFromRemote(row) {
+  return {
+    id: row.id,
+    createdAt: row.created_at || new Date().toISOString(),
+    reviewer: row.reviewer || "Ospite",
+    rating: clampNumber(Number(row.rating), 1, 5),
+    title: row.title || "",
+    body: row.body || "",
+  };
+}
+
+function loadTrucks() {
+  return cloneDefaultTrucks();
+}
+
 function saveTrucks() {
-  localStorage.setItem(TRUCK_STORAGE_KEY, JSON.stringify(trucks));
 }
 
 async function saveTruckRemote(truck) {
@@ -2792,8 +2964,8 @@ function mapTruckToRemote(truck) {
     menu: truck.menu,
     color: truck.color || "#e84b2a",
     status: truck.status || "open",
-    x: Number(truck.x) || 24,
-    y: Number(truck.y) || 36,
+    x: normalizeCoordinate(truck.x, 24),
+    y: normalizeCoordinate(truck.y, 36),
     map_positions: Array.isArray(truck.mapPositions) ? truck.mapPositions : null,
   };
 }
@@ -2814,23 +2986,17 @@ function mapTruckFromRemote(row) {
     menu: row.menu || fallback.menu || "",
     color: row.color || fallback.color || "#e84b2a",
     status: row.status || fallback.status || "open",
-    x: Number(row.x ?? fallback.x ?? 24),
-    y: Number(row.y ?? fallback.y ?? 36),
+    x: normalizeCoordinate(row.x ?? fallback.x, 24),
+    y: normalizeCoordinate(row.y ?? fallback.y, 36),
     mapPositions,
   };
 }
 
 function loadVotes() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(VOTE_STORAGE_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function saveVotes() {
-  localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(votes));
 }
 
 async function saveVoteRemote(vote) {
@@ -2886,16 +3052,45 @@ function mapVoteLeaderboardFromRemote(row) {
 }
 
 function loadAnalyticsEvents() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(ANALYTICS_STORAGE_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 function saveAnalyticsEvents() {
-  localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(analyticsEvents));
+}
+
+async function saveAnalyticsEventRemote(event) {
+  if (!supabaseClient) return false;
+
+  try {
+    const { error } = await supabaseClient.from(SUPABASE_ANALYTICS_TABLE).insert(mapAnalyticsEventToRemote(event));
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+function mapAnalyticsEventToRemote(event) {
+  return {
+    id: event.id,
+    created_at: event.createdAt,
+    type: event.type,
+    label: event.label,
+    section: event.section || "app",
+    session_id: event.sessionId,
+    details: event.details || {},
+  };
+}
+
+function mapAnalyticsEventFromRemote(row) {
+  return {
+    id: row.id,
+    createdAt: row.created_at || new Date().toISOString(),
+    type: row.type || "visit",
+    label: row.label || "",
+    section: row.section || "app",
+    sessionId: row.session_id || row.sessionId || "",
+    details: row.details || {},
+  };
 }
 
 function getAverageRating() {
@@ -2924,8 +3119,18 @@ function mergeWithDefaultTrucks(storedTrucks) {
   });
   const customTrucks = storedTrucks
     .filter((truck) => !officialIds.has(truck.id))
-    .map(({ tags, ...truck }) => ({ ...truck, status: "open" }));
+    .map(({ tags, ...truck }) => ({
+      ...truck,
+      x: normalizeCoordinate(truck.x, 24),
+      y: normalizeCoordinate(truck.y, 36),
+      status: "open",
+    }));
   return [...officialTrucks, ...customTrucks];
+}
+
+function normalizeCoordinate(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) ? clampNumber(number, 0, 100) : fallback;
 }
 
 function createReservationId() {
