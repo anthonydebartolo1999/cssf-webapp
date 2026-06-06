@@ -11,8 +11,8 @@ const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v153";
-const SERVICE_WORKER_VERSION = "20260606-pwa-v153";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v154";
+const SERVICE_WORKER_VERSION = "20260606-pwa-v154";
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
 const SUPABASE_RESERVATIONS_TABLE = "reservations";
@@ -423,6 +423,7 @@ bindEvent(acceptAnalyticsButton, "click", () => setAnalyticsConsent("accepted"))
 bindEvent(rejectAnalyticsButton, "click", () => setAnalyticsConsent("rejected"));
 bindEvent(privacyPreferencesButton, "click", resetPrivacyPreferences);
 bindEvent(window, "storage", handleSharedStorageUpdate);
+bindEvent(window, "pageshow", handlePageShow);
 
 setupMoodButtons();
 setupSlotModal();
@@ -446,6 +447,34 @@ setupSupabaseAnalytics();
 
 function bindEvent(element, eventName, handler) {
   element?.addEventListener(eventName, handler);
+}
+
+function handlePageShow(event) {
+  normalizeTruckFilters();
+  render();
+  renderReviews();
+
+  if (!event.persisted) return;
+
+  if (supabaseClient) {
+    if (festivalMap || truckGrid || voteTruck || leaderboardList || staffVoteLeaderboard) {
+      refreshTrucksFromRemote();
+    }
+    if (reviewsList || reviewForm) {
+      refreshReviewsFromRemote();
+    }
+    if (voteForm || leaderboardList) {
+      refreshVoteLeaderboardFromRemote();
+    }
+    if (bookingForm || slotsGrid || availabilityReadout) {
+      refreshReservationSlotUsageFromRemote();
+    }
+    if (isStaffPage() && staffSession) {
+      refreshReservationsFromRemote();
+      refreshVotesFromRemote();
+      refreshAnalyticsFromRemote();
+    }
+  }
 }
 
 function withTimeout(promise, timeoutMs) {
@@ -1129,6 +1158,7 @@ function renderTasteRoute(mood) {
 function renderFestival() {
   if (!festivalMap && !selectedTruckCard && !truckGrid && !voteTruck && !truckAdminTable) return;
 
+  normalizeTruckFilters();
   const filtered = getFilteredTrucks();
 
   if (!filtered.length) {
@@ -1143,6 +1173,19 @@ function renderFestival() {
   renderVoteOptions();
   renderLeaderboard();
   renderTruckAdminTable();
+}
+
+function normalizeTruckFilters() {
+  if (truckSearchInput && typeof truckSearchInput.value !== "string") {
+    truckSearchInput.value = "";
+  }
+
+  if (!categoryFilter) return;
+
+  const validCategories = new Set(["all", ...Object.keys(categoryLabels)]);
+  if (!validCategories.has(categoryFilter.value)) {
+    categoryFilter.value = "all";
+  }
 }
 
 function renderTruckMap(filtered) {
