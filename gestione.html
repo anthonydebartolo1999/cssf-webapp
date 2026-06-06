@@ -18,7 +18,37 @@
     <link rel="manifest" href="manifest-staff.webmanifest?v=20260606-staff-v2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260606-pwa-v152" />
+    <link rel="stylesheet" href="styles.css?v=20260606-pwa-v153" />
+    <script>
+      (function () {
+        window.addEventListener(
+          "pageshow",
+          function () {
+            if ("serviceWorker" in navigator) {
+              navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                return Promise.all(
+                  registrations.map(function (registration) {
+                    return registration.unregister();
+                  }),
+                );
+              }).catch(function () {});
+            }
+            if ("caches" in window) {
+              caches.keys().then(function (keys) {
+                return Promise.all(
+                  keys.filter(function (key) {
+                    return key.indexOf("cssf-pwa-") === 0;
+                  }).map(function (key) {
+                    return caches.delete(key);
+                  }),
+                );
+              }).catch(function () {});
+            }
+          },
+          { once: true },
+        );
+      })();
+    </script>
   </head>
   <body data-page="gestione" class="staff-app">
     <div class="app-shell">
@@ -164,6 +194,6 @@
     </div>
     <template id="reservationRowTemplate"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></template>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260606-pwa-v152"></script>
+    <script src="app.js?v=20260606-pwa-v153"></script>
   </body>
 </html>

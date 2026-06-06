@@ -1,7 +1,25 @@
 {
   "headers": [
     {
-      "source": "/(.*).html",
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.html)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.(js|css))",
       "headers": [
         {
           "key": "Cache-Control",
@@ -19,7 +37,7 @@
       ]
     },
     {
-      "source": "/(manifest.*\\.webmanifest)",
+      "source": "/(.*\\.webmanifest)",
       "headers": [
         {
           "key": "Cache-Control",

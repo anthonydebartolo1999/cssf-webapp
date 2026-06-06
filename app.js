@@ -11,8 +11,8 @@ const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v152";
-const SERVICE_WORKER_VERSION = "20260606-pwa-v152";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v153";
+const SERVICE_WORKER_VERSION = "20260606-pwa-v153";
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
 const SUPABASE_RESERVATIONS_TABLE = "reservations";
@@ -2676,26 +2676,29 @@ async function handleInstallClick() {
 }
 
 function registerServiceWorker() {
-  if (!("serviceWorker" in navigator) || !isInstallSecureContext()) {
-    updateInstallUi();
-    return;
-  }
+  const unregisterPromise = "serviceWorker" in navigator
+    ? navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
+        .catch(() => {})
+    : Promise.resolve();
 
-  window.addEventListener("load", async () => {
-    try {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-      await cleanupLegacyCaches();
-      if (navigator.serviceWorker.controller && sessionStorage.getItem(SERVICE_WORKER_RESET_KEY) !== SERVICE_WORKER_VERSION) {
-        sessionStorage.setItem(SERVICE_WORKER_RESET_KEY, SERVICE_WORKER_VERSION);
-        window.location.reload();
-        return;
+  Promise.all([unregisterPromise, cleanupLegacyCaches()])
+    .then(() => {
+      if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+        const resetVersion = sessionStorage.getItem(SERVICE_WORKER_RESET_KEY);
+        if (resetVersion !== SERVICE_WORKER_VERSION) {
+          sessionStorage.setItem(SERVICE_WORKER_RESET_KEY, SERVICE_WORKER_VERSION);
+          window.location.reload();
+          return;
+        }
       }
+
       updateInstallUi();
-    } catch {
+    })
+    .catch(() => {
       updateInstallUi();
-    }
-  });
+    });
 }
 
 function updateInstallUi() {
