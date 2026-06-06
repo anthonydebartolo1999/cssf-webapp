@@ -11,8 +11,8 @@ const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v154";
-const SERVICE_WORKER_VERSION = "20260606-pwa-v154";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v155";
+const SERVICE_WORKER_VERSION = "20260607-reviews-v155";
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
 const SUPABASE_RESERVATIONS_TABLE = "reservations";
@@ -255,6 +255,46 @@ const voteCategories = [
   { value: "top-drink", label: "Miglior Drink" },
 ];
 
+const reviewLabels = {
+  ageRange: {
+    "under-18": "Meno di 18",
+    "18-24": "18-24",
+    "25-34": "25-34",
+    "35-44": "35-44",
+    "45-54": "45-54",
+    "55-plus": "55+",
+  },
+  gender: {
+    female: "Donna",
+    male: "Uomo",
+    "non-binary": "Non binario",
+    "prefer-not": "Non specificato",
+  },
+  favoriteAspect: {
+    food: "Qualita' del cibo",
+    "stand-variety": "Varieta' stand",
+    atmosphere: "Atmosfera",
+    music: "Musica",
+    organization: "Organizzazione",
+    location: "Location",
+  },
+  improvementArea: {
+    queues: "Code",
+    seating: "Posti a sedere",
+    prices: "Prezzi",
+    signage: "Segnaletica",
+    payment: "Pagamenti",
+    cleanliness: "Pulizia",
+    "more-stands": "Piu' stand",
+    nothing: "Nulla in particolare",
+  },
+  wouldReturn: {
+    yes: "Si",
+    maybe: "Forse",
+    no: "No",
+  },
+};
+
 const tasteRoutes = {
   tradizione: {
     text: "Un percorso pensato per chi cerca sapori locali, street food caldo e prodotti del territorio.",
@@ -297,6 +337,7 @@ const reviewsList = document.querySelector("#reviewsList");
 const emptyReviews = document.querySelector("#emptyReviews");
 const reviewAverage = document.querySelector("#reviewAverage");
 const reviewCount = document.querySelector("#reviewCount");
+const reviewsInsights = document.querySelector("#reviewsInsights");
 const installButton = document.querySelector("#installButton");
 const installHint = document.querySelector("#installHint");
 const tasteText = document.querySelector("#tasteText");
@@ -567,6 +608,11 @@ async function handleReviewSubmit(event) {
     createdAt: new Date().toISOString(),
     reviewer: cleanText(formData.get("reviewer")),
     rating: clampNumber(Number(formData.get("rating")), 1, 5),
+    ageRange: cleanText(formData.get("ageRange")),
+    gender: cleanText(formData.get("gender")),
+    favoriteAspect: cleanText(formData.get("favoriteAspect")),
+    improvementArea: cleanText(formData.get("improvementArea")),
+    wouldReturn: cleanText(formData.get("wouldReturn")),
     title: cleanText(formData.get("title")),
     body: cleanText(formData.get("body")),
   };
@@ -2395,9 +2441,17 @@ function renderReviews() {
   emptyReviews.classList.toggle("visible", reviews.length === 0);
   reviewAverage.textContent = reviews.length ? getAverageRating().toFixed(1) : "--";
   reviewCount.textContent = `${reviews.length} ${reviews.length === 1 ? "recensione" : "recensioni"}`;
+  renderReviewInsights();
 
   reviews.forEach((review) => {
     const stars = Array.from({ length: review.rating }, () => "&#9733;").join("");
+    const tags = [
+      getReviewLabel("ageRange", review.ageRange),
+      getReviewLabel("gender", review.gender),
+      review.favoriteAspect ? `Top: ${getReviewLabel("favoriteAspect", review.favoriteAspect)}` : "",
+      review.improvementArea ? `Migliorare: ${getReviewLabel("improvementArea", review.improvementArea)}` : "",
+      review.wouldReturn ? `Ritorno: ${getReviewLabel("wouldReturn", review.wouldReturn)}` : "",
+    ].filter(Boolean);
     const card = document.createElement("article");
     card.className = "review-card";
     card.innerHTML = `
@@ -2408,10 +2462,54 @@ function renderReviews() {
         </div>
         <span aria-label="${review.rating} stelle">${stars}</span>
       </header>
+      ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
       <p>${escapeHtml(review.body)}</p>
     `;
     reviewsList.append(card);
   });
+}
+
+function renderReviewInsights() {
+  if (!reviewsInsights) return;
+
+  if (!reviews.length) {
+    reviewsInsights.innerHTML = "";
+    return;
+  }
+
+  const topImprovement = getTopReviewStat("improvementArea");
+  const topFavorite = getTopReviewStat("favoriteAspect");
+  const topAge = getTopReviewStat("ageRange");
+  const returnStats = getReviewReturnStats();
+
+  reviewsInsights.innerHTML = `
+    <div class="review-insight-card main">
+      <span>Media stelle</span>
+      <strong>${getAverageRating().toFixed(1)}</strong>
+      <small>${reviews.length} risposte raccolte</small>
+    </div>
+    <div class="review-insight-card">
+      <span>Cosa piace</span>
+      <strong>${escapeHtml(topFavorite?.label || "In raccolta")}</strong>
+      <small>${topFavorite ? `${topFavorite.count} risposte` : "Ancora pochi dati"}</small>
+    </div>
+    <div class="review-insight-card">
+      <span>Da migliorare</span>
+      <strong>${escapeHtml(topImprovement?.label || "In raccolta")}</strong>
+      <small>${topImprovement ? `${topImprovement.count} risposte` : "Ancora pochi dati"}</small>
+    </div>
+    <div class="review-insight-card">
+      <span>Pubblico piu' presente</span>
+      <strong>${escapeHtml(topAge?.label || "In raccolta")}</strong>
+      <small>${topAge ? `${topAge.count} risposte` : "Ancora pochi dati"}</small>
+    </div>
+    <div class="review-return-meter">
+      <span>Tornerebbe all'evento</span>
+      <strong>${returnStats.yes}%</strong>
+      <div><i style="width: ${returnStats.yes}%"></i></div>
+      <small>Forse ${returnStats.maybe}% - No ${returnStats.no}%</small>
+    </div>
+  `;
 }
 
 function createStatusSelect(reservation) {
@@ -2926,6 +3024,11 @@ function mapReviewToRemote(review) {
     created_at: review.createdAt,
     reviewer: review.reviewer,
     rating: review.rating,
+    age_range: review.ageRange || null,
+    gender: review.gender || null,
+    favorite_aspect: review.favoriteAspect || null,
+    improvement_area: review.improvementArea || null,
+    would_return: review.wouldReturn || null,
     title: review.title,
     body: review.body,
   };
@@ -2937,6 +3040,11 @@ function mapReviewFromRemote(row) {
     createdAt: row.created_at || new Date().toISOString(),
     reviewer: row.reviewer || "Ospite",
     rating: clampNumber(Number(row.rating), 1, 5),
+    ageRange: row.age_range || row.ageRange || "",
+    gender: row.gender || "",
+    favoriteAspect: row.favorite_aspect || row.favoriteAspect || "",
+    improvementArea: row.improvement_area || row.improvementArea || "",
+    wouldReturn: row.would_return || row.wouldReturn || "",
     title: row.title || "",
     body: row.body || "",
   };
@@ -3142,6 +3250,34 @@ function mapAnalyticsEventFromRemote(row) {
 function getAverageRating() {
   if (!reviews.length) return 0;
   return reviews.reduce((sum, review) => sum + Number(review.rating), 0) / reviews.length;
+}
+
+function getReviewLabel(group, value) {
+  return reviewLabels[group]?.[value] || "";
+}
+
+function getTopReviewStat(field) {
+  const counts = reviews.reduce((acc, review) => {
+    const value = review[field];
+    if (!value) return acc;
+    acc[value] = (acc[value] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(counts)
+    .map(([value, count]) => ({ value, label: getReviewLabel(field, value), count }))
+    .filter((row) => row.label)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))[0];
+}
+
+function getReviewReturnStats() {
+  const total = reviews.filter((review) => review.wouldReturn).length || 1;
+  const count = (value) => reviews.filter((review) => review.wouldReturn === value).length;
+  return {
+    yes: Math.round((count("yes") / total) * 100),
+    maybe: Math.round((count("maybe") / total) * 100),
+    no: Math.round((count("no") / total) * 100),
+  };
 }
 
 function cloneDefaultTrucks() {

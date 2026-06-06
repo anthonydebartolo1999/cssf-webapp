@@ -18,7 +18,7 @@
     <link rel="manifest" href="manifest.webmanifest?v=20260605-icon2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260606-pwa-v154" />
+    <link rel="stylesheet" href="styles.css?v=20260607-reviews-v155" />
     <script>
       (function () {
         window.addEventListener(
@@ -61,18 +61,29 @@
       </header>
       <main>
         <section class="reviews-section" id="recensioni" aria-labelledby="recensioni-title">
-          <div class="view-hero"><span class="section-label">Recensioni</span><h2 id="recensioni-title">La voce della community</h2><p>Lascia un feedback e aiuta gli organizzatori a capire cosa sta funzionando meglio.</p></div>
+          <div class="view-hero"><span class="section-label">Recensioni</span><h2 id="recensioni-title">La voce della community</h2><p>Lascia un feedback utile: ci aiuta a leggere pubblico, qualita' percepita e punti da migliorare.</p></div>
           <div class="reviews-layout">
             <form class="review-form" id="reviewForm">
               <div class="review-summary"><strong id="reviewAverage">--</strong><span id="reviewCount">0 recensioni</span></div>
-              <label>Nome <input name="reviewer" type="text" required /></label>
-              <label>Voto<select name="rating"><option value="5">5 stelle</option><option value="4">4 stelle</option><option value="3">3 stelle</option><option value="2">2 stelle</option><option value="1">1 stella</option></select></label>
-              <label>Titolo <input name="title" type="text" required /></label>
-              <label>Recensione <textarea name="body" rows="5" required></textarea></label>
+              <div class="review-form-grid">
+                <label>Nome <input name="reviewer" type="text" required /></label>
+                <label>Voto<select name="rating"><option value="5">5 stelle</option><option value="4">4 stelle</option><option value="3">3 stelle</option><option value="2">2 stelle</option><option value="1">1 stella</option></select></label>
+                <label>Eta<select name="ageRange"><option value="">Preferisco non dirlo</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
+                <label>Genere<select name="gender"><option value="">Preferisco non dirlo</option><option value="female">Donna</option><option value="male">Uomo</option><option value="non-binary">Non binario</option><option value="prefer-not">Non specifico</option></select></label>
+                <label>Cosa ti e' piaciuto di piu'<select name="favoriteAspect"><option value="">Scegli</option><option value="food">Qualita' del cibo</option><option value="stand-variety">Varieta' degli stand</option><option value="atmosphere">Atmosfera</option><option value="music">Musica</option><option value="organization">Organizzazione</option><option value="location">Location</option></select></label>
+                <label>Cosa migliorare<select name="improvementArea"><option value="">Scegli</option><option value="queues">Code</option><option value="seating">Posti a sedere</option><option value="prices">Prezzi</option><option value="signage">Segnaletica</option><option value="payment">Pagamenti</option><option value="cleanliness">Pulizia</option><option value="more-stands">Piu' stand</option><option value="nothing">Nulla in particolare</option></select></label>
+                <label>Torneresti?<select name="wouldReturn"><option value="">Scegli</option><option value="yes">Si</option><option value="maybe">Forse</option><option value="no">No</option></select></label>
+                <label>Titolo <input name="title" type="text" required /></label>
+              </div>
+              <label>Recensione <textarea name="body" rows="5" required placeholder="Raccontaci cosa ha funzionato e cosa possiamo migliorare."></textarea></label>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
               <button class="primary-action" type="submit">Pubblica recensione</button>
             </form>
-            <article class="reviews-feed"><div id="reviewsList"></div><div class="empty-state" id="emptyReviews">Ancora nessuna recensione.</div></article>
+            <article class="reviews-feed">
+              <div class="reviews-insights" id="reviewsInsights"></div>
+              <div id="reviewsList"></div>
+              <div class="empty-state" id="emptyReviews">Ancora nessuna recensione.</div>
+            </article>
           </div>
         </section>
       </main>
@@ -80,6 +91,6 @@
     </div>
     <div class="consent-banner" id="consentBanner" hidden><div><strong>Cookie e statistiche</strong><p>Usiamo statistiche anonime, solo con consenso, per migliorare la web app dell'evento. Leggi l'<a href="privacy.html">informativa privacy</a>.</p></div><div class="consent-actions"><button class="ghost-link" id="rejectAnalyticsButton" type="button">Rifiuta</button><button class="primary-action" id="acceptAnalyticsButton" type="button">Accetta</button></div></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260606-pwa-v154"></script>
+    <script src="app.js?v=20260607-reviews-v155"></script>
   </body>
 </html>

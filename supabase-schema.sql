@@ -67,8 +67,16 @@ create table if not exists public.reviews (
   body text not null
 );
 
+alter table public.reviews
+add column if not exists age_range text,
+add column if not exists gender text,
+add column if not exists favorite_aspect text,
+add column if not exists improvement_area text,
+add column if not exists would_return text;
+
 create index if not exists reviews_created_at_idx on public.reviews (created_at desc);
 create index if not exists reviews_rating_idx on public.reviews (rating);
+create index if not exists reviews_improvement_area_idx on public.reviews (improvement_area);
 
 create table if not exists public.analytics_events (
   id text primary key,
@@ -298,6 +306,11 @@ with check (
   and char_length(trim(reviewer)) between 1 and 80
   and char_length(trim(title)) between 2 and 120
   and char_length(trim(body)) between 10 and 800
+  and coalesce(age_range, '') in ('', 'under-18', '18-24', '25-34', '35-44', '45-54', '55-plus')
+  and coalesce(gender, '') in ('', 'female', 'male', 'non-binary', 'prefer-not')
+  and coalesce(favorite_aspect, '') in ('', 'food', 'stand-variety', 'atmosphere', 'music', 'organization', 'location')
+  and coalesce(improvement_area, '') in ('', 'queues', 'seating', 'prices', 'signage', 'payment', 'cleanliness', 'more-stands', 'nothing')
+  and coalesce(would_return, '') in ('', 'yes', 'maybe', 'no')
 );
 
 drop policy if exists "Staff can delete reviews" on public.reviews;
