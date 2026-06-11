@@ -29,9 +29,8 @@
         </a>
         <nav class="site-nav" id="primaryNav" aria-label="Navigazione principale">
           <a href="index.html" data-view-link="home">Home</a>
-          <a href="mappa.html" data-view-link="mappa">Mappa &amp; Stand</a>
-          <a href="vota.html" data-view-link="vota">Vota</a>
-          <a href="prenota.html" data-view-link="prenota">Prenota</a>
+          <a href="mappa.html" data-view-link="mappa">Mappa Street Chef</a>
+          <a href="vota.html" data-view-link="vota">Contest</a>
           <a href="programma.html" data-view-link="programma">Programma</a>
           <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
         </nav>
@@ -71,29 +70,29 @@
       </header>
       <main>
         <section class="festival-section festival-showcase" id="mappa" aria-labelledby="mappa-title">
-          <div class="view-hero"><span class="section-label">Mappa &amp; stand</span><h2 id="mappa-title">Un solo spazio, tutta l'area evento</h2><p>Consulta la mappa, tocca uno stand per vedere il dettaglio live e scorri sotto per confrontare tutte le proposte.</p></div>
+          <div class="view-hero"><span class="section-label">Mappa &amp; street chef</span><h2 id="mappa-title">Un solo spazio, tutta l'area evento</h2><p>Consulta la mappa, tocca uno street chef per vedere il dettaglio live e scorri sotto per confrontare tutte le proposte.</p></div>
           <div class="festival-showcase-layout">
             <article class="map-panel festival-map-panel">
               <div class="map-toolbar">
-                <input id="truckSearchInput" type="search" placeholder="Cerca stand, piatto o zona" />
+                <input id="truckSearchInput" type="search" placeholder="Cerca street chef, piatto o zona" />
                 <select id="categoryFilter" aria-label="Categoria food"><option value="all">Tutte le categorie</option><option value="cocktail">Cocktail</option><option value="dolci">Dolci e gelati</option><option value="birra">Birra</option><option value="sudamericano">Sudamericano</option><option value="primi">Primi piatti</option><option value="carne">Carne</option><option value="pesce">Pesce</option><option value="forno">Forno</option><option value="fritti">Fritti</option><option value="bbq">BBQ</option><option value="tradizione">Tradizione</option><option value="brace">Brace</option><option value="pizza">Pizza</option></select>
               </div>
               <div class="map-mobile-helper" aria-hidden="true">
                 <span>Tocca la mappa per aprirla grande</span>
                 <span>Usa i filtri per trovare piu' in fretta</span>
               </div>
-              <div class="festival-map" id="festivalMap" aria-label="Planimetria interattiva degli stand"></div>
+              <div class="festival-map" id="festivalMap" aria-label="Planimetria interattiva degli street chef"></div>
             </article>
             <aside class="selected-truck-panel festival-selected-panel"><div id="selectedTruckCard"></div></aside>
             <section class="festival-stands-panel" aria-labelledby="festival-stands-title">
               <div class="panel-heading compact">
                 <div>
-                  <span class="section-label">Tutti gli stand</span>
+                  <span class="section-label">Tutti gli street chef</span>
                   <h2 id="festival-stands-title">Scorri e confronta</h2>
                 </div>
               </div>
               <div class="truck-grid" id="truckGrid"></div>
-              <div class="empty-state" id="emptyTrucks">Nessuno stand trovato con questi filtri.</div>
+              <div class="empty-state" id="emptyTrucks">Nessuno street chef trovato con questi filtri.</div>
             </section>
           </div>
         </section>
