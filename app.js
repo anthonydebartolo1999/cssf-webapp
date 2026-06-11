@@ -10,8 +10,15 @@ const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v169";
-const SERVICE_WORKER_VERSION = "20260611-pwa-v169";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v170";
+const SERVICE_WORKER_VERSION = "20260611-pwa-v170";
+const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
+const PUSH_SUBSCRIBE_ENDPOINT = "/api/push/subscribe";
+const PUSH_BROADCAST_ENDPOINT = "/api/push/broadcast";
+const STAFF_PUSH_SCOPE = "staff";
+const PUBLIC_PUSH_SCOPE = "public";
+const STAFF_PUSH_STATUS_KEY = "cssf-push-staff-enabled";
+const PUBLIC_PUSH_STATUS_KEY = "cssf-push-public-enabled";
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
 const SUPABASE_RESERVATIONS_TABLE = "reservations";
@@ -386,6 +393,9 @@ const staffWorkspace = document.querySelector("#staffWorkspace");
 const adminLogoutButton = document.querySelector("#adminLogoutButton");
 const staffAuthStatus = document.querySelector("#staffAuthStatus");
 const notificationPermissionButton = document.querySelector("#notificationPermissionButton");
+const publicNotificationButton = document.querySelector("#publicNotificationButton");
+const communicationForm = document.querySelector("#communicationForm");
+const communicationStatus = document.querySelector("#communicationStatus");
 const exportAnalyticsButton = document.querySelector("#exportAnalyticsButton");
 const clearAnalyticsButton = document.querySelector("#clearAnalyticsButton");
 const consentBanner = document.querySelector("#consentBanner");
@@ -445,6 +455,8 @@ let remoteReservationsSynced = false;
 let reservationSlotUsage = new Map();
 let remoteReservationSlotUsageSynced = false;
 let reservationSlotUsageRefreshTimer = null;
+let serviceWorkerRegistrationPromise = null;
+let staffPushSubscribed = false;
 sessionStorage.setItem("cssf-session-id", sessionId);
 
 redirectLegacyHashRoute();
@@ -476,6 +488,8 @@ bindEvent(resetTruckFormButton, "click", resetTruckForm);
 bindEvent(adminLoginForm, "submit", handleAdminLogin);
 bindEvent(adminLogoutButton, "click", handleAdminLogout);
 bindEvent(notificationPermissionButton, "click", requestStaffNotifications);
+bindEvent(publicNotificationButton, "click", requestPublicNotifications);
+bindEvent(communicationForm, "submit", handleCommunicationSubmit);
 bindEvent(exportAnalyticsButton, "click", exportAnalyticsCsv);
 bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
 bindEvent(clearVotesButton, "click", clearVotesRemote);
@@ -1181,62 +1195,279 @@ async function initializeStaffAuth() {
 }
 
 async function requestStaffNotifications() {
-  if (!("Notification" in window)) {
-    updateNotificationPermissionUi();
+  await requestPushNotificationsForScope(STAFF_PUSH_SCOPE);
+}
+
+async function requestPublicNotifications() {
+  await requestPushNotificationsForScope(PUBLIC_PUSH_SCOPE);
+}
+
+async function requestPushNotificationsForScope(scope) {
+  const isStaffScope = scope === STAFF_PUSH_SCOPE;
+  const successMessage = isStaffScope ? "Notifiche staff attive." : "Notifiche evento attive.";
+  const existingMessage = isStaffScope ? "Notifiche staff gia attive." : "Notifiche evento gia attive.";
+
+  if (!supportsPushNotifications()) {
+    await refreshPushUi();
     showToast("Questo browser non supporta le notifiche.");
     return;
   }
 
   if (Notification.permission === "granted") {
-    updateNotificationPermissionUi();
-    showToast("Notifiche staff gia attive.");
+    try {
+      const result = await ensurePushSubscription(scope);
+      await refreshPushUi();
+      showToast(result === "existing" ? existingMessage : successMessage);
+    } catch (error) {
+      await refreshPushUi();
+      showToast(error?.message || "Notifiche non attivabili ora.");
+    }
     return;
   }
 
   const permission = await Notification.requestPermission();
-  updateNotificationPermissionUi();
-  showToast(
-    permission === "granted"
-      ? "Notifiche staff attive."
-      : permission === "denied"
+  if (permission !== "granted") {
+    setPushScopeState(scope, false);
+    await refreshPushUi();
+    showToast(
+      permission === "denied"
         ? "Notifiche bloccate: riattivale dalle impostazioni del browser."
         : "Notifiche non abilitate.",
-  );
-}
-
-function updateNotificationPermissionUi() {
-  if (!notificationPermissionButton) return;
-
-  if (!("Notification" in window)) {
-    notificationPermissionButton.classList.remove("is-active", "is-blocked");
-    notificationPermissionButton.classList.add("is-unavailable");
-    notificationPermissionButton.setAttribute("aria-label", "Notifiche non supportate");
-    notificationPermissionButton.title = "Notifiche non supportate";
-    notificationPermissionButton.disabled = true;
+    );
     return;
   }
 
-  if (Notification.permission === "granted") {
-    notificationPermissionButton.classList.add("is-active");
-    notificationPermissionButton.classList.remove("is-blocked", "is-unavailable");
-    notificationPermissionButton.setAttribute("aria-label", "Notifiche staff attive");
-    notificationPermissionButton.setAttribute("aria-pressed", "true");
-    notificationPermissionButton.title = "Notifiche staff attive";
-    notificationPermissionButton.disabled = false;
-  } else if (Notification.permission === "denied") {
-    notificationPermissionButton.classList.add("is-blocked");
-    notificationPermissionButton.classList.remove("is-active", "is-unavailable");
-    notificationPermissionButton.setAttribute("aria-label", "Notifiche bloccate dal browser");
-    notificationPermissionButton.setAttribute("aria-pressed", "false");
-    notificationPermissionButton.title = "Notifiche bloccate dal browser";
-    notificationPermissionButton.disabled = false;
-  } else {
-    notificationPermissionButton.classList.remove("is-active", "is-blocked", "is-unavailable");
-    notificationPermissionButton.setAttribute("aria-label", "Attiva notifiche staff");
-    notificationPermissionButton.setAttribute("aria-pressed", "false");
-    notificationPermissionButton.title = "Attiva notifiche staff";
-    notificationPermissionButton.disabled = false;
+  try {
+    await ensurePushSubscription(scope);
+    await refreshPushUi();
+    showToast(successMessage);
+  } catch (error) {
+    await refreshPushUi();
+    showToast(error?.message || "Notifiche non attivabili ora.");
   }
+}
+
+function updateNotificationPermissionUi() {
+  refreshPushUi();
+}
+
+async function refreshPushUi() {
+  await refreshStaffPushUi();
+  await refreshPublicPushUi();
+}
+
+async function refreshStaffPushUi() {
+  if (!notificationPermissionButton) return;
+  await updatePushButtonUi(notificationPermissionButton, STAFF_PUSH_SCOPE, {
+    inactiveLabel: "Attiva notifiche staff",
+    activeLabel: "Notifiche staff attive",
+    pendingLabel: "Completa attivazione notifiche staff",
+  });
+}
+
+async function refreshPublicPushUi() {
+  if (!publicNotificationButton) return;
+  await updatePushButtonUi(publicNotificationButton, PUBLIC_PUSH_SCOPE, {
+    inactiveLabel: "Attiva notifiche evento",
+    activeLabel: "Notifiche evento attive",
+    pendingLabel: "Completa attivazione notifiche evento",
+  });
+}
+
+async function updatePushButtonUi(button, scope, labels) {
+  if (!button) return;
+  const updatesVisibleText = button !== notificationPermissionButton;
+
+  if (!supportsPushNotifications()) {
+    button.classList.remove("is-active", "is-blocked");
+    button.classList.add("is-unavailable");
+    button.setAttribute("aria-label", "Notifiche non supportate");
+    button.title = "Notifiche non supportate";
+    if (updatesVisibleText) {
+      button.textContent = "Notifiche non supportate";
+    }
+    button.disabled = true;
+    return;
+  }
+
+  if (Notification.permission === "default") {
+    setPushScopeState(scope, false);
+    button.classList.remove("is-active", "is-blocked", "is-unavailable");
+    button.setAttribute("aria-label", labels.inactiveLabel);
+    button.setAttribute("aria-pressed", "false");
+    button.title = labels.inactiveLabel;
+    if (updatesVisibleText) {
+      button.textContent = labels.inactiveLabel;
+    }
+    button.disabled = false;
+    return;
+  }
+
+  const hasBrowserSubscription = Notification.permission === "granted"
+    ? await hasAnyPushSubscription()
+    : false;
+  const isScopeEnabled = hasBrowserSubscription && getPushScopeState(scope);
+
+  if (scope === STAFF_PUSH_SCOPE) {
+    staffPushSubscribed = isScopeEnabled;
+  }
+
+  if (Notification.permission === "granted") {
+    button.classList.toggle("is-active", isScopeEnabled);
+    button.classList.remove("is-blocked", "is-unavailable");
+    button.setAttribute("aria-label", isScopeEnabled ? labels.activeLabel : labels.pendingLabel);
+    button.setAttribute("aria-pressed", String(isScopeEnabled));
+    button.title = isScopeEnabled ? labels.activeLabel : labels.pendingLabel;
+    if (updatesVisibleText) {
+      button.textContent = isScopeEnabled ? labels.activeLabel : labels.inactiveLabel;
+    }
+    button.disabled = false;
+  } else if (Notification.permission === "denied") {
+    setPushScopeState(scope, false);
+    button.classList.add("is-blocked");
+    button.classList.remove("is-active", "is-unavailable");
+    button.setAttribute("aria-label", "Notifiche bloccate dal browser");
+    button.setAttribute("aria-pressed", "false");
+    button.title = "Notifiche bloccate dal browser";
+    if (updatesVisibleText) {
+      button.textContent = "Notifiche bloccate";
+    }
+    button.disabled = false;
+  } else {
+    button.classList.remove("is-active", "is-blocked", "is-unavailable");
+    button.setAttribute("aria-label", labels.inactiveLabel);
+    button.setAttribute("aria-pressed", "false");
+    button.title = labels.inactiveLabel;
+    if (updatesVisibleText) {
+      button.textContent = labels.inactiveLabel;
+    }
+    button.disabled = false;
+  }
+}
+
+function supportsPushNotifications() {
+  return (
+    typeof window !== "undefined" &&
+    "Notification" in window &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    isInstallSecureContext()
+  );
+}
+
+async function hasAnyPushSubscription() {
+  if (!supportsPushNotifications()) return false;
+
+  try {
+    const registration = await ensureServiceWorkerReady();
+    return Boolean(await registration.pushManager.getSubscription());
+  } catch {
+    return false;
+  }
+}
+
+async function ensureServiceWorkerReady() {
+  if (!("serviceWorker" in navigator) || !isInstallSecureContext()) {
+    throw new Error("Service worker non disponibile.");
+  }
+
+  if (!serviceWorkerRegistrationPromise) {
+    serviceWorkerRegistrationPromise = navigator.serviceWorker.ready;
+  }
+
+  return serviceWorkerRegistrationPromise;
+}
+
+async function ensurePushSubscription(scope) {
+  const registration = await ensureServiceWorkerReady();
+  const existingSubscription = await registration.pushManager.getSubscription();
+  if (existingSubscription) {
+    await syncPushSubscription(scope, existingSubscription);
+    setPushScopeState(scope, true);
+    staffPushSubscribed = getPushScopeState(STAFF_PUSH_SCOPE);
+    return "existing";
+  }
+
+  const publicKey = await fetchPushPublicKey();
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(publicKey),
+  });
+
+  await syncPushSubscription(scope, subscription);
+  setPushScopeState(scope, true);
+  staffPushSubscribed = getPushScopeState(STAFF_PUSH_SCOPE);
+  return "subscribed";
+}
+
+async function fetchPushPublicKey() {
+  const response = await fetch(PUSH_PUBLIC_KEY_ENDPOINT, {
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error("Config push non disponibile sul server.");
+  }
+
+  const payload = await response.json();
+  if (!payload?.publicKey) {
+    throw new Error("Chiave push non valida.");
+  }
+
+  return payload.publicKey;
+}
+
+async function syncPushSubscription(scope, subscription) {
+  const response = await fetch(PUSH_SUBSCRIBE_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      scope,
+      deviceLabel: getPushDeviceLabel(),
+      userAgent: navigator.userAgent,
+      subscription: subscription.toJSON(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Registrazione push non riuscita.");
+  }
+}
+
+function getPushScopeState(scope) {
+  return localStorage.getItem(getPushStatusKey(scope)) === "yes";
+}
+
+function setPushScopeState(scope, enabled) {
+  localStorage.setItem(getPushStatusKey(scope), enabled ? "yes" : "no");
+}
+
+function getPushStatusKey(scope) {
+  return scope === STAFF_PUSH_SCOPE ? STAFF_PUSH_STATUS_KEY : PUBLIC_PUSH_STATUS_KEY;
+}
+
+function getPushDeviceLabel() {
+  if (isIosDevice()) return "iPhone o iPad";
+  if (/Android/i.test(navigator.userAgent)) return "Android";
+  if (/Windows/i.test(navigator.userAgent)) return "Windows";
+  if (/Macintosh|Mac OS X/i.test(navigator.userAgent)) return "Mac";
+  return "Dispositivo staff";
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let index = 0; index < rawData.length; index += 1) {
+    outputArray[index] = rawData.charCodeAt(index);
+  }
+
+  return outputArray;
 }
 
 function announceNewRemoteReservations(remoteReservations) {
@@ -1253,7 +1484,7 @@ function announceNewRemoteReservations(remoteReservations) {
 }
 
 function showStaffBrowserNotification(reservation, message) {
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  if (!("Notification" in window) || Notification.permission !== "granted" || staffPushSubscribed) return;
 
   const notification = new Notification("Nuova prenotazione CSSF", {
     body: message,
@@ -1756,12 +1987,78 @@ function renderAdminAccess() {
   if (clearVotesButton) {
     clearVotesButton.disabled = !unlocked;
   }
+  if (communicationForm) {
+    const submitButton = communicationForm.querySelector("button[type='submit']");
+    if (submitButton) {
+      submitButton.disabled = !unlocked;
+    }
+  }
   updateNotificationPermissionUi();
 
   if (staffSession) {
     setStaffAuthStatus(`Sessione Supabase attiva: ${staffSession.user?.email || "staff"}.`);
   } else {
     setStaffAuthStatus("Sessione staff non attiva.");
+  }
+}
+
+async function handleCommunicationSubmit(event) {
+  event.preventDefault();
+
+  if (!staffSession?.access_token) {
+    showToast("Accedi come staff per inviare comunicazioni.");
+    setCommunicationStatus("Sessione staff richiesta.");
+    return;
+  }
+
+  const formData = new FormData(communicationForm);
+  const title = cleanText(formData.get("title")).slice(0, 80);
+  const message = cleanText(formData.get("message")).slice(0, 240);
+  const targetUrl = String(formData.get("targetUrl") || "/index.html");
+
+  if (!message) {
+    showToast("Scrivi il testo della comunicazione.");
+    setCommunicationStatus("Messaggio mancante.");
+    return;
+  }
+
+  setCommunicationStatus("Invio in corso...");
+
+  try {
+    const response = await fetch(PUSH_BROADCAST_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${staffSession.access_token}`,
+      },
+      body: JSON.stringify({
+        title: title || "Aggiornamento CSSF",
+        message,
+        targetUrl,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload?.error || "Invio comunicazione non riuscito.");
+    }
+
+    communicationForm.reset();
+    if (communicationForm.elements.targetUrl) {
+      communicationForm.elements.targetUrl.value = "/index.html";
+    }
+    setCommunicationStatus(`Comunicazione inviata a ${payload?.sent || 0} dispositivi.`);
+    showToast(`Comunicazione inviata a ${payload?.sent || 0} dispositivi.`);
+  } catch (error) {
+    setCommunicationStatus(error?.message || "Invio comunicazione non riuscito.");
+    showToast(error?.message || "Invio comunicazione non riuscito.");
+  }
+}
+
+function setCommunicationStatus(message) {
+  if (communicationStatus) {
+    communicationStatus.textContent = message;
   }
 }
 
@@ -3018,19 +3315,26 @@ async function handleInstallClick() {
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator) || !isInstallSecureContext()) {
     updateInstallUi();
+    refreshStaffPushUi();
     return;
   }
 
   const serviceWorkerUrl = `service-worker.js?v=${encodeURIComponent(SERVICE_WORKER_VERSION)}`;
 
-  navigator.serviceWorker
+  serviceWorkerRegistrationPromise = navigator.serviceWorker
     .register(serviceWorkerUrl, { updateViaCache: "none" })
-    .then(() => cleanupLegacyCaches())
+    .then((registration) =>
+      cleanupLegacyCaches().then(() => registration),
+    )
     .then(() => {
       updateInstallUi();
+      refreshStaffPushUi();
+      return navigator.serviceWorker.ready;
     })
     .catch(() => {
+      serviceWorkerRegistrationPromise = null;
       updateInstallUi();
+      refreshStaffPushUi();
     });
 }
 
@@ -3622,17 +3926,6 @@ function showToast(message) {
     window.setTimeout(() => toast.remove(), 220);
   }, 2800);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

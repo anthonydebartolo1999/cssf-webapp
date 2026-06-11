@@ -1,4 +1,4 @@
-const CACHE_NAME = "cssf-pwa-v169";
+const CACHE_NAME = "cssf-pwa-v170";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -13,8 +13,8 @@ const PRECACHE_URLS = [
   "./staff.html",
   "./manifest.webmanifest?v=20260605-icon2",
   "./manifest-staff.webmanifest?v=20260606-staff-v2",
-  "./styles.css?v=20260611-homepremium-v168",
-  "./app.js?v=20260611-pwa-v169",
+  "./styles.css?v=20260611-homepremium-v169",
+  "./app.js?v=20260611-pwa-v170",
   "./icons/app-icon-192.png",
   "./icons/app-icon-512.png",
   "./icons/logo-photoroom.png?v=20260605-logo",
@@ -60,6 +60,30 @@ self.addEventListener("fetch", (event) => {
   if (shouldCacheAsset(request, url)) {
     event.respondWith(handleStaticAssetRequest(request));
   }
+});
+
+self.addEventListener("push", (event) => {
+  const payload = parsePushPayload(event.data);
+  const title = payload.title || "Nuova prenotazione CSSF";
+  const body = payload.body || "E' arrivata una nuova prenotazione staff.";
+  const notificationOptions = {
+    body,
+    icon: payload.icon || "icons/app-icon-192.png",
+    badge: payload.badge || "icons/app-icon-192.png",
+    tag: payload.tag || "cssf-staff-reservation",
+    data: {
+      url: payload.url || "/gestione.html#prenotazioni",
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, notificationOptions));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const targetUrl = new URL(event.notification.data?.url || "/gestione.html#prenotazioni", self.location.origin).href;
+  event.waitUntil(focusOrOpenClient(targetUrl));
 });
 
 async function handleNavigationRequest(request) {
@@ -111,4 +135,33 @@ function shouldCacheAsset(request, url) {
     url.pathname.endsWith(".jpeg") ||
     url.pathname.endsWith(".svg")
   );
+}
+
+function parsePushPayload(data) {
+  if (!data) return {};
+
+  try {
+    return data.json();
+  } catch {
+    return { body: data.text() };
+  }
+}
+
+async function focusOrOpenClient(targetUrl) {
+  const clients = await self.clients.matchAll({
+    type: "window",
+    includeUncontrolled: true,
+  });
+
+  for (const client of clients) {
+    if (client.url === targetUrl || client.url.startsWith(`${self.location.origin}/gestione.html`)) {
+      await client.focus();
+      if ("navigate" in client) {
+        await client.navigate(targetUrl);
+      }
+      return;
+    }
+  }
+
+  await self.clients.openWindow(targetUrl);
 }

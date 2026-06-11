@@ -7,7 +7,7 @@ drop policy if exists "Public can create reservations" on public.reservations;
 create policy "Public can create reservations"
 on public.reservations
 for insert
-to anon
+to anon, authenticated
 with check (
   status in ('pending', 'waiting')
   and guests between 1 and 30

@@ -1,0 +1,7 @@
+{
+  "name": "cssf-2-0",
+  "private": true,
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}

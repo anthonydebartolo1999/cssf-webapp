@@ -26,6 +26,7 @@ Cuori, Localita Gidora, Luzzi.
 - Recensioni locali con valutazione, testo e media stelle.
 - PWA con `manifest.webmanifest`, `service-worker.js`, icone PNG/SVG e cache
   offline dei file principali.
+- Notifiche push staff per la PWA, incluse web app iPhone/iPad salvate in Home.
 
 ## Avvio
 
@@ -58,6 +59,34 @@ Le analytics demo sono first-party e salvate solo nel browser locale. Il Garante
 Privacy indica che gli analytics possono essere assimilati ai tecnici solo se
 usati per statistiche aggregate, su singolo sito/app e con adeguata informativa;
 per usi piu invasivi serve consenso esplicito.
+
+## Setup notifiche push staff
+
+Per avere notifiche reali anche quando la web app staff e chiusa, e inviare
+comunicazioni push al pubblico:
+
+1. Installa la dipendenza serverless su Vercel con `npm install`.
+2. In Vercel aggiungi queste variabili ambiente:
+   - `WEB_PUSH_VAPID_PUBLIC_KEY`
+   - `WEB_PUSH_VAPID_PRIVATE_KEY`
+   - `WEB_PUSH_SUBJECT`
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `PUSH_WEBHOOK_SECRET`
+3. Esegui `supabase-push-setup.sql` in Supabase.
+4. In Supabase crea un Database Webhook su `public.reservations`, evento `INSERT`,
+   verso `https://TUO-DOMINIO/api/push/reservations`, con header
+   `x-webhook-secret: TUO_PUSH_WEBHOOK_SECRET`.
+5. Apri `gestione.html` dalla PWA staff su iPhone o desktop e premi la campanella
+   per registrare quel dispositivo alle notifiche.
+6. Dalla web app pubblica gli utenti possono usare `Attiva notifiche` nel banner
+   consensi; da `gestione.html` lo staff puo inviare broadcast con la card
+   `Comunicazioni`.
+
+Nota: la parte push e pensata per dispositivi staff. Se il webhook Supabase non e
+attivo, la campanella registra il device ma le notifiche remote sulle nuove
+prenotazioni non partiranno. Le comunicazioni pubblico, invece, passano dalla
+card admin e dall'endpoint `api/push/broadcast`.
 
 ## Fonti usate
 

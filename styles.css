@@ -324,6 +324,23 @@ a {
   cursor: not-allowed;
 }
 
+.ghost-link.is-active {
+  border-color: rgba(243, 182, 63, 0.42);
+  background: rgba(243, 182, 63, 0.16);
+  color: inherit;
+}
+
+.ghost-link.is-blocked {
+  border-color: rgba(232, 75, 42, 0.28);
+  background: rgba(232, 75, 42, 0.12);
+  color: #ffd4c9;
+}
+
+.ghost-link.is-unavailable {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
 .staff-topbar .notification-bell {
   margin-left: 0;
   box-shadow: none;
@@ -3203,6 +3220,7 @@ td {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .consent-actions .ghost-link,
@@ -3216,6 +3234,45 @@ td {
   border-color: rgba(32, 25, 22, 0.14);
   background: white;
   color: var(--ink);
+}
+
+.communication-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.communication-form {
+  display: grid;
+  gap: 14px;
+}
+
+.communication-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--sand);
+}
+
+.communication-form input,
+.communication-form textarea,
+.communication-form select {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 198, 79, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  font: inherit;
+}
+
+.communication-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.communication-form select option {
+  color: #161412;
 }
 
 .empty-state {

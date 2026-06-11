@@ -18,7 +18,7 @@
     <link rel="manifest" href="manifest-staff.webmanifest?v=20260606-staff-v2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260611-homepremium-v168" />
+    <link rel="stylesheet" href="styles.css?v=20260611-homepremium-v169" />
   </head>
   <body data-page="gestione" class="staff-app">
     <div class="app-shell">
@@ -31,6 +31,7 @@
           <a href="#prenotazioni">Prenotazioni</a>
           <a href="#voti">Voti</a>
           <a href="#statistiche">Statistiche</a>
+          <a href="#comunicazioni">Comunicazioni</a>
         </nav>
         <div class="topbar-actions staff-topbar-actions">
           <button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">&#128276;</button>
@@ -74,6 +75,7 @@
               <a href="#prenotazioni"><span>01</span><strong>Prenotazioni</strong><small>Richieste e riepilogo</small></a>
               <a href="#voti"><span>02</span><strong>Voti</strong><small>Classifiche e dettaglio nominativi</small></a>
               <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>KPI chiari e lettura rapida</small></a>
+              <a href="#comunicazioni"><span>04</span><strong>Comunicazioni</strong><small>Broadcast agli utenti iscritti</small></a>
             </nav>
             <section class="staff-work-area staff-area-bookings" id="prenotazioni" aria-labelledby="staff-bookings-title">
               <div class="staff-area-heading">
@@ -202,6 +204,37 @@
                 <button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button>
               </div>
             </section>
+            <section class="staff-work-area staff-area-communications" id="comunicazioni" aria-labelledby="staff-communications-title">
+              <div class="staff-area-heading">
+                <div>
+                  <span class="section-label">Comunicazioni</span>
+                  <h2 id="staff-communications-title">Invia una notifica al pubblico</h2>
+                </div>
+              </div>
+              <article class="analytics-panel communication-panel">
+                <form id="communicationForm" class="communication-form">
+                  <label>Titolo
+                    <input name="title" type="text" maxlength="80" placeholder="Aggiornamento CSSF" />
+                  </label>
+                  <label>Messaggio
+                    <textarea name="message" rows="4" maxlength="240" placeholder="Stasera si parte alle 19:00, vi aspettiamo in piazza."></textarea>
+                  </label>
+                  <label>Apri questa sezione
+                    <select name="targetUrl">
+                      <option value="/index.html">Home</option>
+                      <option value="/programma.html">Programma</option>
+                      <option value="/mappa.html">Mappa</option>
+                      <option value="/prenota.html">Prenota</option>
+                      <option value="/vota.html">Vota</option>
+                    </select>
+                  </label>
+                  <div class="staff-actions compact">
+                    <button class="primary-action" type="submit">Invia comunicazione</button>
+                  </div>
+                </form>
+                <p class="auth-status" id="communicationStatus">Pronta per un invio broadcast ai dispositivi che hanno attivato le notifiche.</p>
+              </article>
+            </section>
           </div>
         </section>
       </main>
@@ -209,6 +242,6 @@
     </div>
     <template id="reservationRowTemplate"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></template>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260611-pwa-v169"></script>
+    <script src="app.js?v=20260611-pwa-v170"></script>
   </body>
 </html>

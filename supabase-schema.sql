@@ -117,7 +117,25 @@ create table if not exists public.staff_members (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now(),
+  endpoint text not null,
+  subscription jsonb not null,
+  p256dh_key text not null,
+  auth_key text not null,
+  scope text not null default 'staff' check (scope in ('staff', 'public')),
+  device_label text,
+  user_agent text,
+  active boolean not null default true
+);
+
+create unique index if not exists push_subscriptions_endpoint_scope_idx on public.push_subscriptions (endpoint, scope);
+
 alter table public.staff_members enable row level security;
+alter table public.push_subscriptions enable row level security;
 
 create or replace function public.is_staff(member_id uuid default auth.uid())
 returns boolean
@@ -153,6 +171,11 @@ create trigger trucks_set_updated_at
 before update on public.trucks
 for each row execute function public.set_updated_at();
 
+drop trigger if exists push_subscriptions_set_updated_at on public.push_subscriptions;
+create trigger push_subscriptions_set_updated_at
+before update on public.push_subscriptions
+for each row execute function public.set_updated_at();
+
 alter table public.reservations enable row level security;
 alter table public.trucks enable row level security;
 alter table public.votes enable row level security;
@@ -180,7 +203,7 @@ drop policy if exists "Public can create reservations" on public.reservations;
 create policy "Public can create reservations"
 on public.reservations
 for insert
-to anon
+to anon, authenticated
 with check (
   status in ('pending', 'waiting')
   and guests between 1 and 30
@@ -343,6 +366,13 @@ drop policy if exists "Staff can delete analytics events" on public.analytics_ev
 create policy "Staff can delete analytics events"
 on public.analytics_events
 for delete
+to authenticated
+using (public.is_staff());
+
+drop policy if exists "Staff can read push subscriptions" on public.push_subscriptions;
+create policy "Staff can read push subscriptions"
+on public.push_subscriptions
+for select
 to authenticated
 using (public.is_staff());
 
