@@ -1367,6 +1367,7 @@ h3 {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 3;
   width: 36px;
   height: 36px;
   border: 0;
@@ -1375,6 +1376,8 @@ h3 {
   color: #fffaf3;
   font-size: 1.5rem;
   line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
 .map-image-frame {
@@ -1412,6 +1415,10 @@ h3 {
   background-size: 93% auto;
   background-repeat: no-repeat;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body[data-page="mappa"] .map-marker {
+  display: none !important;
 }
 
 .festival-showcase .festival-map {
@@ -3273,6 +3280,61 @@ td {
 
 .communication-form select option {
   color: #161412;
+}
+
+.staff-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.staff-overview-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.staff-overview-card:hover,
+.staff-overview-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(243, 182, 63, 0.24);
+  background: linear-gradient(180deg, rgba(243, 182, 63, 0.09), rgba(255, 255, 255, 0.03));
+}
+
+.staff-overview-card strong {
+  font-size: 1.12rem;
+  line-height: 1.05;
+  color: white;
+}
+
+.staff-overview-card p {
+  margin: 0;
+  color: rgba(255, 250, 243, 0.72);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.staff-work-area .analytics-panel,
+.staff-work-area .analytics-chart-card,
+.staff-work-area .reservations-panel,
+.staff-work-area .leaderboard-panel,
+.staff-work-area .staff-vote-detail {
+  border-radius: 10px;
+}
+
+.staff-area-heading h2,
+.reservations-heading h2 {
+  letter-spacing: -0.03em;
 }
 
 .empty-state {
@@ -6805,5 +6867,10 @@ body[data-page="home"] .home-map-card .primary-action {
   body[data-page="home"] .topbar,
   body[data-page="gestione"] .staff-topbar {
     top: calc(8px + env(safe-area-inset-top));
+  }
+
+  .staff-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 }

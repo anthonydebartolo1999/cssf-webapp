@@ -29,9 +29,9 @@
         </a>
         <nav class="site-nav" id="primaryNav" aria-label="Navigazione staff">
           <a href="#prenotazioni">Prenotazioni</a>
-          <a href="#voti">Voti</a>
-          <a href="#statistiche">Statistiche</a>
           <a href="#comunicazioni">Comunicazioni</a>
+          <a href="#statistiche">Statistiche</a>
+          <a href="#voti">Classifica stand</a>
         </nav>
         <div class="topbar-actions staff-topbar-actions">
           <button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">&#128276;</button>
@@ -49,11 +49,11 @@
           <div class="view-hero staff-hero">
             <div>
               <span class="section-label">Area gestione</span>
-              <h2 id="staff-title">Regia organizzatori</h2>
-              <p>Prenotazioni, voti e statistiche in un unico quadro operativo.</p>
+              <h2 id="staff-title">CSSF Staff, tutto sotto controllo</h2>
+              <p>Una dashboard semplice per gestire prenotazioni, comunicazioni, statistiche e classifica stand.</p>
             </div>
             <div class="staff-hero-status" aria-label="Stato gestionale">
-              <span>CSSF Staff</span>
+              <span>Dashboard</span>
               <strong>Operativo</strong>
             </div>
           </div>
@@ -72,16 +72,38 @@
           </section>
           <div id="staffWorkspace" hidden>
             <nav class="staff-command-grid" aria-label="Collegamenti gestione">
-              <a href="#prenotazioni"><span>01</span><strong>Prenotazioni</strong><small>Richieste e riepilogo</small></a>
-              <a href="#voti"><span>02</span><strong>Voti</strong><small>Classifiche e dettaglio nominativi</small></a>
-              <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>KPI chiari e lettura rapida</small></a>
-              <a href="#comunicazioni"><span>04</span><strong>Comunicazioni</strong><small>Broadcast agli utenti iscritti</small></a>
+              <a href="#prenotazioni"><span>01</span><strong>Prenotazioni</strong><small>Tavoli, stato e azioni rapide</small></a>
+              <a href="#comunicazioni"><span>02</span><strong>Comunicazioni</strong><small>Invii rapidi al pubblico</small></a>
+              <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>Numeri chiari e lettura veloce</small></a>
+              <a href="#voti"><span>04</span><strong>Classifica stand</strong><small>Voti live e podio evento</small></a>
             </nav>
+            <section class="staff-overview-grid" aria-label="Panoramica gestione">
+              <a class="staff-overview-card" href="#prenotazioni">
+                <span class="section-label">Priorita'</span>
+                <strong>Prenotazioni</strong>
+                <p>Controlla richieste, stati e tavoli in pochi passaggi.</p>
+              </a>
+              <a class="staff-overview-card" href="#comunicazioni">
+                <span class="section-label">Invio rapido</span>
+                <strong>Comunicazioni</strong>
+                <p>Avvisa il pubblico con una notifica chiara e immediata.</p>
+              </a>
+              <a class="staff-overview-card" href="#statistiche">
+                <span class="section-label">Sintesi</span>
+                <strong>Statistiche</strong>
+                <p>Leggi al volo traffico, interesse e andamento web app.</p>
+              </a>
+              <a class="staff-overview-card" href="#voti">
+                <span class="section-label">Live</span>
+                <strong>Classifica stand</strong>
+                <p>Segui il ranking e i voti registrati in tempo reale.</p>
+              </a>
+            </section>
             <section class="staff-work-area staff-area-bookings" id="prenotazioni" aria-labelledby="staff-bookings-title">
               <div class="staff-area-heading">
                 <div>
                   <span class="section-label">Prenotazioni</span>
-                  <h2 id="staff-bookings-title">Richieste tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2>
+                  <h2 id="staff-bookings-title">Gestione tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2>
                 </div>
                 <div class="staff-actions compact">
                   <button class="ghost-link strong" id="copyReportButton" type="button">Copia report</button>
@@ -93,8 +115,8 @@
                 <article class="reservations-panel">
                   <div class="reservations-heading">
                     <div>
-                      <span class="section-label">Richieste</span>
-                      <h2>Richieste tavoli</h2>
+                      <span class="section-label">Vista completa</span>
+                      <h2>Elenco prenotazioni</h2>
                     </div>
                     <div class="filters">
                       <input id="searchInput" type="search" placeholder="Cerca nome, telefono, note" />
@@ -123,27 +145,36 @@
                 </article>
               </div>
             </section>
-            <section class="staff-votes-panel staff-work-area staff-area-votes" id="voti" aria-labelledby="staff-votes-title">
-              <div class="reservations-heading">
+            <section class="staff-work-area staff-area-communications" id="comunicazioni" aria-labelledby="staff-communications-title">
+              <div class="staff-area-heading">
                 <div>
-                  <span class="section-label">Voti live</span>
-                  <h2 id="staff-votes-title">Classifica votazioni <span class="staff-count-badge gold" id="metricVotes">0</span></h2>
+                  <span class="section-label">Comunicazioni</span>
+                  <h2 id="staff-communications-title">Invia una notifica al pubblico</h2>
                 </div>
-                <button class="ghost-link strong" id="clearVotesButton" type="button">Svuota voti test</button>
               </div>
-              <div class="leaderboard-tabs" id="staffVoteTabs"></div>
-              <div class="staff-vote-layout">
-                <article class="leaderboard-panel compact"><div class="leaderboard-list" id="staffVoteLeaderboard"></div></article>
-                <article class="staff-vote-detail">
-                  <div class="table-wrap">
-                    <table>
-                      <thead><tr><th>Ora</th><th>Nome</th><th>Categoria</th><th>Stand</th></tr></thead>
-                      <tbody id="staffVotesTable"></tbody>
-                    </table>
+              <article class="analytics-panel communication-panel">
+                <form id="communicationForm" class="communication-form">
+                  <label>Titolo
+                    <input name="title" type="text" maxlength="80" placeholder="Aggiornamento CSSF" />
+                  </label>
+                  <label>Messaggio
+                    <textarea name="message" rows="4" maxlength="240" placeholder="Stasera si parte alle 19:00, vi aspettiamo in piazza."></textarea>
+                  </label>
+                  <label>Apri questa sezione
+                    <select name="targetUrl">
+                      <option value="/index.html">Home</option>
+                      <option value="/programma.html">Programma</option>
+                      <option value="/mappa.html">Mappa</option>
+                      <option value="/prenota.html">Prenota</option>
+                      <option value="/vota.html">Vota</option>
+                    </select>
+                  </label>
+                  <div class="staff-actions compact">
+                    <button class="primary-action" type="submit">Invia comunicazione</button>
                   </div>
-                  <div class="empty-state" id="emptyStaffVotes">Nessun voto registrato.</div>
-                </article>
-              </div>
+                </form>
+                <p class="auth-status" id="communicationStatus">Pronta per un invio broadcast ai dispositivi che hanno attivato le notifiche.</p>
+              </article>
             </section>
             <section class="staff-work-area staff-area-stats" id="statistiche" aria-labelledby="staff-stats-title">
               <div class="staff-area-heading">
@@ -204,36 +235,27 @@
                 <button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button>
               </div>
             </section>
-            <section class="staff-work-area staff-area-communications" id="comunicazioni" aria-labelledby="staff-communications-title">
-              <div class="staff-area-heading">
+            <section class="staff-votes-panel staff-work-area staff-area-votes" id="voti" aria-labelledby="staff-votes-title">
+              <div class="reservations-heading">
                 <div>
-                  <span class="section-label">Comunicazioni</span>
-                  <h2 id="staff-communications-title">Invia una notifica al pubblico</h2>
+                  <span class="section-label">Voti live</span>
+                  <h2 id="staff-votes-title">Classifica stand <span class="staff-count-badge gold" id="metricVotes">0</span></h2>
                 </div>
+                <button class="ghost-link strong" id="clearVotesButton" type="button">Svuota voti test</button>
               </div>
-              <article class="analytics-panel communication-panel">
-                <form id="communicationForm" class="communication-form">
-                  <label>Titolo
-                    <input name="title" type="text" maxlength="80" placeholder="Aggiornamento CSSF" />
-                  </label>
-                  <label>Messaggio
-                    <textarea name="message" rows="4" maxlength="240" placeholder="Stasera si parte alle 19:00, vi aspettiamo in piazza."></textarea>
-                  </label>
-                  <label>Apri questa sezione
-                    <select name="targetUrl">
-                      <option value="/index.html">Home</option>
-                      <option value="/programma.html">Programma</option>
-                      <option value="/mappa.html">Mappa</option>
-                      <option value="/prenota.html">Prenota</option>
-                      <option value="/vota.html">Vota</option>
-                    </select>
-                  </label>
-                  <div class="staff-actions compact">
-                    <button class="primary-action" type="submit">Invia comunicazione</button>
+              <div class="leaderboard-tabs" id="staffVoteTabs"></div>
+              <div class="staff-vote-layout">
+                <article class="leaderboard-panel compact"><div class="leaderboard-list" id="staffVoteLeaderboard"></div></article>
+                <article class="staff-vote-detail">
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Ora</th><th>Nome</th><th>Categoria</th><th>Stand</th></tr></thead>
+                      <tbody id="staffVotesTable"></tbody>
+                    </table>
                   </div>
-                </form>
-                <p class="auth-status" id="communicationStatus">Pronta per un invio broadcast ai dispositivi che hanno attivato le notifiche.</p>
-              </article>
+                  <div class="empty-state" id="emptyStaffVotes">Nessun voto registrato.</div>
+                </article>
+              </div>
             </section>
           </div>
         </section>
