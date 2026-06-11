@@ -10,8 +10,8 @@ const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v170";
-const SERVICE_WORKER_VERSION = "20260611-pwa-v170";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v171";
+const SERVICE_WORKER_VERSION = "20260611-pwa-v171";
 const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
 const PUSH_SUBSCRIBE_ENDPOINT = "/api/push/subscribe";
 const PUSH_BROADCAST_ENDPOINT = "/api/push/broadcast";
@@ -1207,6 +1207,12 @@ async function requestPushNotificationsForScope(scope) {
   const successMessage = isStaffScope ? "Notifiche staff attive." : "Notifiche evento attive.";
   const existingMessage = isStaffScope ? "Notifiche staff gia attive." : "Notifiche evento gia attive.";
 
+  if (isIosDevice() && !isStandaloneMode()) {
+    await refreshPushUi();
+    showToast("Su iPhone installa prima la web app con Aggiungi a Home, poi attiva le notifiche dall'app.");
+    return;
+  }
+
   if (!supportsPushNotifications()) {
     await refreshPushUi();
     showToast("Questo browser non supporta le notifiche.");
@@ -1410,11 +1416,12 @@ async function fetchPushPublicKey() {
   }
 
   const payload = await response.json();
-  if (!payload?.publicKey) {
+  const publicKey = String(payload?.publicKey || "").replace(/\s+/g, "").trim();
+  if (!publicKey) {
     throw new Error("Chiave push non valida.");
   }
 
-  return payload.publicKey;
+  return publicKey;
 }
 
 async function syncPushSubscription(scope, subscription) {
@@ -1458,8 +1465,9 @@ function getPushDeviceLabel() {
 }
 
 function urlBase64ToUint8Array(base64String) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const normalizedBase64 = String(base64String || "").replace(/\s+/g, "").trim();
+  const padding = "=".repeat((4 - (normalizedBase64.length % 4)) % 4);
+  const base64 = (normalizedBase64 + padding).replace(/-/g, "+").replace(/_/g, "/");
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
 
@@ -3926,8 +3934,6 @@ function showToast(message) {
     window.setTimeout(() => toast.remove(), 220);
   }, 2800);
 }
-
-
 
 
 
