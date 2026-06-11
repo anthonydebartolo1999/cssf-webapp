@@ -26,100 +26,238 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Caveat:wght@700&family=Manrope:wght@400;500;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="manifest" href="manifest.webmanifest?v=20260605-icon2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260607-reviews-v155" />
-    <script>
-      (function () {
-        window.addEventListener(
-          "pageshow",
-          function () {
-            if ("serviceWorker" in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                return Promise.all(
-                  registrations.map(function (registration) {
-                    return registration.unregister();
-                  }),
-                );
-              }).catch(function () {});
-            }
-            if ("caches" in window) {
-              caches.keys().then(function (keys) {
-                return Promise.all(
-                  keys.filter(function (key) {
-                    return key.indexOf("cssf-pwa-") === 0;
-                  }).map(function (key) {
-                    return caches.delete(key);
-                  }),
-                );
-              }).catch(function () {});
-            }
-          },
-          { once: true },
-        );
-      })();
-    </script>
+    <link rel="stylesheet" href="styles.css?v=20260611-homepremium-v168" />
   </head>
   <body data-page="home">
     <div class="app-shell">
-      <header class="topbar">
+      <header class="topbar premium-topbar">
         <a class="brand-mini brand-button" href="index.html" data-view-link="home" aria-label="Cosenza Super Street Food home">
           <img src="icons/logo-photoroom.png?v=20260605-logo" alt="" />
           <strong>COSENZASUPERSTREETFOOD</strong>
         </a>
-        <nav class="site-nav" aria-label="Navigazione principale">
+        <nav class="site-nav" id="primaryNav" aria-label="Navigazione principale">
           <a href="index.html" data-view-link="home">Home</a>
-          <a href="mappa.html" data-view-link="mappa">Mappa</a>
-          <a href="truck.html" data-view-link="truck">Stand</a>
+          <a href="mappa.html" data-view-link="mappa">Mappa &amp; Stand</a>
           <a href="vota.html" data-view-link="vota">Vota</a>
           <a href="prenota.html" data-view-link="prenota">Prenota</a>
           <a href="programma.html" data-view-link="programma">Programma</a>
           <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
         </nav>
         <div class="topbar-actions">
-          <button class="install-button" id="installButton" type="button" hidden>Installa app</button>
-          <a class="ghost-link" href="https://www.instagram.com/cosenzasuperstreetfood/" target="_blank" rel="noreferrer">
-            Instagram
+          <button class="install-button" id="installButton" type="button" hidden aria-label="Installa la PWA">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12" />
+              <path d="m8 11 4 4 4-4" />
+              <path d="M8 21h8" />
+            </svg>
+            <span class="install-button-label">Installa</span>
+          </button>
+          <a class="primary-action home-topbar-cta" href="prenota.html">Prenota ora</a>
+          <a class="insta-orbit" href="https://www.instagram.com/cosenzasuperstreetfood/" target="_blank" rel="noreferrer" aria-label="Apri Instagram CSSF" title="Instagram CSSF">
+            <span class="insta-orbit-center" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <defs>
+                  <linearGradient id="instagramStroke" x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#f09433"></stop>
+                    <stop offset="30%" stop-color="#e6683c"></stop>
+                    <stop offset="62%" stop-color="#dc2743"></stop>
+                    <stop offset="100%" stop-color="#bc1888"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="4.5" y="4.5" width="15" height="15" rx="4"></rect>
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <circle cx="17.4" cy="6.8" r="1"></circle>
+              </svg>
+            </span>
           </a>
+          <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Apri il menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </div>
       </header>
 
       <main>
         <section class="hero" id="home" aria-label="Home Cosenza Super Street Food">
           <div class="hero-copy">
-            <div class="hero-event-meta">
-              <div class="hero-event-line hero-event-dates" id="hero-title">26-27-28&nbsp;giugno&nbsp;2026</div>
-              <div class="hero-event-line hero-event-place">Luzzi | Chiesa Sacri Cuori</div>
-              <div class="hero-event-line hero-event-address">C/da Gidora.</div>
+            <div class="hero-date-ribbon" id="hero-title" aria-label="Date evento">
+              <span>26</span>
+              <i></i>
+              <span>27</span>
+              <i></i>
+              <span>28</span>
             </div>
-            <div class="hero-eyebrow">Festival di street food, musica, piazza e community</div>
+            <div class="hero-date-caption">Giugno 2026</div>
+            <div class="hero-location-line">Piazza Sacri Cuori, Localita Gidora, Luzzi</div>
+            <h1 class="hero-title-stack" aria-label="Cosenza Super Street Food">
+              <span>Cosenza</span>
+              <span class="accent">Super</span>
+              <em>Street Food</em>
+            </h1>
             <p class="hero-description">
-              <strong>#L'INIMITABILE</strong> Cosenza Super Street Food &egrave; il festival di street food pi&ugrave; grande della provincia di Cosenza: tre serate tra sapori autentici, specialit&agrave; regionali, musica e spettacoli. A Luzzi, decine di espositori da tutta Italia incontrano una piazza viva, accogliente e pensata per ogni et&agrave;. Un'occasione unica per scoprire nuove tradizioni gastronomiche, gustare eccellenze provenienti da ogni territorio e vivere momenti di condivisione in un'atmosfera di festa, divertimento e convivialit&agrave;. Un evento che celebra il cibo di strada, la cultura del territorio e il piacere di stare insieme.
+              Il piu' grande festival di street food della provincia di Cosenza. Tre serate di piazza, stand, birra, musica live e un'atmosfera costruita per farsi ricordare.
             </p>
+            <div class="hero-icon-facts" aria-label="Punti chiave evento">
+              <span><strong>14+</strong> stand</span>
+              <span><strong>Area</strong> food</span>
+              <span><strong>Area</strong> family</span>
+            </div>
+            <div class="hero-actions">
+              <a class="primary-action large" href="prenota.html">Prenota ora</a>
+              <a class="ghost-link hero-secondary-action" href="mappa.html">Scopri gli stand</a>
+            </div>
           </div>
 
-          <div class="hero-countdown-bar" aria-label="Countdown evento">
-            <div class="countdown-heading">
-              <strong>La quarta edizione prende vita tra</strong>
+          <div class="hero-side">
+            <div class="hero-visual-stage" aria-hidden="true">
+              <div class="hero-beer-shot"></div>
+              <div class="hero-burger-shot"></div>
             </div>
-            <div class="countdown-grid">
-              <span class="countdown-unit"><strong id="countdownDays">--</strong>giorni</span>
-              <span class="countdown-unit"><strong id="countdownHours">--</strong>ore</span>
-              <span class="countdown-unit"><strong id="countdownMinutes">--</strong>min</span>
-              <span class="countdown-unit seconds"><strong id="countdownSeconds">--</strong>sec</span>
+
+            <div class="hero-countdown-bar" aria-label="Countdown evento">
+              <div class="countdown-heading">
+                <strong>La festa inizia tra</strong>
+              </div>
+              <div class="countdown-grid">
+                <span class="countdown-unit"><strong id="countdownDays">--</strong><span class="countdown-label">giorni</span></span>
+                <span class="countdown-unit"><strong id="countdownHours">--</strong><span class="countdown-label">ore</span></span>
+                <span class="countdown-unit"><strong id="countdownMinutes">--</strong><span class="countdown-label">min</span></span>
+                <span class="countdown-unit seconds"><strong id="countdownSeconds">--</strong><span class="countdown-label">sec</span></span>
+              </div>
+              <div class="burger-progress" aria-hidden="true">
+                <div class="burger-progress-fill" id="countdownProgressFill"></div>
+                <span class="burger-progress-emoji" id="countdownBurger">&#127828;</span>
+                <span class="burger-progress-flag" id="countdownFlag">&#127937;</span>
+              </div>
+              <p id="installHint"></p>
             </div>
-            <div class="burger-progress" aria-hidden="true">
-              <div class="burger-progress-fill" id="countdownProgressFill"></div>
-              <span class="burger-progress-emoji" id="countdownBurger">&#127828;</span>
-              <span class="burger-progress-flag" id="countdownFlag">&#127937;</span>
-            </div>
-            <p id="installHint"></p>
           </div>
         </section>
+
+        <section class="home-stats-band" aria-label="Statistiche evento">
+          <article>
+            <strong>3 giorni</strong>
+            <span>di gusto e festa</span>
+          </article>
+          <article>
+            <strong>14+ stand</strong>
+            <span>da tutta la Calabria</span>
+          </article>
+          <article>
+            <strong>Family area</strong>
+            <span>spazio pensato per tutti</span>
+          </article>
+          <article>
+            <strong>13.000+</strong>
+            <span>visitatori a edizione</span>
+          </article>
+        </section>
+
+        <section class="home-section home-featured-stands" aria-labelledby="featured-stands-title">
+          <div class="section-intro">
+            <div>
+              <span class="section-label">Stand 2026</span>
+              <h2 id="featured-stands-title">Quattro tappe da non perdere</h2>
+            </div>
+            <a class="ghost-link home-inline-action" href="mappa.html">Tutti gli stand</a>
+          </div>
+          <div class="home-feature-grid">
+            <article class="home-feature-card feature-card-panzerotto">
+              <div class="home-feature-overlay">
+                <h3>Panzerotto On The Road</h3>
+                <p>Panzerotti dorati e burrata fritta: fritto caldo, impasto pieno e un classico che chiama subito il morso.</p>
+              </div>
+            </article>
+            <article class="home-feature-card feature-card-butchers">
+              <div class="home-feature-overlay">
+                <h3>La Verace</h3>
+                <p>Cuzzitiello e corn dog: panini ricchi, fritto dorato e street food diretto, goloso e immediato.</p>
+              </div>
+            </article>
+            <article class="home-feature-card feature-card-birra">
+              <div class="home-feature-overlay">
+                <h3>Birra Cala</h3>
+                <p>Birra fresca e servizio rapido: la sosta giusta per accompagnare fritti, panini e ritmo della serata.</p>
+              </div>
+            </article>
+            <article class="home-feature-card feature-card-dolci">
+              <div class="home-feature-overlay">
+                <h3>Armonia Dei Gusti</h3>
+                <p>Dessert, gelati e dolci da passeggio: una chiusura piu' morbida e golosa dopo il giro tra gli stand.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="home-section home-spotlight-grid" aria-label="Programma e mappa in evidenza">
+          <article class="home-spotlight-card home-program-card">
+            <div class="home-spotlight-copy">
+              <span class="section-label">Programma</span>
+              <h2>Tre sere di musica</h2>
+              <p>Un programma diverso ogni giorno<br />per tenere alta l'energia.</p>
+            </div>
+            <div class="home-program-list" aria-label="Estratto programma">
+              <div><strong>Ven 26</strong><span>Sax ID, Liga n' Roll e Romeo Renne</span></div>
+              <div><strong>Sab 27</strong><span>Paris-Buenos Aires, Unconventional Drea e Febbre Italiana</span></div>
+              <div><strong>Dom 28</strong><span>Alessandra Latino e I Ricci di Mare</span></div>
+            </div>
+            <a class="primary-action" href="programma.html">Apri il programma</a>
+          </article>
+          <article class="home-spotlight-card home-map-card">
+            <div class="home-spotlight-copy">
+              <span class="section-label">Mappa evento</span>
+              <h2>Orientati subito tra palco, tavoli e stand</h2>
+              <p>Una sola vista per leggere l'area, trovare il tuo stand e confrontare tutte le proposte senza perdere il ritmo della serata.</p>
+            </div>
+            <div class="home-map-preview" aria-hidden="true"></div>
+            <a class="primary-action" href="mappa.html">Esplora la mappa</a>
+          </article>
+        </section>
+
+        <section class="home-section home-social-grid" aria-label="Community, recensioni e sponsor">
+          <article class="home-social-card social-feed-card">
+            <span class="section-label">Community</span>
+            <h3>#cosenzasuperstreetfood</h3>
+            <p>Scatta, condividi e porta online l'atmosfera della piazza. Il festival vive bene anche fuori dal palco.</p>
+            <div class="social-thumb-grid" aria-hidden="true">
+              <span class="social-thumb thumb-one"></span>
+              <span class="social-thumb thumb-two"></span>
+              <span class="social-thumb thumb-three"></span>
+              <span class="social-thumb thumb-four"></span>
+            </div>
+          </article>
+          <article class="home-social-card social-review-card">
+            <span class="section-label">Recensioni</span>
+            <h3>La community sta gia' parlando</h3>
+            <p>Feedback utili, voto rapido e impressioni vere: la sezione recensioni ora e' parte dell'esperienza evento.</p>
+            <div class="home-rating-line" aria-label="Valutazione media">
+              <strong>4.8/5</strong>
+              <span>oltre 3000 recensioni raccolte</span>
+            </div>
+            <a class="primary-action" href="recensioni.html">Leggi le recensioni</a>
+          </article>
+          <article class="home-social-card social-sponsor-card">
+            <span class="section-label">Partner &amp; sponsor</span>
+            <h3>Brand che accompagnano l'evento</h3>
+            <p>Un supporto visibile ma ordinato, integrato con il tono premium della home e con lo stile dell'evento.</p>
+            <div class="home-sponsor-ticker" aria-label="Sponsor">
+              <div class="home-sponsor-track">
+                <div class="home-sponsor-item"><img src="Coca-Cola_logo.svg.png" alt="Coca-Cola" /></div>
+                <div class="home-sponsor-item"><img src="Pepsi-Cola_1950_(Wordmark).png" alt="Pepsi-Cola" /></div>
+                <div class="home-sponsor-item"><img src="Coca-Cola_logo.svg.png" alt="Coca-Cola" /></div>
+                <div class="home-sponsor-item"><img src="Pepsi-Cola_1950_(Wordmark).png" alt="Pepsi-Cola" /></div>
+              </div>
+            </div>
+          </article>
+        </section>
+
       </main>
       <footer class="app-footer" aria-label="Crediti">
         <span>&copy; 2026 Cosenza Super Street Food</span>
@@ -189,6 +327,6 @@
       })();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260607-reviews-v155"></script>
+    <script src="app.js?v=20260611-pwa-v169"></script>
   </body>
 </html>

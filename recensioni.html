@@ -18,70 +18,149 @@
     <link rel="manifest" href="manifest.webmanifest?v=20260605-icon2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260607-reviews-v155" />
-    <script>
-      (function () {
-        window.addEventListener(
-          "pageshow",
-          function () {
-            if ("serviceWorker" in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                return Promise.all(
-                  registrations.map(function (registration) {
-                    return registration.unregister();
-                  }),
-                );
-              }).catch(function () {});
-            }
-            if ("caches" in window) {
-              caches.keys().then(function (keys) {
-                return Promise.all(
-                  keys.filter(function (key) {
-                    return key.indexOf("cssf-pwa-") === 0;
-                  }).map(function (key) {
-                    return caches.delete(key);
-                  }),
-                );
-              }).catch(function () {});
-            }
-          },
-          { once: true },
-        );
-      })();
-    </script>
+    <link rel="stylesheet" href="styles.css?v=20260611-homepremium-v168" />
   </head>
   <body data-page="recensioni">
     <div class="app-shell">
-      <header class="topbar">
-        <a class="brand-mini brand-button" href="index.html" data-view-link="home" aria-label="Cosenza Super Street Food home"><img src="icons/logo-photoroom.png?v=20260605-logo" alt="" /><strong>COSENZASUPERSTREETFOOD</strong></a>
-        <nav class="site-nav" aria-label="Navigazione principale">
-          <a href="index.html" data-view-link="home">Home</a><a href="mappa.html" data-view-link="mappa">Mappa</a><a href="truck.html" data-view-link="truck">Stand</a><a href="vota.html" data-view-link="vota">Vota</a><a href="prenota.html" data-view-link="prenota">Prenota</a><a href="programma.html" data-view-link="programma">Programma</a><a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
+      <header class="topbar premium-topbar">
+        <a class="brand-mini brand-button" href="index.html" data-view-link="home" aria-label="Cosenza Super Street Food home">
+          <img src="icons/logo-photoroom.png?v=20260605-logo" alt="" />
+          <strong>COSENZASUPERSTREETFOOD</strong>
+        </a>
+        <nav class="site-nav" id="primaryNav" aria-label="Navigazione principale">
+          <a href="index.html" data-view-link="home">Home</a>
+          <a href="mappa.html" data-view-link="mappa">Mappa &amp; Stand</a>
+          <a href="vota.html" data-view-link="vota">Vota</a>
+          <a href="prenota.html" data-view-link="prenota">Prenota</a>
+          <a href="programma.html" data-view-link="programma">Programma</a>
+          <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
         </nav>
-        <div class="topbar-actions"><button class="install-button" id="installButton" type="button" hidden>Installa app</button><a class="ghost-link" href="https://www.instagram.com/cosenzasuperstreetfood/" target="_blank" rel="noreferrer">Instagram</a></div>
+        <div class="topbar-actions">
+          <button class="install-button" id="installButton" type="button" hidden aria-label="Installa la PWA">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12" />
+              <path d="m8 11 4 4 4-4" />
+              <path d="M8 21h8" />
+            </svg>
+            <span class="install-button-label">Installa</span>
+          </button>
+          <a class="primary-action home-topbar-cta" href="prenota.html">Prenota ora</a>
+          <a class="insta-orbit" href="https://www.instagram.com/cosenzasuperstreetfood/" target="_blank" rel="noreferrer" aria-label="Apri Instagram CSSF" title="Instagram CSSF">
+            <span class="insta-orbit-center" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <defs>
+                  <linearGradient id="instagramStroke" x1="3" y1="21" x2="21" y2="3" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#f09433"></stop>
+                    <stop offset="30%" stop-color="#e6683c"></stop>
+                    <stop offset="62%" stop-color="#dc2743"></stop>
+                    <stop offset="100%" stop-color="#bc1888"></stop>
+                  </linearGradient>
+                </defs>
+                <rect x="4.5" y="4.5" width="15" height="15" rx="4"></rect>
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <circle cx="17.4" cy="6.8" r="1"></circle>
+              </svg>
+            </span>
+          </a>
+          <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Apri il menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </header>
       <main>
         <section class="reviews-section" id="recensioni" aria-labelledby="recensioni-title">
-          <div class="view-hero"><span class="section-label">Recensioni</span><h2 id="recensioni-title">La voce della community</h2><p>Lascia un feedback utile: ci aiuta a leggere pubblico, qualita' percepita e punti da migliorare.</p></div>
+          <div class="view-hero review-hero">
+            <div class="review-hero-copy">
+              <span class="section-label">Recensioni</span>
+              <h2 id="recensioni-title">La voce della community</h2>
+              <p>Lascia un feedback utile: ci aiuta a leggere pubblico, qualita' percepita e punti da migliorare.</p>
+              <div class="review-hero-meta" aria-label="Focus recensioni">
+                <span>Food</span>
+                <span>Atmosfera</span>
+                <span>Organizzazione</span>
+              </div>
+            </div>
+          </div>
           <div class="reviews-layout">
             <form class="review-form" id="reviewForm">
-              <div class="review-summary"><strong id="reviewAverage">--</strong><span id="reviewCount">0 recensioni</span></div>
-              <div class="review-form-grid">
-                <label>Nome <input name="reviewer" type="text" required /></label>
-                <label>Voto<select name="rating"><option value="5">5 stelle</option><option value="4">4 stelle</option><option value="3">3 stelle</option><option value="2">2 stelle</option><option value="1">1 stella</option></select></label>
-                <label>Eta<select name="ageRange"><option value="">Preferisco non dirlo</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
-                <label>Genere<select name="gender"><option value="">Preferisco non dirlo</option><option value="female">Donna</option><option value="male">Uomo</option><option value="non-binary">Non binario</option><option value="prefer-not">Non specifico</option></select></label>
-                <label>Cosa ti e' piaciuto di piu'<select name="favoriteAspect"><option value="">Scegli</option><option value="food">Qualita' del cibo</option><option value="stand-variety">Varieta' degli stand</option><option value="atmosphere">Atmosfera</option><option value="music">Musica</option><option value="organization">Organizzazione</option><option value="location">Location</option></select></label>
-                <label>Cosa migliorare<select name="improvementArea"><option value="">Scegli</option><option value="queues">Code</option><option value="seating">Posti a sedere</option><option value="prices">Prezzi</option><option value="signage">Segnaletica</option><option value="payment">Pagamenti</option><option value="cleanliness">Pulizia</option><option value="more-stands">Piu' stand</option><option value="nothing">Nulla in particolare</option></select></label>
-                <label>Torneresti?<select name="wouldReturn"><option value="">Scegli</option><option value="yes">Si</option><option value="maybe">Forse</option><option value="no">No</option></select></label>
-                <label>Titolo <input name="title" type="text" required /></label>
+              <div class="review-form-head">
+                <div class="review-summary">
+                  <strong id="reviewAverage">--</strong>
+                  <span id="reviewCount">0 recensioni</span>
+                </div>
+                <p class="review-form-note">Scrivi un titolo chiaro e un commento concreto: il valore sta nei dettagli, non nella lunghezza.</p>
               </div>
-              <label>Recensione <textarea name="body" rows="5" required placeholder="Raccontaci cosa ha funzionato e cosa possiamo migliorare."></textarea></label>
+              <section class="review-form-section" aria-labelledby="review-rating-title">
+                <div class="review-section-head">
+                  <span class="review-section-kicker">Valutazione</span>
+                  <h3 id="review-rating-title">Che voto dai all'esperienza?</h3>
+                </div>
+                <fieldset class="review-rating-field">
+                  <legend class="sr-only">Seleziona un voto da 1 a 5 stelle</legend>
+                  <div class="review-star-control" aria-label="Voto in stelle">
+                    <input id="review-rating-1" name="rating" type="radio" value="1" />
+                    <label for="review-rating-1" data-value="1" aria-label="1 stella"></label>
+                    <input id="review-rating-2" name="rating" type="radio" value="2" />
+                    <label for="review-rating-2" data-value="2" aria-label="2 stelle"></label>
+                    <input id="review-rating-3" name="rating" type="radio" value="3" />
+                    <label for="review-rating-3" data-value="3" aria-label="3 stelle"></label>
+                    <input id="review-rating-4" name="rating" type="radio" value="4" />
+                    <label for="review-rating-4" data-value="4" aria-label="4 stelle"></label>
+                    <input id="review-rating-5" name="rating" type="radio" value="5" checked />
+                    <label for="review-rating-5" data-value="5" aria-label="5 stelle"></label>
+                  </div>
+                  <p class="review-rating-caption" id="reviewRatingCaption">Esperienza ottima</p>
+                </fieldset>
+              </section>
+              <section class="review-form-section" aria-labelledby="review-profile-title">
+                <div class="review-section-head">
+                  <span class="review-section-kicker">Profilo</span>
+                  <h3 id="review-profile-title">Chi sta lasciando il feedback?</h3>
+                </div>
+                <div class="review-form-grid">
+                  <label>Nome <input name="reviewer" type="text" required /></label>
+                  <label>Eta<select name="ageRange"><option value="">Preferisco non dirlo</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
+                  <label>Genere<select name="gender"><option value="">Preferisco non dirlo</option><option value="female">Donna</option><option value="male">Uomo</option><option value="non-binary">Non binario</option><option value="prefer-not">Non specifico</option></select></label>
+                  <label>Torneresti?<select name="wouldReturn"><option value="">Scegli</option><option value="yes">Si</option><option value="maybe">Forse</option><option value="no">No</option></select></label>
+                </div>
+              </section>
+              <section class="review-form-section" aria-labelledby="review-feedback-title">
+                <div class="review-section-head">
+                  <span class="review-section-kicker">Feedback</span>
+                  <h3 id="review-feedback-title">Dove ha colpito davvero l'evento?</h3>
+                </div>
+                <div class="review-form-grid">
+                  <label>Cosa ti e' piaciuto di piu'<select name="favoriteAspect"><option value="">Scegli</option><option value="food">Qualita' del cibo</option><option value="stand-variety">Varieta' degli stand</option><option value="atmosphere">Atmosfera</option><option value="music">Musica</option><option value="organization">Organizzazione</option><option value="location">Location</option></select></label>
+                  <label>Cosa migliorare<select name="improvementArea"><option value="">Scegli</option><option value="queues">Code</option><option value="seating">Posti a sedere</option><option value="prices">Prezzi</option><option value="signage">Segnaletica</option><option value="payment">Pagamenti</option><option value="cleanliness">Pulizia</option><option value="more-stands">Piu' stand</option><option value="nothing">Nulla in particolare</option></select></label>
+                  <label>Titolo <input name="title" type="text" required /></label>
+                </div>
+              </section>
+              <section class="review-form-section review-form-section-featured" aria-labelledby="review-story-title">
+                <div class="review-section-head">
+                  <span class="review-section-kicker">Racconto</span>
+                  <h3 id="review-story-title">Descrivi il momento che ti e' rimasto</h3>
+                </div>
+                <label class="review-story-field">Recensione <textarea name="body" rows="6" required placeholder="Raccontaci cosa ha funzionato, cosa ti ha colpito e cosa possiamo migliorare."></textarea></label>
+              </section>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
               <button class="primary-action" type="submit">Pubblica recensione</button>
             </form>
             <article class="reviews-feed">
+              <div class="reviews-feed-header">
+                <div>
+                  <span class="section-label">Community feed</span>
+                  <h3>Ultime recensioni raccolte</h3>
+                </div>
+                <p>Una lettura rapida di come l'evento viene vissuto dal pubblico.</p>
+              </div>
+              <div class="reviews-feed-banner" aria-label="Sintesi community">
+                <span>Osservatorio live</span>
+                <strong>Commenti, percezione del pubblico e segnali utili per la prossima edizione.</strong>
+              </div>
               <div class="reviews-insights" id="reviewsInsights"></div>
-              <div id="reviewsList"></div>
+              <div class="reviews-list" id="reviewsList"></div>
               <div class="empty-state" id="emptyReviews">Ancora nessuna recensione.</div>
             </article>
           </div>
@@ -91,6 +170,6 @@
     </div>
     <div class="consent-banner" id="consentBanner" hidden><div><strong>Cookie e statistiche</strong><p>Usiamo statistiche anonime, solo con consenso, per migliorare la web app dell'evento. Leggi l'<a href="privacy.html">informativa privacy</a>.</p></div><div class="consent-actions"><button class="ghost-link" id="rejectAnalyticsButton" type="button">Rifiuta</button><button class="primary-action" id="acceptAnalyticsButton" type="button">Accetta</button></div></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260607-reviews-v155"></script>
+    <script src="app.js?v=20260611-pwa-v169"></script>
   </body>
 </html>

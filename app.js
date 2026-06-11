@@ -6,13 +6,12 @@ const VOTE_STORAGE_KEY = "cssf-votes-v1";
 const ANALYTICS_STORAGE_KEY = "cssf-analytics-v1";
 const ANALYTICS_CONSENT_KEY = "cssf-analytics-consent-v1";
 const PRIVACY_BANNER_SEEN_KEY = "cssf-privacy-banner-seen-v1";
-const SERVICE_WORKER_RESET_KEY = "cssf-service-worker-reset-v1";
 const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v155";
-const SERVICE_WORKER_VERSION = "20260607-reviews-v155";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v169";
+const SERVICE_WORKER_VERSION = "20260611-pwa-v169";
 const SUPABASE_URL = "https://rwbszwbsxdidhjaxozhn.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3YnN6d2JzeGRpZGhqYXhvemhuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzcxNTYsImV4cCI6MjA5NjIxMzE1Nn0.a2lI6u4R15pHwJfABjzF0i30ZKXahavNujaC3BThKR8";
 const SUPABASE_RESERVATIONS_TABLE = "reservations";
@@ -48,10 +47,11 @@ const defaultTrucks = [
     category: "cocktail",
     zone: "Area drink",
     menu: "Cocktail freschi e gustosi per accompagnare le serate.",
-    color: "#7c3aed",
+    color: "#8b5cf6",
+    mapPositions: [{ x: 65.6, y: 12.9 }],
     status: "open",
-    x: 52.3,
-    y: 16.1,
+    x: 65.6,
+    y: 12.9,
   },
   {
     id: "stand-armonia-gusti",
@@ -60,10 +60,11 @@ const defaultTrucks = [
     category: "dolci",
     zone: "Passeggiata dolce",
     menu: "Gelati, monoporzioni e pangoccioli.",
-    color: "#db2777",
+    color: "#ec4899",
+    mapPositions: [{ x: 44.5, y: 52.8 }],
     status: "open",
-    x: 47.1,
-    y: 29.5,
+    x: 44.5,
+    y: 52.8,
   },
   {
     id: "stand-birra-cala",
@@ -72,14 +73,14 @@ const defaultTrucks = [
     category: "birra",
     zone: "Area drink",
     menu: "Birra per rinfrescare la serata.",
-    color: "#d97706",
+    color: "#f59e0b",
     mapPositions: [
-      { x: 58.9, y: 16.9 },
-      { x: 26.3, y: 36.4 },
+      { x: 75.8, y: 13.4 },
+      { x: 29.7, y: 78.2 },
     ],
     status: "open",
-    x: 58.9,
-    y: 16.9,
+    x: 75.8,
+    y: 13.4,
   },
   {
     id: "stand-caracas-bistro-25",
@@ -88,10 +89,11 @@ const defaultTrucks = [
     category: "sudamericano",
     zone: "Area world food",
     menu: "Burrito, arepas e churros per un salto in Sud America.",
-    color: "#059669",
+    color: "#14b8a6",
+    mapPositions: [{ x: 18.4, y: 74.4 }],
     status: "open",
-    x: 19.1,
-    y: 34.5,
+    x: 18.4,
+    y: 74.4,
   },
   {
     id: "stand-che-gnocchi",
@@ -100,10 +102,11 @@ const defaultTrucks = [
     category: "primi",
     zone: "Via centrale",
     menu: "Gnocchi alla carbonara, gnocchi all'amatriciana e gustose lasagne.",
-    color: "#2563eb",
+    color: "#3b82f6",
+    mapPositions: [{ x: 18.2, y: 17.8 }],
     status: "open",
-    x: 16.7,
-    y: 15.5,
+    x: 18.2,
+    y: 17.8,
   },
   {
     id: "stand-chimi",
@@ -112,10 +115,11 @@ const defaultTrucks = [
     category: "carne",
     zone: "Area brace",
     menu: "Asado argentino tradizionale e hamburger.",
-    color: "#dc2626",
+    color: "#ef4444",
+    mapPositions: [{ x: 88.7, y: 77.2 }],
     status: "open",
-    x: 64.4,
-    y: 67.8,
+    x: 88.7,
+    y: 77.2,
   },
   {
     id: "stand-gamro",
@@ -124,10 +128,11 @@ const defaultTrucks = [
     category: "pesce",
     zone: "Area mare",
     menu: "Panini con il pesce e frittura.",
-    color: "#0891b2",
+    color: "#06b6d4",
+    mapPositions: [{ x: 28.8, y: 15.8 }],
     status: "open",
-    x: 25.3,
-    y: 16.8,
+    x: 28.8,
+    y: 15.8,
   },
   {
     id: "stand-la-forneria",
@@ -136,10 +141,11 @@ const defaultTrucks = [
     category: "forno",
     zone: "Via centrale",
     menu: "Focacce gustose e cuoppo di polpette.",
-    color: "#ca8a04",
+    color: "#eab308",
+    mapPositions: [{ x: 84.2, y: 14.8 }],
     status: "open",
-    x: 65.7,
-    y: 16.8,
+    x: 84.2,
+    y: 14.8,
   },
   {
     id: "stand-la-verace",
@@ -148,10 +154,11 @@ const defaultTrucks = [
     category: "fritti",
     zone: "Area novita",
     menu: "Cuzzitiello e corn dog.",
-    color: "#ea580c",
+    color: "#f97316",
+    mapPositions: [{ x: 40.8, y: 75.8 }],
     status: "open",
-    x: 34.4,
-    y: 38.7,
+    x: 40.8,
+    y: 75.8,
   },
   {
     id: "stand-panzerotto-on-the-road",
@@ -160,10 +167,11 @@ const defaultTrucks = [
     category: "fritti",
     zone: "Via centrale",
     menu: "Panzerotti e burrata fritta.",
-    color: "#16a34a",
+    color: "#22c55e",
+    mapPositions: [{ x: 6.3, y: 20.7 }],
     status: "open",
-    x: 8.8,
-    y: 16.7,
+    x: 6.3,
+    y: 20.7,
   },
   {
     id: "stand-sams-food-truck",
@@ -172,10 +180,11 @@ const defaultTrucks = [
     category: "bbq",
     zone: "Area BBQ",
     menu: "Brisket e panini con pulled pork.",
-    color: "#be123c",
+    color: "#9f1239",
+    mapPositions: [{ x: 60.5, y: 74.9 }],
     status: "open",
-    x: 49.4,
-    y: 53.4,
+    x: 60.5,
+    y: 74.9,
   },
   {
     id: "stand-the-butchers",
@@ -184,10 +193,11 @@ const defaultTrucks = [
     category: "carne",
     zone: "Area brace",
     menu: "Cuoppo di carne, hamburger, salsiccia e alette di pollo.",
-    color: "#9333ea",
+    color: "#6366f1",
+    mapPositions: [{ x: 44.5, y: 15.4 }],
     status: "open",
-    x: 37.4,
-    y: 20.1,
+    x: 44.5,
+    y: 15.4,
   },
   {
     id: "stand-trattoria-da-ciardullo",
@@ -196,10 +206,11 @@ const defaultTrucks = [
     category: "tradizione",
     zone: "Area tradizione",
     menu: "Patate mbacchiuse e pasta casereccia.",
-    color: "#4d7c0f",
+    color: "#65a30d",
+    mapPositions: [{ x: 54.8, y: 11.7 }],
     status: "open",
-    x: 43.5,
-    y: 15.3,
+    x: 54.8,
+    y: 11.7,
   },
   {
     id: "stand-willy-crak",
@@ -208,10 +219,11 @@ const defaultTrucks = [
     category: "brace",
     zone: "Area brace",
     menu: "Arrosticini, caciocavallo impiccato e novita con bistecca di pecora.",
-    color: "#b45309",
+    color: "#c2410c",
+    mapPositions: [{ x: 6.1, y: 72.8 }],
     status: "open",
-    x: 10.7,
-    y: 30.6,
+    x: 6.1,
+    y: 72.8,
   },
   {
     id: "stand-zia-ne",
@@ -220,10 +232,11 @@ const defaultTrucks = [
     category: "pizza",
     zone: "Area pizza",
     menu: "Pizza a portafoglio e gustose frittatine di pasta.",
-    color: "#e11d48",
+    color: "#f43f5e",
+    mapPositions: [{ x: 74.2, y: 76.2 }],
     status: "open",
-    x: 56.3,
-    y: 61,
+    x: 74.2,
+    y: 76.2,
   },
 ];
 
@@ -340,11 +353,17 @@ const reviewCount = document.querySelector("#reviewCount");
 const reviewsInsights = document.querySelector("#reviewsInsights");
 const installButton = document.querySelector("#installButton");
 const installHint = document.querySelector("#installHint");
+const mobileMenuToggle = document.querySelector("#mobileMenuToggle");
+const primaryNav = document.querySelector("#primaryNav");
+const publicTopbar = document.querySelector(".topbar");
 const tasteText = document.querySelector("#tasteText");
 const tasteList = document.querySelector("#tasteList");
 const truckSearchInput = document.querySelector("#truckSearchInput");
 const categoryFilter = document.querySelector("#categoryFilter");
 const festivalMap = document.querySelector("#festivalMap");
+const mapImageModal = document.querySelector("#mapImageModal");
+const mapImageBackdrop = document.querySelector("#mapImageBackdrop");
+const mapImageClose = document.querySelector("#mapImageClose");
 const selectedTruckCard = document.querySelector("#selectedTruckCard");
 const truckGrid = document.querySelector("#truckGrid");
 const emptyTrucks = document.querySelector("#emptyTrucks");
@@ -463,14 +482,21 @@ bindEvent(clearVotesButton, "click", clearVotesRemote);
 bindEvent(acceptAnalyticsButton, "click", () => setAnalyticsConsent("accepted"));
 bindEvent(rejectAnalyticsButton, "click", () => setAnalyticsConsent("rejected"));
 bindEvent(privacyPreferencesButton, "click", resetPrivacyPreferences);
+bindEvent(mobileMenuToggle, "click", toggleMobileMenu);
+bindEvent(festivalMap, "click", openMapImageModal);
+bindEvent(mapImageBackdrop, "click", closeMapImageModal);
+bindEvent(mapImageClose, "click", closeMapImageModal);
 bindEvent(window, "storage", handleSharedStorageUpdate);
 bindEvent(window, "pageshow", handlePageShow);
+bindEvent(window, "resize", handleViewportResize);
 
 setupMoodButtons();
 setupSlotModal();
 setupInstallPrompt();
 setupAnalytics();
+setupReviewRating();
 setupAppViews();
+setupMobileMenu();
 initializeStaffAuth();
 registerServiceWorker();
 updateCountdown();
@@ -494,6 +520,9 @@ function handlePageShow(event) {
   normalizeTruckFilters();
   render();
   renderReviews();
+  setupReviewRating();
+  syncMobileMenuState(false);
+  closeMapImageModal();
 
   if (!event.persisted) return;
 
@@ -518,6 +547,69 @@ function handlePageShow(event) {
   }
 }
 
+function setupMobileMenu() {
+  if (!mobileMenuToggle || !primaryNav || !publicTopbar) return;
+
+  primaryNav.querySelectorAll("a, button").forEach((item) => {
+    item.addEventListener("click", () => {
+      if (window.innerWidth <= 780) {
+        syncMobileMenuState(false);
+      }
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!publicTopbar.classList.contains("is-mobile-menu-open")) return;
+    if (publicTopbar.contains(event.target)) return;
+    syncMobileMenuState(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      syncMobileMenuState(false);
+      closeMapImageModal();
+    }
+  });
+
+  syncMobileMenuState(false);
+}
+
+function toggleMobileMenu() {
+  if (!mobileMenuToggle || !publicTopbar) return;
+  const isOpen = publicTopbar.classList.contains("is-mobile-menu-open");
+  syncMobileMenuState(!isOpen);
+}
+
+function syncMobileMenuState(isOpen) {
+  if (!mobileMenuToggle || !publicTopbar) return;
+  publicTopbar.classList.toggle("is-mobile-menu-open", isOpen);
+  mobileMenuToggle.setAttribute("aria-expanded", String(isOpen));
+  mobileMenuToggle.setAttribute("aria-label", isOpen ? "Chiudi il menu" : "Apri il menu");
+}
+
+function handleViewportResize() {
+  if (window.innerWidth > 780) {
+    syncMobileMenuState(false);
+    closeMapImageModal();
+  }
+}
+
+function openMapImageModal(event) {
+  if (!festivalMap || !mapImageModal) return;
+  if (window.innerWidth > 780) return;
+  if (event?.target?.closest(".map-marker")) return;
+
+  mapImageModal.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeMapImageModal() {
+  if (!mapImageModal) return;
+
+  mapImageModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
 function withTimeout(promise, timeoutMs) {
   return Promise.race([
     promise,
@@ -532,7 +624,7 @@ async function cleanupLegacyCaches() {
 
   try {
     const keys = await caches.keys();
-    const legacyKeys = keys.filter((key) => key.startsWith("cssf-pwa-"));
+    const legacyKeys = keys.filter((key) => key.startsWith("cssf-pwa-") && key !== ACTIVE_PWA_CACHE_NAME);
     await Promise.all(legacyKeys.map((key) => caches.delete(key)));
   } catch {}
 }
@@ -626,6 +718,7 @@ async function handleReviewSubmit(event) {
   reviews.unshift(review);
   saveReviews();
   reviewForm.reset();
+  setupReviewRating();
   renderReviews();
   trackEvent("conversion", "recensione pubblicata", { section: "recensioni", rating: review.rating });
   showToast("Recensione pubblicata.");
@@ -1247,7 +1340,10 @@ function renderTruckMap(filtered) {
     marker.style.setProperty("--marker-color", truck.color || "#e84b2a");
     marker.style.left = `${position.x}%`;
     marker.style.top = `${position.y}%`;
-    marker.textContent = truck.code;
+    marker.innerHTML = `
+      <span class="map-marker-core" aria-hidden="true"></span>
+      <span class="map-marker-badge" aria-hidden="true">${escapeHtml(truck.code)}</span>
+    `;
     marker.setAttribute(
       "aria-label",
       total > 1
@@ -1325,7 +1421,6 @@ function createTruckCardMarkup(truck, selected) {
 
   return `
     <div class="truck-meta">
-      <span>${escapeHtml(truck.code)}</span>
       <span>${escapeHtml(categoryLabels[truck.category] || truck.category)}</span>
       <span>${escapeHtml(truck.zone)}</span>
     </div>
@@ -1863,7 +1958,6 @@ function renderAnalyticsDashboard() {
   renderEventMix(sectionStats);
   renderDurationTrendChart(durationStats.rows);
   renderColumnChart("#sectionBarChart", sectionStats, "Nessuna sezione visitata.");
-  renderHorizontalChart("#clickBarChart", clickSectionStats, "Nessun click registrato.");
 
   renderStatsList(
     "#sectionStatsList",
@@ -1871,7 +1965,56 @@ function renderAnalyticsDashboard() {
     "Nessuna sezione tracciata.",
   );
   renderStatsList("#clickStatsList", clickSectionStats, "Nessun click tracciato.");
-  renderDurationList("#durationStatsList", durationStats.rows, "Non ci sono ancora sessioni misurabili.");
+  renderAnalyticsSummary(sectionStats, clickSectionStats, durationStats, sessions.size, sectionViews.length, clicks.length);
+}
+
+function renderAnalyticsSummary(sectionStats, clickSectionStats, durationStats, sessionCount, sectionViewCount, clickCount) {
+  const element = document.querySelector("#analyticsSummary");
+  if (!element) return;
+
+  const topSection = sectionStats[0];
+  const topClick = clickSectionStats[0];
+  const longestSession = durationStats.rows[0];
+
+  const summaryRows = [
+    {
+      label: "Sezione guida",
+      value: topSection ? `${topSection.label} (${topSection.count})` : "Nessun dato",
+    },
+    {
+      label: "Click piu forte",
+      value: topClick ? `${topClick.label} (${topClick.count})` : "Nessun dato",
+    },
+    {
+      label: "Sessione piu lunga",
+      value: longestSession ? formatDuration(longestSession.durationMs) : "Non misurabile",
+    },
+    {
+      label: "Rapporto click/visite",
+      value: sectionViewCount ? `${Math.round((clickCount / sectionViewCount) * 100)}%` : "0%",
+    },
+    {
+      label: "Media eventi per sessione",
+      value: sessionCount ? `${Math.max(1, Math.round(analyticsEvents.length / sessionCount))}` : "0",
+    },
+  ];
+
+  element.innerHTML = `
+    <div class="stats-list">
+      ${summaryRows
+        .map(
+          (row) => `
+            <div class="stats-row">
+              <div class="stats-row-main">
+                <strong>${escapeHtml(row.label)}</strong>
+                <span>${escapeHtml(String(row.value))}</span>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 function renderEventMix(rows) {
@@ -2444,7 +2587,9 @@ function renderReviews() {
   renderReviewInsights();
 
   reviews.forEach((review) => {
-    const stars = Array.from({ length: review.rating }, () => "&#9733;").join("");
+    const stars = Array.from({ length: 5 }, (_, index) =>
+      `<span class="${index < review.rating ? "is-filled" : ""}">&#9733;</span>`
+    ).join("");
     const tags = [
       getReviewLabel("ageRange", review.ageRange),
       getReviewLabel("gender", review.gender),
@@ -2460,13 +2605,67 @@ function renderReviews() {
           <strong>${escapeHtml(review.title)}</strong>
           <div class="review-meta">${escapeHtml(review.reviewer)} - ${formatDate(review.createdAt)}</div>
         </div>
-        <span aria-label="${review.rating} stelle">${stars}</span>
+        <div class="review-card-rating">
+          <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
+          <div class="review-rating-chip">${review.rating}/5</div>
+        </div>
       </header>
       ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
       <p>${escapeHtml(review.body)}</p>
     `;
     reviewsList.append(card);
   });
+}
+
+function setupReviewRating() {
+  const control = document.querySelector(".review-star-control");
+  if (!control) return;
+
+  const labels = Array.from(control.querySelectorAll("label"));
+  const inputs = Array.from(control.querySelectorAll("input[name='rating']"));
+  const caption = document.querySelector("#reviewRatingCaption");
+  const ratingCaptions = {
+    1: "Da rivedere",
+    2: "Serata sotto tono",
+    3: "Buona base",
+    4: "Molto riuscita",
+    5: "Esperienza ottima",
+  };
+
+  const applyRatingState = (value) => {
+    const numericValue = clampNumber(Number(value) || 5, 1, 5);
+    labels.forEach((label) => {
+      label.classList.toggle("is-active", Number(label.dataset.value) <= numericValue);
+    });
+    if (caption) {
+      caption.textContent = ratingCaptions[numericValue] || ratingCaptions[5];
+    }
+  };
+
+  labels.forEach((label) => {
+    if (label.dataset.bound === "yes") return;
+    label.dataset.bound = "yes";
+
+    label.addEventListener("mouseenter", () => applyRatingState(label.dataset.value));
+    label.addEventListener("click", () => applyRatingState(label.dataset.value));
+  });
+
+  if (control.dataset.bound !== "yes") {
+    control.dataset.bound = "yes";
+    control.addEventListener("mouseleave", () => {
+      const checkedValue = control.querySelector("input[name='rating']:checked")?.value || "5";
+      applyRatingState(checkedValue);
+    });
+  }
+
+  inputs.forEach((input) => {
+    if (input.dataset.bound === "yes") return;
+    input.dataset.bound = "yes";
+    input.addEventListener("change", () => applyRatingState(input.value));
+  });
+
+  const checkedValue = control.querySelector("input[name='rating']:checked")?.value || "5";
+  applyRatingState(checkedValue);
 }
 
 function renderReviewInsights() {
@@ -2817,24 +3016,17 @@ async function handleInstallClick() {
 }
 
 function registerServiceWorker() {
-  const unregisterPromise = "serviceWorker" in navigator
-    ? navigator.serviceWorker
-        .getRegistrations()
-        .then((registrations) => Promise.all(registrations.map((registration) => registration.unregister())))
-        .catch(() => {})
-    : Promise.resolve();
+  if (!("serviceWorker" in navigator) || !isInstallSecureContext()) {
+    updateInstallUi();
+    return;
+  }
 
-  Promise.all([unregisterPromise, cleanupLegacyCaches()])
+  const serviceWorkerUrl = `service-worker.js?v=${encodeURIComponent(SERVICE_WORKER_VERSION)}`;
+
+  navigator.serviceWorker
+    .register(serviceWorkerUrl, { updateViaCache: "none" })
+    .then(() => cleanupLegacyCaches())
     .then(() => {
-      if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-        const resetVersion = sessionStorage.getItem(SERVICE_WORKER_RESET_KEY);
-        if (resetVersion !== SERVICE_WORKER_VERSION) {
-          sessionStorage.setItem(SERVICE_WORKER_RESET_KEY, SERVICE_WORKER_VERSION);
-          window.location.reload();
-          return;
-        }
-      }
-
       updateInstallUi();
     })
     .catch(() => {
@@ -2853,7 +3045,14 @@ function updateInstallUi() {
 
   if (!isInstallSecureContext()) {
     installButton.hidden = false;
-    installButton.textContent = "Come installare";
+    installButton.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3v12" />
+        <path d="m8 11 4 4 4-4" />
+        <path d="M8 21h8" />
+      </svg>
+      <span class="install-button-label">Installa</span>
+    `;
     setInstallHint("Per installarla usa il sito pubblicato in HTTPS.");
     return;
   }
@@ -3423,14 +3622,6 @@ function showToast(message) {
     window.setTimeout(() => toast.remove(), 220);
   }, 2800);
 }
-
-
-
-
-
-
-
-
 
 
 

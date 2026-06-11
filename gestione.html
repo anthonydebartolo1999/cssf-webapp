@@ -18,37 +18,7 @@
     <link rel="manifest" href="manifest-staff.webmanifest?v=20260606-staff-v2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260607-reviews-v155" />
-    <script>
-      (function () {
-        window.addEventListener(
-          "pageshow",
-          function () {
-            if ("serviceWorker" in navigator) {
-              navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                return Promise.all(
-                  registrations.map(function (registration) {
-                    return registration.unregister();
-                  }),
-                );
-              }).catch(function () {});
-            }
-            if ("caches" in window) {
-              caches.keys().then(function (keys) {
-                return Promise.all(
-                  keys.filter(function (key) {
-                    return key.indexOf("cssf-pwa-") === 0;
-                  }).map(function (key) {
-                    return caches.delete(key);
-                  }),
-                );
-              }).catch(function () {});
-            }
-          },
-          { once: true },
-        );
-      })();
-    </script>
+    <link rel="stylesheet" href="styles.css?v=20260611-homepremium-v168" />
   </head>
   <body data-page="gestione" class="staff-app">
     <div class="app-shell">
@@ -57,12 +27,21 @@
           <img src="icons/logo-photoroom.png?v=20260605-logo" alt="" />
           <strong>CSSF STAFF</strong>
         </a>
-        <nav class="site-nav" aria-label="Navigazione staff">
+        <nav class="site-nav" id="primaryNav" aria-label="Navigazione staff">
           <a href="#prenotazioni">Prenotazioni</a>
           <a href="#voti">Voti</a>
           <a href="#statistiche">Statistiche</a>
-          <span class="staff-public-tools"><button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">🔔</button><a href="index.html">Web app pubblica</a><button class="install-button" id="installButton" type="button" hidden>Installa staff</button></span>
         </nav>
+        <div class="topbar-actions staff-topbar-actions">
+          <button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">&#128276;</button>
+          <a class="ghost-link" href="index.html">Web app pubblica</a>
+          <button class="install-button" id="installButton" type="button" hidden>Installa staff</button>
+          <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Apri il menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
       </header>
       <main>
         <section class="staff-section" id="staff" aria-labelledby="staff-title">
@@ -94,14 +73,27 @@
             <nav class="staff-command-grid" aria-label="Collegamenti gestione">
               <a href="#prenotazioni"><span>01</span><strong>Prenotazioni</strong><small>Richieste e riepilogo</small></a>
               <a href="#voti"><span>02</span><strong>Voti</strong><small>Classifiche e dettaglio nominativi</small></a>
-              <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>Analytics e conversioni</small></a>
+              <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>KPI chiari e lettura rapida</small></a>
             </nav>
             <section class="staff-work-area staff-area-bookings" id="prenotazioni" aria-labelledby="staff-bookings-title">
-              <div class="staff-area-heading"><div><span class="section-label">Prenotazioni</span><h2 id="staff-bookings-title">Richieste tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2></div><div class="staff-actions compact"><button class="ghost-link strong" id="copyReportButton" type="button">Copia report</button><button class="ghost-link strong" id="exportCsvButton" type="button">Esporta CSV</button><button class="ghost-link" id="adminLogoutButton" type="button">Logout</button></div></div>
+              <div class="staff-area-heading">
+                <div>
+                  <span class="section-label">Prenotazioni</span>
+                  <h2 id="staff-bookings-title">Richieste tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2>
+                </div>
+                <div class="staff-actions compact">
+                  <button class="ghost-link strong" id="copyReportButton" type="button">Copia report</button>
+                  <button class="ghost-link strong" id="exportCsvButton" type="button">Esporta CSV</button>
+                  <button class="ghost-link" id="adminLogoutButton" type="button">Logout</button>
+                </div>
+              </div>
               <div class="booking-layout">
                 <article class="reservations-panel">
                   <div class="reservations-heading">
-                    <div><span class="section-label">Richieste</span><h2>Richieste tavoli</h2></div>
+                    <div>
+                      <span class="section-label">Richieste</span>
+                      <h2>Richieste tavoli</h2>
+                    </div>
                     <div class="filters">
                       <input id="searchInput" type="search" placeholder="Cerca nome, telefono, note" />
                       <select id="dayFilter">
@@ -131,7 +123,10 @@
             </section>
             <section class="staff-votes-panel staff-work-area staff-area-votes" id="voti" aria-labelledby="staff-votes-title">
               <div class="reservations-heading">
-                <div><span class="section-label">Voti live</span><h2 id="staff-votes-title">Classifica votazioni <span class="staff-count-badge gold" id="metricVotes">0</span></h2></div>
+                <div>
+                  <span class="section-label">Voti live</span>
+                  <h2 id="staff-votes-title">Classifica votazioni <span class="staff-count-badge gold" id="metricVotes">0</span></h2>
+                </div>
                 <button class="ghost-link strong" id="clearVotesButton" type="button">Svuota voti test</button>
               </div>
               <div class="leaderboard-tabs" id="staffVoteTabs"></div>
@@ -149,43 +144,63 @@
               </div>
             </section>
             <section class="staff-work-area staff-area-stats" id="statistiche" aria-labelledby="staff-stats-title">
-              <div class="staff-area-heading"><div><span class="section-label">Statistiche</span><h2 id="staff-stats-title">Andamento web app <span class="staff-count-badge olive"><span id="metricTrucks">0</span> stand</span></h2></div></div>
+              <div class="staff-area-heading">
+                <div>
+                  <span class="section-label">Statistiche</span>
+                  <h2 id="staff-stats-title">Andamento web app <span class="staff-count-badge olive"><span id="metricTrucks">0</span> stand</span></h2>
+                </div>
+              </div>
+              <div class="analytics-overview">
+                <article class="analytics-hero-card">
+                  <span class="section-label">Traffico</span>
+                  <strong id="metricSessions">0</strong>
+                  <p>sessioni utili rilevate sulla web app</p>
+                </article>
+                <article class="analytics-kpi-card">
+                  <span>Sezioni viste</span>
+                  <strong id="metricSectionViews">0</strong>
+                </article>
+                <article class="analytics-kpi-card">
+                  <span>Click utili</span>
+                  <strong id="metricClicks">0</strong>
+                </article>
+                <article class="analytics-kpi-card">
+                  <span>Tempo medio</span>
+                  <strong id="metricAvgDuration">0s</strong>
+                </article>
+                <article class="analytics-mix-card">
+                  <div>
+                    <span class="section-label">Focus traffico</span>
+                    <strong>Sezioni piu' cercate</strong>
+                  </div>
+                  <div class="analytics-mix-bars" id="eventMixBars"></div>
+                </article>
+              </div>
               <div class="analytics-chart-grid">
                 <article class="analytics-chart-card analytics-chart-card-wide">
                   <div class="chart-heading">
-                    <div><span class="section-label">Permanenza</span><h3>Tempo medio in web app</h3></div>
-                    <strong id="metricAvgDuration">0s</strong>
+                    <div><span class="section-label">Permanenza</span><h3>Andamento sessioni</h3></div>
+                    <strong>Trend</strong>
                   </div>
                   <div class="analytics-line-chart" id="durationTrendChart"></div>
                 </article>
                 <article class="analytics-chart-card">
                   <div class="chart-heading">
                     <div><span class="section-label">Visite</span><h3>Sezioni viste</h3></div>
-                    <strong id="metricSectionViews">0</strong>
+                    <strong>Top</strong>
                   </div>
                   <div class="analytics-column-chart" id="sectionBarChart"></div>
-                </article>
-                <article class="analytics-chart-card">
-                  <div class="chart-heading">
-                    <div><span class="section-label">Click</span><h3>Sezioni cliccate</h3></div>
-                    <strong id="metricClicks">0</strong>
-                  </div>
-                  <div class="analytics-horizontal-chart" id="clickBarChart"></div>
-                </article>
-                <article class="analytics-chart-card analytics-session-card">
-                  <div class="chart-heading">
-                    <div><span class="section-label">Traffico</span><h3>Sessioni tracciate</h3></div>
-                    <strong id="metricSessions">0</strong>
-                  </div>
-                  <div class="analytics-mix-bars" id="eventMixBars"></div>
                 </article>
               </div>
               <div class="analytics-grid">
                 <article class="analytics-panel"><h3>Sezioni piu visitate</h3><div id="sectionStatsList"></div></article>
                 <article class="analytics-panel"><h3>Sezioni piu cliccate</h3><div id="clickStatsList"></div></article>
-                <article class="analytics-panel"><h3>Permanenza sessioni</h3><div id="durationStatsList"></div></article>
+                <article class="analytics-panel"><h3>Lettura rapida</h3><div id="analyticsSummary"></div></article>
               </div>
-              <div class="staff-actions"><button class="ghost-link strong" id="exportAnalyticsButton" type="button">Esporta analytics</button><button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button></div>
+              <div class="staff-actions">
+                <button class="ghost-link strong" id="exportAnalyticsButton" type="button">Esporta analytics</button>
+                <button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button>
+              </div>
             </section>
           </div>
         </section>
@@ -194,6 +209,6 @@
     </div>
     <template id="reservationRowTemplate"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></template>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260607-reviews-v155"></script>
+    <script src="app.js?v=20260611-pwa-v169"></script>
   </body>
 </html>
