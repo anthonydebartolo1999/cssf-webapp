@@ -6799,11 +6799,11 @@ body[data-page="home"] .home-map-card .primary-action {
   .topbar,
   .premium-topbar,
   .staff-topbar {
-    padding-top: calc(12px + env(safe-area-inset-top));
+    padding-top: 0;
   }
 
   body[data-page="home"] .topbar,
   body[data-page="gestione"] .staff-topbar {
-    top: 0;
+    top: calc(8px + env(safe-area-inset-top));
   }
 }
