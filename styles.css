@@ -4952,10 +4952,11 @@ td {
 
 .home-stats-band strong {
   font-family: "Archivo Black", "Arial Black", sans-serif;
-  font-size: clamp(1.35rem, 1.85vw, 2rem);
+  font-size: clamp(1.15rem, 1.55vw, 1.65rem);
   line-height: 1;
   color: #161412;
   letter-spacing: -0.02em;
+  white-space: nowrap;
 }
 
 .home-stats-band span {
