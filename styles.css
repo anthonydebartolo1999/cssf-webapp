@@ -3413,6 +3413,7 @@ td {
   border-color: rgba(255, 255, 255, 0.5);
   background: rgba(13, 16, 15, 0.9);
   box-shadow: 0 18px 54px rgba(13, 16, 15, 0.24);
+  border-radius: 14px;
 }
 
 .staff-topbar .brand-mini strong {
@@ -3421,6 +3422,7 @@ td {
 
 .staff-topbar .site-nav {
   justify-content: flex-start;
+  gap: 10px;
 }
 
 .staff-topbar .site-nav a[href="index.html"] {
@@ -3451,14 +3453,18 @@ td {
 .staff-topbar-actions {
   justify-content: flex-end;
   flex-wrap: nowrap;
+  gap: 10px;
 }
 
 .staff-topbar-actions .ghost-link {
   min-height: 42px;
+  padding-inline: 14px;
+  border-color: rgba(255, 250, 243, 0.12);
+  background: rgba(255, 250, 243, 0.04);
 }
 
 .staff-app .staff-section {
-  padding-top: 10px;
+  padding-top: 14px;
 }
 
 .staff-hero {
@@ -3466,13 +3472,14 @@ td {
   align-items: center;
   overflow: hidden;
   min-height: 0;
-  padding: 20px 24px;
+  padding: 24px 28px;
+  border-radius: 18px;
   border-color: rgba(13, 16, 15, 0.08);
   background:
     linear-gradient(135deg, rgba(15, 18, 17, 0.96), rgba(36, 48, 42, 0.92) 54%, rgba(232, 75, 42, 0.84)),
     #161412;
   color: #fffaf3;
-  box-shadow: 0 16px 46px rgba(13, 16, 15, 0.18);
+  box-shadow: 0 20px 52px rgba(13, 16, 15, 0.18);
 }
 
 .staff-hero .section-label {
@@ -3491,19 +3498,19 @@ td {
 
 .staff-hero p {
   max-width: 620px;
-  margin-top: 8px;
+  margin-top: 10px;
   color: rgba(255, 250, 243, 0.76);
-  line-height: 1.42;
+  line-height: 1.5;
 }
 
 .staff-hero-status {
-  min-width: 164px;
+  min-width: 184px;
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
+  gap: 6px;
+  padding: 16px 18px;
   border: 1px solid rgba(255, 250, 243, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 250, 243, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 250, 243, 0.09);
   text-align: right;
 }
 
@@ -3522,15 +3529,23 @@ td {
 .staff-app .admin-login-panel {
   grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
   align-items: center;
-  padding: clamp(18px, 3vw, 28px);
+  gap: 28px;
+  padding: clamp(22px, 3vw, 34px);
+  border-radius: 18px;
+  border: 1px solid rgba(32, 25, 22, 0.08);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(246, 239, 228, 0.96)),
     #fffaf3;
+  box-shadow: 0 16px 40px rgba(32, 25, 22, 0.08);
 }
 
 .staff-app .admin-login-panel form {
   display: grid;
-  gap: 14px;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(32, 25, 22, 0.06);
 }
 
 .staff-app .admin-login-panel input,
@@ -3543,6 +3558,10 @@ td {
   background: #fffdf9;
   color: #171412;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  min-height: 52px;
+  padding: 0 14px;
+  font-size: 0.98rem;
 }
 
 .staff-app .admin-login-panel input::placeholder,
@@ -3602,6 +3621,7 @@ td {
 .staff-app .staff-actions {
   justify-content: flex-end;
   margin: 8px 0 12px;
+  gap: 10px;
 }
 
 .staff-actions.compact {
@@ -3610,10 +3630,13 @@ td {
 
 .staff-work-area {
   margin-top: 14px;
-  padding: 18px;
+  padding: 22px;
   border: 1px solid rgba(32, 25, 22, 0.08);
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(255, 250, 243, 0.82), rgba(255, 250, 243, 0.7));
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 243, 0.92), rgba(255, 250, 243, 0.78)),
+    #fffaf3;
+  box-shadow: 0 14px 34px rgba(32, 25, 22, 0.06);
   scroll-margin-top: 110px;
 }
 
@@ -3634,7 +3657,7 @@ td {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .staff-area-heading h2 {
@@ -3679,7 +3702,7 @@ td {
 .staff-vote-layout {
   display: grid;
   grid-template-columns: minmax(300px, 0.38fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: 16px;
 }
 
 .staff-vote-detail {
@@ -3693,7 +3716,10 @@ td {
 
 .leaderboard-panel.compact {
   min-height: 0;
-  padding: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(32, 25, 22, 0.06);
 }
 
 .staff-app .booking-layout,
@@ -3711,8 +3737,10 @@ td {
 .staff-app .analytics-panel,
 .staff-app .analytics-grid article {
   border-color: rgba(32, 25, 22, 0.04);
-  background: transparent;
+  background: rgba(255, 255, 255, 0.62);
   box-shadow: none;
+  border-radius: 16px;
+  border: 1px solid rgba(32, 25, 22, 0.05);
 }
 
 .staff-app .staff-work-area.staff-votes-panel {
@@ -3762,10 +3790,11 @@ td {
 }
 
 .staff-app .filters {
-  padding: 4px;
+  padding: 6px;
   border: 1px solid rgba(32, 25, 22, 0.08);
-  border-radius: 8px;
-  background: rgba(245, 240, 231, 0.86);
+  border-radius: 14px;
+  background: rgba(245, 240, 231, 0.92);
+  gap: 8px;
 }
 
 .staff-app .filters input,
@@ -3773,12 +3802,15 @@ td {
   width: min(210px, 100%);
   border-color: rgba(32, 25, 22, 0.1);
   background: white;
+  border-radius: 10px;
+  min-height: 46px;
 }
 
 .staff-app .table-wrap {
   border: 1px solid rgba(32, 25, 22, 0.06);
-  border-radius: 8px;
+  border-radius: 16px;
   background: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .staff-app .reservations-panel,
@@ -3805,13 +3837,21 @@ td {
 .staff-app .analytics-chart-grid,
 .staff-app .analytics-grid,
 .staff-app .staff-prize-grid {
-  margin-top: 10px;
+  margin-top: 12px;
+}
+
+.staff-app .communication-form {
+  padding: 22px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(32, 25, 22, 0.05);
+  gap: 16px;
 }
 
 .bookings-export-actions {
   justify-content: flex-start;
   margin: 0;
-  padding-top: 14px;
+  padding: 16px 0 0;
 }
 
 .bookings-export-actions .primary-action {
@@ -3829,10 +3869,15 @@ td {
 
 .staff-app th {
   background: #f7f2e9;
+  color: #5d4c41;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .staff-app td {
   background: rgba(255, 255, 255, 0.78);
+  color: #171412;
 }
 
 .staff-app tbody tr {
@@ -3905,6 +3950,59 @@ td {
 
 .staff-app .app-footer {
   margin-top: 44px;
+}
+
+.staff-app label {
+  display: grid;
+  gap: 8px;
+  color: #43362f;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.staff-app .primary-action,
+.staff-app .ghost-link {
+  border-radius: 12px;
+}
+
+.staff-app .primary-action {
+  box-shadow: 0 10px 24px rgba(243, 182, 63, 0.16);
+}
+
+.staff-app .analytics-kpi-card {
+  min-height: 112px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(32, 25, 22, 0.05);
+  box-shadow: 0 12px 28px rgba(32, 25, 22, 0.05);
+}
+
+.staff-app .analytics-kpi-card span {
+  color: #7d6f67;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.staff-app .analytics-kpi-card strong {
+  color: #171412;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+}
+
+.staff-app .analytics-chart-card,
+.staff-app .analytics-panel-simple {
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(32, 25, 22, 0.05);
+}
+
+.staff-app .chart-heading,
+.staff-app .reservations-heading {
+  padding: 18px 18px 14px;
+}
+
+.staff-app .leaderboard-list {
+  padding: 4px 0 0;
 }
 
 @media (max-width: 1120px) {
@@ -5282,42 +5380,44 @@ td {
 .home-sponsor-ticker {
   position: relative;
   margin-top: auto;
+  transform: translateY(8px);
   overflow: hidden;
   border: 1px solid rgba(255, 250, 243, 0.12);
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(255, 250, 243, 0.03);
 }
 
 .home-sponsor-track {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   width: max-content;
-  padding: 12px;
+  padding: 16px;
   animation: sponsorTicker 18s linear infinite;
 }
 
 .home-sponsor-item {
-  min-width: 240px;
-  min-height: 54px;
+  min-width: 280px;
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 16px;
+  padding: 0 22px;
   border: 1px solid rgba(255, 250, 243, 0.08);
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(255, 250, 243, 0.04);
 }
 
 .home-sponsor-item img {
-  max-width: 170px;
-  max-height: 36px;
+  max-width: 220px;
+  max-height: 52px;
   width: auto;
   height: auto;
   object-fit: contain;
   display: block;
   filter: brightness(1.04) contrast(1.02);
 }
+
 
 .home-sponsor-ticker:hover .home-sponsor-track {
   animation-play-state: paused;
@@ -5415,6 +5515,7 @@ body[data-page="home"] .app-shell {
   top: max(10px, env(safe-area-inset-top));
   left: auto;
   width: 100%;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   margin: 14px auto 0;
   min-height: 76px;
   padding: 12px 18px;
@@ -5448,7 +5549,7 @@ body[data-page="home"] .app-shell {
   overflow: hidden;
   white-space: nowrap;
   border-right: 2px solid #f7f3ed;
-  width: 17em;
+  width: 15.5em;
   animation: typing 5.5s steps(22, end) 0.8s 1 forwards, blink 5.5s 0.8s 1 forwards, waveFlow 6s ease-in-out infinite;
 }
 
@@ -5458,7 +5559,9 @@ body[data-page="home"] .app-shell {
 }
 
 .premium-topbar .site-nav {
-  gap: 14px;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 12px;
 }
 
 .premium-topbar .site-nav a {
@@ -5467,9 +5570,15 @@ body[data-page="home"] .app-shell {
   border: 0;
   border-radius: 0;
   color: rgba(255, 250, 243, 0.92);
-  font-size: 0.88rem;
+  font-size: 0.84rem;
+  letter-spacing: 0.03em;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.premium-topbar .topbar-actions {
+  flex-wrap: nowrap;
+  justify-self: end;
 }
 
 .partner-section {
@@ -5585,8 +5694,8 @@ body[data-page="home"] .app-shell {
 }
 
 .partner-main-logos img:first-child {
-  max-width: 240px;
-  max-height: 96px;
+  max-width: 280px;
+  max-height: 112px;
 }
 
 @media (max-width: 780px) {
@@ -5601,12 +5710,42 @@ body[data-page="home"] .app-shell {
   }
 
   .partner-brand {
-    min-height: 124px;
-    padding-inline: 4px;
+    min-height: 112px;
+    gap: 10px;
+    padding: 12px 2px;
   }
 
   .partner-brand img {
-    max-width: 180px;
+    max-width: 170px;
+    max-height: 68px;
+  }
+
+  .partner-brand--spotlight {
+    gap: 14px;
+    padding-top: 4px;
+  }
+
+  .partner-main-logos {
+    gap: 14px;
+    padding: 10px 0 6px;
+  }
+
+  .partner-main-logos img {
+    max-width: 178px;
+    max-height: 64px;
+  }
+
+  .partner-main-logos img:first-child {
+    max-width: 220px;
+    max-height: 88px;
+  }
+
+  .partner-brand strong {
+    font-size: 0.92rem;
+  }
+
+  .partner-brand span {
+    font-size: 0.82rem;
   }
 }
 
@@ -6493,10 +6632,17 @@ body[data-page="home"] .home-map-card .primary-action {
     opacity: 1;
   }
 
+  body[data-page="home"] .app-shell {
+    width: min(100% - 16px, 720px);
+    padding-top: calc(18px + env(safe-area-inset-top));
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+
   body[data-page="home"] .hero {
     min-height: 0;
     gap: 18px;
-    padding: 24px 14px 16px;
+    padding: 32px 14px 16px;
+    margin-top: 14px;
     border-radius: 12px;
     background-position: center 26%;
   }
