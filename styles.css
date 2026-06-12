@@ -1589,6 +1589,36 @@ body[data-page="mappa"] .map-marker {
   gap: 14px;
 }
 
+.reach-card {
+  display: block;
+  margin-top: 6px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(243, 182, 63, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 250, 243, 0.96)),
+    rgba(255, 250, 243, 0.96);
+  box-shadow: 0 14px 36px rgba(32, 25, 22, 0.08);
+}
+
+.reach-card-map {
+  min-height: 360px;
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(243, 236, 225, 0.78)),
+    #f4ede3;
+}
+
+.reach-card-map iframe {
+  width: 100%;
+  min-height: 360px;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
 .selected-truck-card,
 .truck-card {
   display: grid;
@@ -6989,8 +7019,8 @@ body[data-page="home"] .home-map-card .primary-action {
       0 14px 28px rgba(32, 25, 22, 0.08);
   }
 
-  body[data-page="mappa"] .map-stage,
-  body[data-page="mappa"] .map-entry {
+body[data-page="mappa"] .map-stage,
+body[data-page="mappa"] .map-entry {
     min-height: 30px;
     padding: 6px 10px;
     font-size: 0.68rem;
@@ -7042,6 +7072,18 @@ body[data-page="home"] .home-map-card .primary-action {
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+
+  body[data-page="mappa"] .reach-card {
+    padding: 0;
+  }
+
+  body[data-page="mappa"] .reach-card-map {
+    min-height: 260px;
+  }
+
+  body[data-page="mappa"] .reach-card-map iframe {
+    min-height: 260px;
   }
 
   body[data-page="mappa"] .truck-grid {
@@ -7227,6 +7269,14 @@ body[data-page="home"] .home-map-card .primary-action {
     padding: 16px 16px 14px;
     border-radius: 12px;
   }
+}
+
+body[data-page="vota"] .vote-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body[data-page="vota"] .vote-form {
+  max-width: 760px;
 }
 
 @media (max-width: 560px) {
