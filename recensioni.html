@@ -33,6 +33,7 @@
           <a href="vota.html" data-view-link="vota">Contest</a>
           <a href="programma.html" data-view-link="programma">Programma</a>
           <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
+          <a href="partner.html" data-view-link="partner">Partner</a>
         </nav>
         <div class="topbar-actions">
           <button class="install-button" id="installButton" type="button" hidden aria-label="Installa la PWA">
@@ -119,10 +120,9 @@
                   <h3 id="review-profile-title">Chi sta lasciando il feedback?</h3>
                 </div>
                 <div class="review-form-grid">
-                  <label>Nome <input name="reviewer" type="text" required /></label>
                   <label>Eta<select name="ageRange"><option value="">Preferisco non dirlo</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
                   <label>Genere<select name="gender"><option value="">Preferisco non dirlo</option><option value="female">Donna</option><option value="male">Uomo</option><option value="non-binary">Non binario</option><option value="prefer-not">Non specifico</option></select></label>
-                  <label>Torneresti?<select name="wouldReturn"><option value="">Scegli</option><option value="yes">Si</option><option value="maybe">Forse</option><option value="no">No</option></select></label>
+                  <label>Provenienza<select name="originArea"><option value="">Preferisco non dirlo</option><option value="luzzi">Luzzi</option><option value="province-cosenza">Provincia di Cosenza</option><option value="calabria">Resto della Calabria</option><option value="outside-calabria">Fuori Calabria</option></select></label>
                 </div>
               </section>
               <section class="review-form-section" aria-labelledby="review-feedback-title">
@@ -133,15 +133,8 @@
                 <div class="review-form-grid">
                   <label>Cosa ti e' piaciuto di piu'<select name="favoriteAspect"><option value="">Scegli</option><option value="food">Qualita' del cibo</option><option value="stand-variety">Varieta' degli stand</option><option value="atmosphere">Atmosfera</option><option value="music">Musica</option><option value="organization">Organizzazione</option><option value="location">Location</option></select></label>
                   <label>Cosa migliorare<select name="improvementArea"><option value="">Scegli</option><option value="queues">Code</option><option value="seating">Posti a sedere</option><option value="prices">Prezzi</option><option value="signage">Segnaletica</option><option value="payment">Pagamenti</option><option value="cleanliness">Pulizia</option><option value="more-stands">Piu' stand</option><option value="nothing">Nulla in particolare</option></select></label>
-                  <label>Titolo <input name="title" type="text" required /></label>
+                  <label class="review-story-field">Raccontaci... <textarea name="body" rows="6" required placeholder="Raccontaci cosa ha funzionato, cosa ti ha colpito e cosa possiamo migliorare."></textarea></label>
                 </div>
-              </section>
-              <section class="review-form-section review-form-section-featured" aria-labelledby="review-story-title">
-                <div class="review-section-head">
-                  <span class="review-section-kicker">Racconto</span>
-                  <h3 id="review-story-title">Descrivi il momento che ti e' rimasto</h3>
-                </div>
-                <label class="review-story-field">Recensione <textarea name="body" rows="6" required placeholder="Raccontaci cosa ha funzionato, cosa ti ha colpito e cosa possiamo migliorare."></textarea></label>
               </section>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
               <button class="primary-action" type="submit">Pubblica recensione</button>

@@ -50,10 +50,10 @@ const defaultTrucks = [
   {
     id: "stand-afterlife",
     code: "S01",
-    name: "Afterlife",
+    name: "Afterlife Cocktail",
     category: "cocktail",
     zone: "Area drink",
-    menu: "Cocktail freschi e gustosi per accompagnare le serate.",
+    menu: "Cocktail zone con drink dedicati per accompagnare food, musica e serata.",
     color: "#8b5cf6",
     mapPositions: [{ x: 65.6, y: 12.9 }],
     status: "open",
@@ -63,10 +63,10 @@ const defaultTrucks = [
   {
     id: "stand-armonia-gusti",
     code: "S02",
-    name: "Armonia dei Gusti",
+    name: "Armonia dei gusti",
     category: "dolci",
     zone: "Passeggiata dolce",
-    menu: "Gelati, monoporzioni e pangoccioli.",
+    menu: "Gelati, monoporzioni, pangoccioli e frutta realistica.",
     color: "#ec4899",
     mapPositions: [{ x: 44.5, y: 52.8 }],
     status: "open",
@@ -79,7 +79,7 @@ const defaultTrucks = [
     name: "Birra Cala",
     category: "birra",
     zone: "Area drink",
-    menu: "Birra per rinfrescare la serata.",
+    menu: "Esclusiva birra artigianale per la parte beverage del festival.",
     color: "#f59e0b",
     mapPositions: [
       { x: 75.8, y: 13.4 },
@@ -92,10 +92,10 @@ const defaultTrucks = [
   {
     id: "stand-caracas-bistro-25",
     code: "S04",
-    name: "Caracas Bistro 25",
+    name: "Caracas",
     category: "sudamericano",
     zone: "Area world food",
-    menu: "Burrito, arepas e churros per un salto in Sud America.",
+    menu: "Cucina latina e churros per una tappa dal gusto sudamericano.",
     color: "#14b8a6",
     mapPositions: [{ x: 18.4, y: 74.4 }],
     status: "open",
@@ -105,10 +105,10 @@ const defaultTrucks = [
   {
     id: "stand-che-gnocchi",
     code: "S05",
-    name: "Che Gnocchi",
-    category: "primi",
+    name: "Bar Centrale",
+    category: "tradizione",
     zone: "Via centrale",
-    menu: "Gnocchi alla carbonara, gnocchi all'amatriciana e gustose lasagne.",
+    menu: "Cullurielli, cuddrurieddri e gnocco fritto in chiave street.",
     color: "#3b82f6",
     mapPositions: [{ x: 18.2, y: 17.8 }],
     status: "open",
@@ -118,10 +118,10 @@ const defaultTrucks = [
   {
     id: "stand-chimi",
     code: "S06",
-    name: "Chimi",
+    name: "CHIMI",
     category: "carne",
     zone: "Area brace",
-    menu: "Asado argentino tradizionale e hamburger.",
+    menu: "Carne argentina, asado e hamburger.",
     color: "#ef4444",
     mapPositions: [{ x: 88.7, y: 77.2 }],
     status: "open",
@@ -134,7 +134,7 @@ const defaultTrucks = [
     name: "GamRo",
     category: "pesce",
     zone: "Area mare",
-    menu: "Panini con il pesce e frittura.",
+    menu: "Frittura, cuoppo di calamari, panino polpami, panino squiddi e panino crusco.",
     color: "#06b6d4",
     mapPositions: [{ x: 28.8, y: 15.8 }],
     status: "open",
@@ -147,7 +147,7 @@ const defaultTrucks = [
     name: "La Forneria",
     category: "forno",
     zone: "Via centrale",
-    menu: "Focacce gustose e cuoppo di polpette.",
+    menu: "Focaccia, cuoppo di polpette, pizze rustiche, arancini e patatine.",
     color: "#eab308",
     mapPositions: [{ x: 84.2, y: 14.8 }],
     status: "open",
@@ -160,7 +160,7 @@ const defaultTrucks = [
     name: "La Verace",
     category: "fritti",
     zone: "Area novita",
-    menu: "Cuzzitiello e corn dog.",
+    menu: "Cuzzitiello, corn dog e patatine fritte.",
     color: "#f97316",
     mapPositions: [{ x: 40.8, y: 75.8 }],
     status: "open",
@@ -170,10 +170,10 @@ const defaultTrucks = [
   {
     id: "stand-panzerotto-on-the-road",
     code: "S10",
-    name: "Panzerotto on the Road",
+    name: "Panzerotto on the road",
     category: "fritti",
     zone: "Via centrale",
-    menu: "Panzerotti e burrata fritta.",
+    menu: "Panzerotti e burrate fritte.",
     color: "#22c55e",
     mapPositions: [{ x: 6.3, y: 20.7 }],
     status: "open",
@@ -186,7 +186,7 @@ const defaultTrucks = [
     name: "Sam's Food Truck",
     category: "bbq",
     zone: "Area BBQ",
-    menu: "Brisket e panini con pulled pork.",
+    menu: "Panino con pulled pork e brisket.",
     color: "#9f1239",
     mapPositions: [{ x: 60.5, y: 74.9 }],
     status: "open",
@@ -196,10 +196,10 @@ const defaultTrucks = [
   {
     id: "stand-the-butchers",
     code: "S12",
-    name: "The Butchers",
+    name: "The butchers",
     category: "carne",
     zone: "Area brace",
-    menu: "Cuoppo di carne, hamburger, salsiccia e alette di pollo.",
+    menu: "Cuoppo di carne, panino con salsiccia e hamburger, cuoppo costolette e alette di pollo.",
     color: "#6366f1",
     mapPositions: [{ x: 44.5, y: 15.4 }],
     status: "open",
@@ -212,7 +212,7 @@ const defaultTrucks = [
     name: "Trattoria da Ciardullo",
     category: "tradizione",
     zone: "Area tradizione",
-    menu: "Patate mbacchiuse e pasta casereccia.",
+    menu: "Patate mbacchiuse, pasta casereccia e vino casereccio.",
     color: "#65a30d",
     mapPositions: [{ x: 54.8, y: 11.7 }],
     status: "open",
@@ -225,7 +225,7 @@ const defaultTrucks = [
     name: "Willy Crak",
     category: "brace",
     zone: "Area brace",
-    menu: "Arrosticini, caciocavallo impiccato e novita con bistecca di pecora.",
+    menu: "Arrosticini, caciocavallo impiccato, panino con bistecca di pecora, pulled di pecora e patata alla brace con pulled.",
     color: "#c2410c",
     mapPositions: [{ x: 6.1, y: 72.8 }],
     status: "open",
@@ -235,10 +235,10 @@ const defaultTrucks = [
   {
     id: "stand-zia-ne",
     code: "S15",
-    name: "Zia Ne",
+    name: "ZIA NE'",
     category: "pizza",
     zone: "Area pizza",
-    menu: "Pizza a portafoglio e gustose frittatine di pasta.",
+    menu: "Pizza a portafoglio e frittatine di pasta.",
     color: "#f43f5e",
     mapPositions: [{ x: 74.2, y: 76.2 }],
     status: "open",
@@ -268,11 +268,9 @@ const truckStatusLabels = {
 };
 
 const voteCategories = [
-  { value: "top-street-food", label: "Top Street Food" },
-  { value: "top-panino", label: "Miglior Panino" },
-  { value: "top-tradizione", label: "Miglior Tradizione" },
-  { value: "top-dessert", label: "Miglior Dolce" },
-  { value: "top-drink", label: "Miglior Drink" },
+  { value: "best-street-chef", label: "Miglior Street Chef 2026" },
+  { value: "courtesy-award", label: "Premio Cortesia" },
+  { value: "tradition-award", label: "Premio Tradizione" },
 ];
 
 const reviewLabels = {
@@ -289,6 +287,12 @@ const reviewLabels = {
     male: "Uomo",
     "non-binary": "Non binario",
     "prefer-not": "Non specificato",
+  },
+  originArea: {
+    luzzi: "Luzzi",
+    "province-cosenza": "Provincia di Cosenza",
+    calabria: "Resto della Calabria",
+    "outside-calabria": "Fuori Calabria",
   },
   favoriteAspect: {
     food: "Qualita' del cibo",
@@ -313,6 +317,13 @@ const reviewLabels = {
     maybe: "Forse",
     no: "No",
   },
+};
+
+const contestDistanceLabels = {
+  luzzi: "Luzzi",
+  "province-cosenza": "Provincia di Cosenza",
+  calabria: "Resto della Calabria",
+  "outside-calabria": "Fuori Calabria",
 };
 
 const tasteRoutes = {
@@ -377,12 +388,21 @@ const emptyTrucks = document.querySelector("#emptyTrucks");
 const voteForm = document.querySelector("#voteForm");
 const voteCategory = document.querySelector("#voteCategory");
 const voteTruck = document.querySelector("#voteTruck");
+const prizeOptIn = document.querySelector("#prizeOptIn");
+const voteExtraFields = document.querySelector("#voteExtraFields");
 const leaderboardTabs = document.querySelector("#leaderboardTabs");
 const leaderboardList = document.querySelector("#leaderboardList");
 const staffVoteTabs = document.querySelector("#staffVoteTabs");
 const staffVoteLeaderboard = document.querySelector("#staffVoteLeaderboard");
 const staffVotesTable = document.querySelector("#staffVotesTable");
 const emptyStaffVotes = document.querySelector("#emptyStaffVotes");
+const prizeEntriesTable = document.querySelector("#prizeEntriesTable");
+const emptyPrizeEntries = document.querySelector("#emptyPrizeEntries");
+const prizeSummary = document.querySelector("#prizeSummary");
+const exportPrizeCsvButton = document.querySelector("#exportPrizeCsvButton");
+const drawPrizeWinnerButton = document.querySelector("#drawPrizeWinnerButton");
+const prizeWinnerName = document.querySelector("#prizeWinnerName");
+const prizeWinnerMeta = document.querySelector("#prizeWinnerMeta");
 const clearVotesButton = document.querySelector("#clearVotesButton");
 const truckForm = document.querySelector("#truckForm");
 const truckAdminTable = document.querySelector("#truckAdminTable");
@@ -410,6 +430,7 @@ const PAGE_ROUTES = {
   prenota: "prenota.html",
   programma: "programma.html",
   recensioni: "recensioni.html",
+  partner: "partner.html",
   privacy: "privacy.html",
   gestione: "gestione.html",
   staff: "gestione.html",
@@ -422,6 +443,7 @@ const LEGACY_HASH_ROUTES = {
   "#prenota": "prenota.html",
   "#programma": "programma.html",
   "#recensioni": "recensioni.html",
+  "#partner": "partner.html",
   "#privacy": "privacy.html",
   "#staff": "gestione.html",
   "#gestione": "gestione.html",
@@ -483,6 +505,7 @@ bindEvent(truckSearchInput, "input", renderFestival);
 bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
 bindEvent(voteCategory, "change", renderVoteOptions);
+bindEvent(prizeOptIn, "change", toggleVoteExtraFields);
 bindEvent(truckForm, "submit", handleTruckFormSubmit);
 bindEvent(resetTruckFormButton, "click", resetTruckForm);
 bindEvent(adminLoginForm, "submit", handleAdminLogin);
@@ -492,6 +515,8 @@ bindEvent(publicNotificationButton, "click", requestPublicNotifications);
 bindEvent(communicationForm, "submit", handleCommunicationSubmit);
 bindEvent(exportAnalyticsButton, "click", exportAnalyticsCsv);
 bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
+bindEvent(exportPrizeCsvButton, "click", exportPrizeEntriesCsv);
+bindEvent(drawPrizeWinnerButton, "click", drawPrizeWinner);
 bindEvent(clearVotesButton, "click", clearVotesRemote);
 bindEvent(acceptAnalyticsButton, "click", () => setAnalyticsConsent("accepted"));
 bindEvent(rejectAnalyticsButton, "click", () => setAnalyticsConsent("rejected"));
@@ -709,18 +734,19 @@ async function handleReviewSubmit(event) {
   event.preventDefault();
 
   const formData = new FormData(reviewForm);
+  const reviewBody = cleanText(formData.get("body"));
   const review = {
     id: createId("REV"),
     createdAt: new Date().toISOString(),
-    reviewer: cleanText(formData.get("reviewer")),
+    reviewer: "Ospite",
     rating: clampNumber(Number(formData.get("rating")), 1, 5),
     ageRange: cleanText(formData.get("ageRange")),
     gender: cleanText(formData.get("gender")),
+    originArea: cleanText(formData.get("originArea")),
     favoriteAspect: cleanText(formData.get("favoriteAspect")),
     improvementArea: cleanText(formData.get("improvementArea")),
-    wouldReturn: cleanText(formData.get("wouldReturn")),
-    title: cleanText(formData.get("title")),
-    body: cleanText(formData.get("body")),
+    title: createReviewTitle(reviewBody),
+    body: reviewBody,
   };
 
   const remoteSaved = await saveReviewRemote(review);
@@ -756,7 +782,17 @@ async function handleVoteSubmit(event) {
     category: String(formData.get("category")),
     truckId,
     voter: cleanText(formData.get("voter")),
+    prizeOptIn: formData.get("prizeOptIn") === "on",
+    email: cleanText(formData.get("email")),
+    gender: String(formData.get("gender") || ""),
+    ageRange: String(formData.get("ageRange") || ""),
+    distance: String(formData.get("distance") || ""),
   };
+
+  if (vote.prizeOptIn && !vote.email) {
+    showToast("Inserisci l'email per partecipare all'estrazione.");
+    return;
+  }
 
   const remoteSaved = await saveVoteRemote(vote);
   if (!remoteSaved) {
@@ -770,6 +806,7 @@ async function handleVoteSubmit(event) {
   activeLeaderboardCategory = String(formData.get("category"));
   remoteVoteLeaderboardSynced = false;
   voteForm.reset();
+  toggleVoteExtraFields();
   render();
   refreshVoteLeaderboardFromRemote();
   trackEvent("conversion", "voto inviato", {
@@ -778,6 +815,19 @@ async function handleVoteSubmit(event) {
     truckId,
   });
   showToast(`Voto registrato per ${truck.name}.`);
+}
+
+function toggleVoteExtraFields() {
+  if (!voteExtraFields || !prizeOptIn) return;
+
+  const isEnabled = prizeOptIn.checked;
+  voteExtraFields.hidden = !isEnabled;
+  voteExtraFields.querySelectorAll("input, select").forEach((field) => {
+    field.disabled = !isEnabled;
+    if (!isEnabled) {
+      field.value = "";
+    }
+  });
 }
 
 async function handleTruckFormSubmit(event) {
@@ -847,6 +897,7 @@ function render() {
   renderSlots();
   renderReservations();
   renderStaffVotes();
+  renderPrizeEntries();
   renderAnalyticsDashboard();
   updateAvailabilityReadout();
 }
@@ -1801,6 +1852,130 @@ function renderStaffVotes() {
   });
 }
 
+function renderPrizeEntries() {
+  if (!prizeEntriesTable || !emptyPrizeEntries || !prizeSummary) return;
+
+  const entries = getPrizeEntries();
+  prizeEntriesTable.innerHTML = "";
+  emptyPrizeEntries.classList.toggle("visible", entries.length === 0);
+  renderPrizeSummary(entries);
+  if (!entries.length) {
+    resetPrizeWinnerCard();
+  }
+
+  entries.forEach((vote) => {
+    const truck = trucks.find((item) => item.id === vote.truckId);
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td data-label="Ora">${escapeHtml(formatDateTime(vote.createdAt))}</td>
+      <td data-label="Nome"><strong>${escapeHtml(vote.voter || "Anonimo")}</strong></td>
+      <td data-label="Email">${escapeHtml(vote.email || "-")}</td>
+      <td data-label="Sesso">${escapeHtml(getContestGenderLabel(vote.gender))}</td>
+      <td data-label="Eta'">${escapeHtml(getContestAgeLabel(vote.ageRange))}</td>
+      <td data-label="Distanza">${escapeHtml(getContestDistanceLabel(vote.distance))}</td>
+      <td data-label="Categoria">${escapeHtml(getVoteCategoryLabel(vote.category))}</td>
+      <td data-label="Street chef">${escapeHtml(truck ? truck.name : vote.truckId)}</td>
+    `;
+    prizeEntriesTable.append(row);
+  });
+}
+
+function renderPrizeSummary(entries) {
+  if (!prizeSummary) return;
+
+  if (!entries.length) {
+    prizeSummary.innerHTML = `<div class="empty-state visible">Nessun dato utile per l'estrazione.</div>`;
+    return;
+  }
+
+  const categoryStats = voteCategories
+    .map((category) => ({
+      label: category.label,
+      count: entries.filter((entry) => entry.category === category.value).length,
+    }))
+    .filter((row) => row.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  const distanceStats = getTopCountLabel(
+    entries.map((entry) => getContestDistanceLabel(entry.distance)).filter((value) => value !== "-"),
+  );
+  const ageStats = getTopCountLabel(
+    entries.map((entry) => getContestAgeLabel(entry.ageRange)).filter((value) => value !== "-"),
+  );
+
+  const summaryRows = [
+    { label: "Partecipanti", value: String(entries.length) },
+    {
+      label: "Categoria piu' scelta",
+      value: categoryStats[0] ? `${categoryStats[0].label} (${categoryStats[0].count})` : "Nessun dato",
+    },
+    { label: "Area piu' presente", value: distanceStats ? `${distanceStats.label} (${distanceStats.count})` : "Nessun dato" },
+    { label: "Fascia eta' piu' presente", value: ageStats ? `${ageStats.label} (${ageStats.count})` : "Nessun dato" },
+  ];
+
+  prizeSummary.innerHTML = `
+    <div class="stats-list">
+      ${summaryRows
+        .map(
+          (row) => `
+            <div class="stats-row">
+              <div class="stats-row-main">
+                <strong>${escapeHtml(row.label)}</strong>
+                <span>${escapeHtml(row.value)}</span>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function drawPrizeWinner() {
+  const entries = getPrizeEntries();
+
+  if (!entries.length) {
+    resetPrizeWinnerCard();
+    showToast("Nessun partecipante disponibile per l'estrazione.");
+    return;
+  }
+
+  const winner = entries[Math.floor(Math.random() * entries.length)];
+  const truck = trucks.find((item) => item.id === winner.truckId);
+
+  if (prizeWinnerName) {
+    prizeWinnerName.textContent = winner.voter || "Anonimo";
+  }
+
+  if (prizeWinnerMeta) {
+    const details = [
+      winner.email || "email non inserita",
+      getVoteCategoryLabel(winner.category),
+      truck ? truck.name : winner.truckId,
+    ];
+    prizeWinnerMeta.textContent = details.join(" · ");
+  }
+
+  document.querySelector("#prizeWinnerCard")?.classList.add("is-highlighted");
+  window.setTimeout(() => {
+    document.querySelector("#prizeWinnerCard")?.classList.remove("is-highlighted");
+  }, 1600);
+
+  showToast(`Estratto: ${winner.voter || "Anonimo"}`);
+}
+
+function resetPrizeWinnerCard() {
+  if (prizeWinnerName) {
+    prizeWinnerName.textContent = "Nessun vincitore estratto";
+  }
+
+  if (prizeWinnerMeta) {
+    prizeWinnerMeta.textContent = "Premi il pulsante e scegliamo un partecipante a caso dalla lista.";
+  }
+
+  document.querySelector("#prizeWinnerCard")?.classList.remove("is-highlighted");
+}
+
 function renderTruckAdminTable() {
   if (!truckAdminTable) return;
 
@@ -1985,13 +2160,17 @@ async function handleAdminLogout() {
 }
 
 function renderAdminAccess() {
-  if (!adminLoginPanel || !staffWorkspace || !copyReportButton || !exportCsvButton) return;
+  if (!adminLoginPanel || !staffWorkspace) return;
 
   const unlocked = isAdminAuthenticated();
   adminLoginPanel.hidden = unlocked;
   staffWorkspace.hidden = !unlocked;
-  copyReportButton.disabled = !unlocked;
-  exportCsvButton.disabled = !unlocked;
+  if (copyReportButton) {
+    copyReportButton.disabled = !unlocked;
+  }
+  if (exportCsvButton) {
+    exportCsvButton.disabled = !unlocked;
+  }
   if (clearVotesButton) {
     clearVotesButton.disabled = !unlocked;
   }
@@ -2609,6 +2788,42 @@ function exportAnalyticsCsv() {
   showToast("Analytics esportati.");
 }
 
+function exportPrizeEntriesCsv() {
+  const entries = getPrizeEntries();
+
+  if (!entries.length) {
+    showToast("Nessun partecipante da esportare.");
+    return;
+  }
+
+  const headers = ["ora", "nome", "email", "sesso", "eta", "distanza", "categoria", "street_chef"];
+  const rows = entries.map((entry) => {
+    const truck = trucks.find((item) => item.id === entry.truckId);
+    return [
+      formatDateTime(entry.createdAt),
+      entry.voter || "Anonimo",
+      entry.email || "",
+      getContestGenderLabel(entry.gender),
+      getContestAgeLabel(entry.ageRange),
+      getContestDistanceLabel(entry.distance),
+      getVoteCategoryLabel(entry.category),
+      truck ? truck.name : entry.truckId,
+    ];
+  });
+
+  const csv = [headers, ...rows].map((row) => row.map(toCsvCell).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `cssf-estrazione-contest-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast("Partecipanti esportati.");
+}
+
 async function clearAnalyticsEvents() {
   const confirmed = window.confirm("Svuotare tutti gli eventi analytics salvati su Supabase?");
   if (!confirmed) return;
@@ -2737,8 +2952,9 @@ function updateMetrics() {
   const metricBookings = document.querySelector("#metricBookings");
   const metricTrucks = document.querySelector("#metricTrucks");
   const metricVotes = document.querySelector("#metricVotes");
+  const metricPrizeEntries = document.querySelector("#metricPrizeEntries");
 
-  if (!metricBookings && !metricTrucks && !metricVotes) {
+  if (!metricBookings && !metricTrucks && !metricVotes && !metricPrizeEntries) {
     return;
   }
 
@@ -2747,11 +2963,42 @@ function updateMetrics() {
   if (metricBookings) metricBookings.textContent = String(active.length);
   if (metricTrucks) metricTrucks.textContent = String(trucks.length);
   if (metricVotes) metricVotes.textContent = String(getVoteTotal());
+  if (metricPrizeEntries) metricPrizeEntries.textContent = String(getPrizeEntries().length);
 }
 
 function getVoteTotal() {
   if (votes.length) return votes.length;
   return voteLeaderboardRows.reduce((sum, row) => sum + Number(row.count || 0), 0);
+}
+
+function getPrizeEntries() {
+  return votes
+    .filter((vote) => vote.prizeOptIn)
+    .slice()
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+function getTopCountLabel(values) {
+  const counts = values.reduce((acc, value) => {
+    acc[value] = (acc[value] || 0) + 1;
+    return acc;
+  }, {});
+
+  return Object.entries(counts)
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "it"))[0];
+}
+
+function getContestGenderLabel(value) {
+  return getReviewLabel("gender", value) || "-";
+}
+
+function getContestAgeLabel(value) {
+  return getReviewLabel("ageRange", value) || "-";
+}
+
+function getContestDistanceLabel(value) {
+  return contestDistanceLabels[value] || "-";
 }
 
 function renderSlots() {
@@ -2898,9 +3145,9 @@ function renderReviews() {
     const tags = [
       getReviewLabel("ageRange", review.ageRange),
       getReviewLabel("gender", review.gender),
+      getReviewLabel("originArea", review.originArea),
       review.favoriteAspect ? `Top: ${getReviewLabel("favoriteAspect", review.favoriteAspect)}` : "",
       review.improvementArea ? `Migliorare: ${getReviewLabel("improvementArea", review.improvementArea)}` : "",
-      review.wouldReturn ? `Ritorno: ${getReviewLabel("wouldReturn", review.wouldReturn)}` : "",
     ].filter(Boolean);
     const card = document.createElement("article");
     card.className = "review-card";
@@ -2908,7 +3155,7 @@ function renderReviews() {
       <header>
         <div>
           <strong>${escapeHtml(review.title)}</strong>
-          <div class="review-meta">${escapeHtml(review.reviewer)} - ${formatDate(review.createdAt)}</div>
+          <div class="review-meta">${formatDate(review.createdAt)}</div>
         </div>
         <div class="review-card-rating">
           <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
@@ -2984,7 +3231,7 @@ function renderReviewInsights() {
   const topImprovement = getTopReviewStat("improvementArea");
   const topFavorite = getTopReviewStat("favoriteAspect");
   const topAge = getTopReviewStat("ageRange");
-  const returnStats = getReviewReturnStats();
+  const topOrigin = getTopReviewStat("originArea");
 
   reviewsInsights.innerHTML = `
     <div class="review-insight-card main">
@@ -3007,11 +3254,10 @@ function renderReviewInsights() {
       <strong>${escapeHtml(topAge?.label || "In raccolta")}</strong>
       <small>${topAge ? `${topAge.count} risposte` : "Ancora pochi dati"}</small>
     </div>
-    <div class="review-return-meter">
-      <span>Tornerebbe all'evento</span>
-      <strong>${returnStats.yes}%</strong>
-      <div><i style="width: ${returnStats.yes}%"></i></div>
-      <small>Forse ${returnStats.maybe}% - No ${returnStats.no}%</small>
+    <div class="review-insight-card">
+      <span>Provenienza</span>
+      <strong>${escapeHtml(topOrigin?.label || "In raccolta")}</strong>
+      <small>${topOrigin ? `${topOrigin.count} risposte` : "Ancora pochi dati"}</small>
     </div>
   `;
 }
@@ -3537,6 +3783,7 @@ function mapReviewToRemote(review) {
     rating: review.rating,
     age_range: review.ageRange || null,
     gender: review.gender || null,
+    origin_area: review.originArea || null,
     favorite_aspect: review.favoriteAspect || null,
     improvement_area: review.improvementArea || null,
     would_return: review.wouldReturn || null,
@@ -3553,6 +3800,7 @@ function mapReviewFromRemote(row) {
     rating: clampNumber(Number(row.rating), 1, 5),
     ageRange: row.age_range || row.ageRange || "",
     gender: row.gender || "",
+    originArea: row.origin_area || row.originArea || "",
     favoriteAspect: row.favorite_aspect || row.favoriteAspect || "",
     improvementArea: row.improvement_area || row.improvementArea || "",
     wouldReturn: row.would_return || row.wouldReturn || "",
@@ -3695,6 +3943,11 @@ function mapVoteToRemote(vote) {
     category: vote.category,
     truck_id: vote.truckId,
     voter_name: vote.voter,
+    prize_opt_in: Boolean(vote.prizeOptIn),
+    email: vote.email || null,
+    gender: vote.gender || null,
+    age_range: vote.ageRange || null,
+    distance: vote.distance || null,
   };
 }
 
@@ -3705,6 +3958,11 @@ function mapVoteFromRemote(row) {
     category: row.category || voteCategories[0].value,
     truckId: row.truck_id || row.truckId || "",
     voter: row.voter_name || row.voter || "",
+    prizeOptIn: Boolean(row.prize_opt_in || row.prizeOptIn),
+    email: row.email || "",
+    gender: row.gender || "",
+    ageRange: row.age_range || row.ageRange || "",
+    distance: row.distance || "",
   };
 }
 
@@ -3864,6 +4122,13 @@ function cleanText(value) {
   return String(value || "").trim().replace(/\s+/g, " ");
 }
 
+function createReviewTitle(body) {
+  const normalized = cleanText(body);
+  if (!normalized) return "Recensione CSSF";
+  if (normalized.length <= 72) return normalized;
+  return `${normalized.slice(0, 69).trimEnd()}...`;
+}
+
 function clampNumber(value, min, max) {
   if (Number.isNaN(value)) return min;
   return Math.min(max, Math.max(min, value));
@@ -3934,18 +4199,5 @@ function showToast(message) {
     window.setTimeout(() => toast.remove(), 220);
   }, 2800);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

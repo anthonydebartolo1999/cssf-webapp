@@ -46,13 +46,18 @@ create index if not exists trucks_category_idx on public.trucks (category);
 create table if not exists public.votes (
   id text primary key,
   created_at timestamptz not null default now(),
-  category text not null check (category in ('top-street-food', 'top-panino', 'top-tradizione', 'top-dessert', 'top-drink')),
+  category text not null check (category in ('best-street-chef', 'courtesy-award', 'tradition-award')),
   truck_id text not null references public.trucks (id) on delete cascade,
   voter_name text not null default 'Anonimo'
 );
 
 alter table public.votes
-add column if not exists voter_name text not null default 'Anonimo';
+add column if not exists voter_name text not null default 'Anonimo',
+add column if not exists prize_opt_in boolean not null default false,
+add column if not exists email text,
+add column if not exists gender text,
+add column if not exists age_range text,
+add column if not exists distance text;
 
 create index if not exists votes_created_at_idx on public.votes (created_at desc);
 create index if not exists votes_category_idx on public.votes (category);
@@ -70,6 +75,7 @@ create table if not exists public.reviews (
 alter table public.reviews
 add column if not exists age_range text,
 add column if not exists gender text,
+add column if not exists origin_area text,
 add column if not exists favorite_aspect text,
 add column if not exists improvement_area text,
 add column if not exists would_return text;
@@ -296,8 +302,12 @@ on public.votes
 for insert
 to anon, authenticated
 with check (
-  category in ('top-street-food', 'top-panino', 'top-tradizione', 'top-dessert', 'top-drink')
+  category in ('best-street-chef', 'courtesy-award', 'tradition-award')
   and char_length(trim(voter_name)) between 1 and 80
+  and (email is null or email = '' or email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')
+  and coalesce(gender, '') in ('', 'female', 'male', 'non-binary', 'prefer-not')
+  and coalesce(age_range, '') in ('', 'under-18', '18-24', '25-34', '35-44', '45-54', '55-plus')
+  and coalesce(distance, '') in ('', 'luzzi', 'province-cosenza', 'calabria', 'outside-calabria')
   and exists (
     select 1
     from public.trucks
@@ -331,6 +341,7 @@ with check (
   and char_length(trim(body)) between 10 and 800
   and coalesce(age_range, '') in ('', 'under-18', '18-24', '25-34', '35-44', '45-54', '55-plus')
   and coalesce(gender, '') in ('', 'female', 'male', 'non-binary', 'prefer-not')
+  and coalesce(origin_area, '') in ('', 'luzzi', 'province-cosenza', 'calabria', 'outside-calabria')
   and coalesce(favorite_aspect, '') in ('', 'food', 'stand-variety', 'atmosphere', 'music', 'organization', 'location')
   and coalesce(improvement_area, '') in ('', 'queues', 'seating', 'prices', 'signage', 'payment', 'cleanliness', 'more-stands', 'nothing')
   and coalesce(would_return, '') in ('', 'yes', 'maybe', 'no')
@@ -378,22 +389,34 @@ using (public.is_staff());
 
 insert into public.trucks (id, code, name, category, zone, menu, color, status, x, y, map_positions)
 values
-  ('stand-afterlife', 'S01', 'Afterlife', 'cocktail', 'Area drink', 'Cocktail freschi e gustosi per accompagnare le serate.', '#7c3aed', 'open', 52.3, 16.1, null),
-  ('stand-armonia-gusti', 'S02', 'Armonia dei Gusti', 'dolci', 'Passeggiata dolce', 'Gelati, monoporzioni e pangoccioli.', '#db2777', 'open', 47.1, 29.5, null),
-  ('stand-birra-cala', 'S03', 'Birra Cala', 'birra', 'Area drink', 'Birra per rinfrescare la serata.', '#d97706', 'open', 58.9, 16.9, '[{"x":58.9,"y":16.9},{"x":26.3,"y":36.4}]'::jsonb),
-  ('stand-caracas-bistro-25', 'S04', 'Caracas Bistro 25', 'sudamericano', 'Area world food', 'Burrito, arepas e churros per un salto in Sud America.', '#059669', 'open', 19.1, 34.5, null),
-  ('stand-che-gnocchi', 'S05', 'Che Gnocchi', 'primi', 'Via centrale', 'Gnocchi alla carbonara, gnocchi all''amatriciana e gustose lasagne.', '#2563eb', 'open', 16.7, 15.5, null),
-  ('stand-chimi', 'S06', 'Chimi', 'carne', 'Area brace', 'Asado argentino tradizionale e hamburger.', '#dc2626', 'open', 64.4, 67.8, null),
-  ('stand-gamro', 'S07', 'GamRo', 'pesce', 'Area mare', 'Panini con il pesce e frittura.', '#0891b2', 'open', 25.3, 16.8, null),
-  ('stand-la-forneria', 'S08', 'La Forneria', 'forno', 'Via centrale', 'Focacce gustose e cuoppo di polpette.', '#ca8a04', 'open', 65.7, 16.8, null),
-  ('stand-la-verace', 'S09', 'La Verace', 'fritti', 'Area novita', 'Cuzzitiello e corn dog.', '#ea580c', 'open', 34.4, 38.7, null),
-  ('stand-panzerotto-on-the-road', 'S10', 'Panzerotto on the Road', 'fritti', 'Via centrale', 'Panzerotti e burrata fritta.', '#16a34a', 'open', 8.8, 16.7, null),
-  ('stand-sams-food-truck', 'S11', 'Sam''s Food Truck', 'bbq', 'Area BBQ', 'Brisket e panini con pulled pork.', '#be123c', 'open', 49.4, 53.4, null),
-  ('stand-the-butchers', 'S12', 'The Butchers', 'carne', 'Area brace', 'Cuoppo di carne, hamburger, salsiccia e alette di pollo.', '#9333ea', 'open', 37.4, 20.1, null),
-  ('stand-trattoria-da-ciardullo', 'S13', 'Trattoria da Ciardullo', 'tradizione', 'Area tradizione', 'Patate mbacchiuse e pasta casereccia.', '#4d7c0f', 'open', 43.5, 15.3, null),
-  ('stand-willy-crak', 'S14', 'Willy Crak', 'brace', 'Area brace', 'Arrosticini, caciocavallo impiccato e novita con bistecca di pecora.', '#b45309', 'open', 10.7, 30.6, null),
-  ('stand-zia-ne', 'S15', 'Zia Ne', 'pizza', 'Area pizza', 'Pizza a portafoglio e gustose frittatine di pasta.', '#e11d48', 'open', 56.3, 61, null)
-on conflict (id) do nothing;
+  ('stand-afterlife', 'S01', 'Afterlife Cocktail', 'cocktail', 'Area drink', 'Cocktail zone con drink dedicati per accompagnare food, musica e serata.', '#7c3aed', 'open', 52.3, 16.1, null),
+  ('stand-armonia-gusti', 'S02', 'Armonia dei gusti', 'dolci', 'Passeggiata dolce', 'Gelati, monoporzioni, pangoccioli e frutta realistica.', '#db2777', 'open', 47.1, 29.5, null),
+  ('stand-birra-cala', 'S03', 'Birra Cala', 'birra', 'Area drink', 'Esclusiva birra artigianale per la parte beverage del festival.', '#d97706', 'open', 58.9, 16.9, '[{"x":58.9,"y":16.9},{"x":26.3,"y":36.4}]'::jsonb),
+  ('stand-caracas-bistro-25', 'S04', 'Caracas', 'sudamericano', 'Area world food', 'Cucina latina e churros per una tappa dal gusto sudamericano.', '#059669', 'open', 19.1, 34.5, null),
+  ('stand-che-gnocchi', 'S05', 'Bar Centrale', 'tradizione', 'Via centrale', 'Cullurielli, cuddrurieddri e gnocco fritto in chiave street.', '#2563eb', 'open', 16.7, 15.5, null),
+  ('stand-chimi', 'S06', 'CHIMI', 'carne', 'Area brace', 'Carne argentina, asado e hamburger.', '#dc2626', 'open', 64.4, 67.8, null),
+  ('stand-gamro', 'S07', 'GamRo', 'pesce', 'Area mare', 'Frittura, cuoppo di calamari, panino polpami, panino squiddi e panino crusco.', '#0891b2', 'open', 25.3, 16.8, null),
+  ('stand-la-forneria', 'S08', 'La Forneria', 'forno', 'Via centrale', 'Focaccia, cuoppo di polpette, pizze rustiche, arancini e patatine.', '#ca8a04', 'open', 65.7, 16.8, null),
+  ('stand-la-verace', 'S09', 'La Verace', 'fritti', 'Area novita', 'Cuzzitiello, corn dog e patatine fritte.', '#ea580c', 'open', 34.4, 38.7, null),
+  ('stand-panzerotto-on-the-road', 'S10', 'Panzerotto on the road', 'fritti', 'Via centrale', 'Panzerotti e burrate fritte.', '#16a34a', 'open', 8.8, 16.7, null),
+  ('stand-sams-food-truck', 'S11', 'Sam''s Food Truck', 'bbq', 'Area BBQ', 'Panino con pulled pork e brisket.', '#be123c', 'open', 49.4, 53.4, null),
+  ('stand-the-butchers', 'S12', 'The butchers', 'carne', 'Area brace', 'Cuoppo di carne, panino con salsiccia e hamburger, cuoppo costolette e alette di pollo.', '#9333ea', 'open', 37.4, 20.1, null),
+  ('stand-trattoria-da-ciardullo', 'S13', 'Trattoria da Ciardullo', 'tradizione', 'Area tradizione', 'Patate mbacchiuse, pasta casereccia e vino casereccio.', '#4d7c0f', 'open', 43.5, 15.3, null),
+  ('stand-willy-crak', 'S14', 'Willy Crak', 'brace', 'Area brace', 'Arrosticini, caciocavallo impiccato, panino con bistecca di pecora, pulled di pecora e patata alla brace con pulled.', '#b45309', 'open', 10.7, 30.6, null),
+  ('stand-zia-ne', 'S15', 'ZIA NE''', 'pizza', 'Area pizza', 'Pizza a portafoglio e frittatine di pasta.', '#e11d48', 'open', 56.3, 61, null)
+on conflict (id) do update
+set
+  code = excluded.code,
+  name = excluded.name,
+  category = excluded.category,
+  zone = excluded.zone,
+  menu = excluded.menu,
+  color = excluded.color,
+  status = excluded.status,
+  x = excluded.x,
+  y = excluded.y,
+  map_positions = excluded.map_positions,
+  updated_at = now();
 
 do $$
 begin

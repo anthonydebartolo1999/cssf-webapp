@@ -32,6 +32,7 @@
           <a href="#comunicazioni">Comunicazioni</a>
           <a href="#statistiche">Statistiche</a>
           <a href="#voti">Classifica stand</a>
+          <a href="#estrazione">Estrazione contest</a>
         </nav>
         <div class="topbar-actions staff-topbar-actions">
           <button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">&#128276;</button>
@@ -50,18 +51,18 @@
             <div>
               <span class="section-label">Area gestione</span>
               <h2 id="staff-title">CSSF Staff, tutto sotto controllo</h2>
-              <p>Una dashboard semplice per gestire prenotazioni, comunicazioni, statistiche e classifica stand.</p>
+              <p>Una dashboard semplice per gestire prenotazioni, comunicazioni, statistiche, classifica stand ed estrazione contest.</p>
             </div>
             <div class="staff-hero-status" aria-label="Stato gestionale">
               <span>Dashboard</span>
-              <strong>Operativo</strong>
+              <strong>Staff</strong>
             </div>
           </div>
           <section class="admin-login-panel" id="adminLoginPanel" aria-label="Accesso admin">
             <div class="login-copy">
               <span class="section-label">Accesso riservato</span>
               <h2>Entra nella gestione</h2>
-              <p>Accedi con l'account staff Supabase per leggere e gestire prenotazioni, voti e strumenti operativi.</p>
+              <p>Accedi con l'account staff Supabase per leggere e gestire prenotazioni, voti, contatti contest e strumenti operativi.</p>
             </div>
             <form id="adminLoginForm">
               <label>Email staff <input name="email" type="email" autocomplete="username" placeholder="staff@cosenza..." /></label>
@@ -71,34 +72,6 @@
             </form>
           </section>
           <div id="staffWorkspace" hidden>
-            <nav class="staff-command-grid" aria-label="Collegamenti gestione">
-              <a href="#prenotazioni"><span>01</span><strong>Prenotazioni</strong><small>Tavoli, stato e azioni rapide</small></a>
-              <a href="#comunicazioni"><span>02</span><strong>Comunicazioni</strong><small>Invii rapidi al pubblico</small></a>
-              <a href="#statistiche"><span>03</span><strong>Statistiche</strong><small>Numeri chiari e lettura veloce</small></a>
-              <a href="#voti"><span>04</span><strong>Classifica stand</strong><small>Voti live e podio evento</small></a>
-            </nav>
-            <section class="staff-overview-grid" aria-label="Panoramica gestione">
-              <a class="staff-overview-card" href="#prenotazioni">
-                <span class="section-label">Priorita'</span>
-                <strong>Prenotazioni</strong>
-                <p>Controlla richieste, stati e tavoli in pochi passaggi.</p>
-              </a>
-              <a class="staff-overview-card" href="#comunicazioni">
-                <span class="section-label">Invio rapido</span>
-                <strong>Comunicazioni</strong>
-                <p>Avvisa il pubblico con una notifica chiara e immediata.</p>
-              </a>
-              <a class="staff-overview-card" href="#statistiche">
-                <span class="section-label">Sintesi</span>
-                <strong>Statistiche</strong>
-                <p>Leggi al volo traffico, interesse e andamento web app.</p>
-              </a>
-              <a class="staff-overview-card" href="#voti">
-                <span class="section-label">Live</span>
-                <strong>Classifica stand</strong>
-                <p>Segui il ranking e i voti registrati in tempo reale.</p>
-              </a>
-            </section>
             <section class="staff-work-area staff-area-bookings" id="prenotazioni" aria-labelledby="staff-bookings-title">
               <div class="staff-area-heading">
                 <div>
@@ -106,8 +79,6 @@
                   <h2 id="staff-bookings-title">Gestione tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2>
                 </div>
                 <div class="staff-actions compact">
-                  <button class="ghost-link strong" id="copyReportButton" type="button">Copia report</button>
-                  <button class="ghost-link strong" id="exportCsvButton" type="button">Esporta CSV</button>
                   <button class="ghost-link" id="adminLogoutButton" type="button">Logout</button>
                 </div>
               </div>
@@ -142,6 +113,9 @@
                     </table>
                   </div>
                   <div class="empty-state" id="emptyState">Nessuna prenotazione trovata.</div>
+                  <div class="staff-actions bookings-export-actions">
+                    <button class="primary-action" id="exportCsvButton" type="button">Scarica report</button>
+                  </div>
                 </article>
               </div>
             </section>
@@ -176,65 +150,6 @@
                 <p class="auth-status" id="communicationStatus">Pronta per un invio broadcast ai dispositivi che hanno attivato le notifiche.</p>
               </article>
             </section>
-            <section class="staff-work-area staff-area-stats" id="statistiche" aria-labelledby="staff-stats-title">
-              <div class="staff-area-heading">
-                <div>
-                  <span class="section-label">Statistiche</span>
-                  <h2 id="staff-stats-title">Andamento web app <span class="staff-count-badge olive"><span id="metricTrucks">0</span> stand</span></h2>
-                </div>
-              </div>
-              <div class="analytics-overview">
-                <article class="analytics-hero-card">
-                  <span class="section-label">Traffico</span>
-                  <strong id="metricSessions">0</strong>
-                  <p>sessioni utili rilevate sulla web app</p>
-                </article>
-                <article class="analytics-kpi-card">
-                  <span>Sezioni viste</span>
-                  <strong id="metricSectionViews">0</strong>
-                </article>
-                <article class="analytics-kpi-card">
-                  <span>Click utili</span>
-                  <strong id="metricClicks">0</strong>
-                </article>
-                <article class="analytics-kpi-card">
-                  <span>Tempo medio</span>
-                  <strong id="metricAvgDuration">0s</strong>
-                </article>
-                <article class="analytics-mix-card">
-                  <div>
-                    <span class="section-label">Focus traffico</span>
-                    <strong>Sezioni piu' cercate</strong>
-                  </div>
-                  <div class="analytics-mix-bars" id="eventMixBars"></div>
-                </article>
-              </div>
-              <div class="analytics-chart-grid">
-                <article class="analytics-chart-card analytics-chart-card-wide">
-                  <div class="chart-heading">
-                    <div><span class="section-label">Permanenza</span><h3>Andamento sessioni</h3></div>
-                    <strong>Trend</strong>
-                  </div>
-                  <div class="analytics-line-chart" id="durationTrendChart"></div>
-                </article>
-                <article class="analytics-chart-card">
-                  <div class="chart-heading">
-                    <div><span class="section-label">Visite</span><h3>Sezioni viste</h3></div>
-                    <strong>Top</strong>
-                  </div>
-                  <div class="analytics-column-chart" id="sectionBarChart"></div>
-                </article>
-              </div>
-              <div class="analytics-grid">
-                <article class="analytics-panel"><h3>Sezioni piu visitate</h3><div id="sectionStatsList"></div></article>
-                <article class="analytics-panel"><h3>Sezioni piu cliccate</h3><div id="clickStatsList"></div></article>
-                <article class="analytics-panel"><h3>Lettura rapida</h3><div id="analyticsSummary"></div></article>
-              </div>
-              <div class="staff-actions">
-                <button class="ghost-link strong" id="exportAnalyticsButton" type="button">Esporta analytics</button>
-                <button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button>
-              </div>
-            </section>
             <section class="staff-votes-panel staff-work-area staff-area-votes" id="voti" aria-labelledby="staff-votes-title">
               <div class="reservations-heading">
                 <div>
@@ -255,6 +170,76 @@
                   </div>
                   <div class="empty-state" id="emptyStaffVotes">Nessun voto registrato.</div>
                 </article>
+              </div>
+            </section>
+            <section class="staff-work-area staff-area-prize" id="estrazione" aria-labelledby="staff-prize-title">
+              <div class="staff-area-heading">
+                <div>
+                  <span class="section-label">Contest</span>
+                  <h2 id="staff-prize-title">Estrazione contest <span class="staff-count-badge gold" id="metricPrizeEntries">0</span></h2>
+                </div>
+                <div class="staff-actions compact">
+                  <button class="primary-action" id="drawPrizeWinnerButton" type="button">Estrai vincitore</button>
+                  <button class="ghost-link strong" id="exportPrizeCsvButton" type="button">Esporta partecipanti</button>
+                </div>
+              </div>
+              <div class="analytics-grid staff-prize-grid">
+                <article class="analytics-panel">
+                  <h3>Partecipazione rapida</h3>
+                  <div id="prizeSummary"></div>
+                  <div class="staff-prize-winner" id="prizeWinnerCard">
+                    <span class="section-label">Estrazione</span>
+                    <strong id="prizeWinnerName">Nessun vincitore estratto</strong>
+                    <p id="prizeWinnerMeta">Premi il pulsante e scegliamo un partecipante a caso dalla lista.</p>
+                  </div>
+                </article>
+                <article class="analytics-panel staff-prize-table-panel">
+                  <div class="table-wrap">
+                    <table>
+                      <thead><tr><th>Ora</th><th>Nome</th><th>Email</th><th>Sesso</th><th>Eta'</th><th>Distanza</th><th>Categoria</th><th>Street chef</th></tr></thead>
+                      <tbody id="prizeEntriesTable"></tbody>
+                    </table>
+                  </div>
+                  <div class="empty-state" id="emptyPrizeEntries">Nessun partecipante all'estrazione registrato.</div>
+                </article>
+              </div>
+            </section>
+            <section class="staff-work-area staff-area-stats" id="statistiche" aria-labelledby="staff-stats-title">
+              <div class="staff-area-heading">
+                <div>
+                  <span class="section-label">Statistiche</span>
+                  <h2 id="staff-stats-title">Sintesi web app <span class="staff-count-badge olive"><span id="metricSessions">0</span> sessioni</span></h2>
+                </div>
+              </div>
+              <div class="analytics-overview analytics-overview-simple">
+                <article class="analytics-kpi-card">
+                  <span>Click utili</span>
+                  <strong id="metricClicks">0</strong>
+                </article>
+                <article class="analytics-kpi-card">
+                  <span>Tempo medio</span>
+                  <strong id="metricAvgDuration">0s</strong>
+                </article>
+                <article class="analytics-kpi-card">
+                  <span>Sezioni viste</span>
+                  <strong id="metricSectionViews">0</strong>
+                </article>
+              </div>
+              <div class="analytics-chart-grid analytics-chart-grid-simple">
+                <article class="analytics-chart-card analytics-chart-card-wide">
+                  <div class="chart-heading">
+                    <div><span class="section-label">Permanenza</span><h3>Andamento sessioni</h3></div>
+                  </div>
+                  <div class="analytics-line-chart" id="durationTrendChart"></div>
+                </article>
+                <article class="analytics-panel analytics-panel-simple">
+                  <h3>Sezioni piu cliccate</h3>
+                  <div id="clickStatsList"></div>
+                </article>
+              </div>
+              <div class="staff-actions">
+                <button class="ghost-link strong" id="exportAnalyticsButton" type="button">Esporta analytics</button>
+                <button class="ghost-link" id="clearAnalyticsButton" type="button">Svuota analytics</button>
               </div>
             </section>
           </div>

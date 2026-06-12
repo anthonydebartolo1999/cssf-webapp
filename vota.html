@@ -33,6 +33,7 @@
           <a href="vota.html" data-view-link="vota">Contest</a>
           <a href="programma.html" data-view-link="programma">Programma</a>
           <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
+          <a href="partner.html" data-view-link="partner">Partner</a>
         </nav>
         <div class="topbar-actions">
           <button class="install-button" id="installButton" type="button" hidden aria-label="Installa la PWA">
@@ -70,12 +71,19 @@
       </header>
       <main>
         <section class="vote-section" id="vota" aria-labelledby="vota-title">
-          <div class="view-hero"><span class="section-label">Classifiche live</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Ogni voto alimenta le classifiche live: top street food, panini, tradizione, dolci e drink.</p></div>
+          <div class="view-hero"><span class="section-label">Contest 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli una delle categorie ufficiali del contest e assegna il tuo voto alla realta' che ti ha colpito di piu'.</p></div>
           <div class="vote-layout">
             <form class="vote-form" id="voteForm">
-              <label>Categoria<select id="voteCategory" name="category"><option value="top-street-food">Top Street Food</option><option value="top-panino">Miglior Panino</option><option value="top-tradizione">Miglior Tradizione</option><option value="top-dessert">Miglior Dolce</option><option value="top-drink">Miglior Drink</option></select></label>
-              <label>Stand<select id="voteTruck" name="truckId"></select></label>
+              <label>Categoria<select id="voteCategory" name="category"><option value="best-street-chef">Miglior Street Chef 2026</option><option value="courtesy-award">Premio Cortesia</option><option value="tradition-award">Premio Tradizione</option></select></label>
+              <label>Street chef<select id="voteTruck" name="truckId"></select></label>
               <label>Nome<input name="voter" type="text" placeholder="Il tuo nome" required /></label>
+              <label class="privacy-check"><input id="prizeOptIn" name="prizeOptIn" type="checkbox" /><span>Opzionale: partecipa all'estrazione e prova a vincere una t-shirt personalizzata con il tuo nome.</span></label>
+              <div class="vote-extra-fields" id="voteExtraFields" hidden>
+                <label>Email<input name="email" type="email" placeholder="La tua email" /></label>
+                <label>Sesso<select name="gender"><option value="">Seleziona</option><option value="female">Donna</option><option value="male">Uomo</option><option value="non-binary">Non binary</option><option value="prefer-not">Preferisco non dirlo</option></select></label>
+                <label>Eta'<select name="ageRange"><option value="">Seleziona</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
+                <label>Distanza<select name="distance"><option value="">Seleziona</option><option value="luzzi">Luzzi</option><option value="province-cosenza">Provincia di Cosenza</option><option value="calabria">Resto della Calabria</option><option value="outside-calabria">Fuori Calabria</option></select></label>
+              </div>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
               <button class="primary-action" type="submit">Invia voto</button>
             </form>
