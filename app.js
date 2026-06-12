@@ -350,8 +350,15 @@ const reservationsTable = document.querySelector("#reservationsTable");
 const rowTemplate = document.querySelector("#reservationRowTemplate");
 const emptyState = document.querySelector("#emptyState");
 const searchInput = document.querySelector("#searchInput");
+const bookingSearchToggle = document.querySelector("#bookingSearchToggle");
+const bookingSearchPanel = document.querySelector("#bookingSearchPanel");
 const dayFilter = document.querySelector("#dayFilter");
 const statusFilter = document.querySelector("#statusFilter");
+const bookingQuickViews = document.querySelector("#bookingQuickViews");
+const bookingPendingCount = document.querySelector("#bookingPendingCount");
+const bookingTodayCount = document.querySelector("#bookingTodayCount");
+const bookingAllCount = document.querySelector("#bookingAllCount");
+const bookingTodayLabel = document.querySelector("#bookingTodayLabel");
 const capacityInput = document.querySelector("#capacityInput");
 const availabilityReadout = document.querySelector("#availabilityReadout");
 const slotsGrid = document.querySelector("#slotsGrid");
@@ -399,6 +406,7 @@ const emptyStaffVotes = document.querySelector("#emptyStaffVotes");
 const prizeEntriesTable = document.querySelector("#prizeEntriesTable");
 const emptyPrizeEntries = document.querySelector("#emptyPrizeEntries");
 const prizeSummary = document.querySelector("#prizeSummary");
+const prizeEntriesCount = document.querySelector("#prizeEntriesCount");
 const exportPrizeCsvButton = document.querySelector("#exportPrizeCsvButton");
 const drawPrizeWinnerButton = document.querySelector("#drawPrizeWinnerButton");
 const prizeWinnerName = document.querySelector("#prizeWinnerName");
@@ -479,6 +487,7 @@ let remoteReservationSlotUsageSynced = false;
 let reservationSlotUsageRefreshTimer = null;
 let serviceWorkerRegistrationPromise = null;
 let staffPushSubscribed = false;
+let activeBookingView = "pending";
 sessionStorage.setItem("cssf-session-id", sessionId);
 
 redirectLegacyHashRoute();
@@ -492,8 +501,16 @@ bindEvent(bookingForm?.day, "change", updateAvailabilityReadout);
 bindEvent(bookingForm?.slot, "change", updateAvailabilityReadout);
 bindEvent(bookingForm?.guests, "input", updateAvailabilityReadout);
 bindEvent(searchInput, "input", renderReservations);
-bindEvent(dayFilter, "change", renderReservations);
-bindEvent(statusFilter, "change", renderReservations);
+bindEvent(bookingSearchToggle, "click", toggleBookingSearchPanel);
+bindEvent(dayFilter, "change", () => {
+  activeBookingView = inferActiveBookingView();
+  renderReservations();
+});
+bindEvent(statusFilter, "change", () => {
+  activeBookingView = inferActiveBookingView();
+  renderReservations();
+});
+bindEvent(bookingQuickViews, "click", handleBookingQuickViewClick);
 bindEvent(capacityInput, "change", handleCapacityChange);
 bindEvent(slotQuickForm, "submit", handleSlotQuickSubmit);
 bindEvent(slotGuestsInput, "input", updateSlotModalAvailability);
@@ -518,6 +535,12 @@ bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
 bindEvent(exportPrizeCsvButton, "click", exportPrizeEntriesCsv);
 bindEvent(drawPrizeWinnerButton, "click", drawPrizeWinner);
 bindEvent(clearVotesButton, "click", clearVotesRemote);
+
+if (isStaffPage() && dayFilter && statusFilter) {
+  dayFilter.value = "all";
+  statusFilter.value = "pending";
+  activeBookingView = "pending";
+}
 bindEvent(acceptAnalyticsButton, "click", () => setAnalyticsConsent("accepted"));
 bindEvent(rejectAnalyticsButton, "click", () => setAnalyticsConsent("rejected"));
 bindEvent(privacyPreferencesButton, "click", resetPrivacyPreferences);
@@ -1858,23 +1881,38 @@ function renderPrizeEntries() {
   const entries = getPrizeEntries();
   prizeEntriesTable.innerHTML = "";
   emptyPrizeEntries.classList.toggle("visible", entries.length === 0);
+  if (prizeEntriesCount) {
+    prizeEntriesCount.textContent = String(entries.length);
+  }
   renderPrizeSummary(entries);
   if (!entries.length) {
     resetPrizeWinnerCard();
   }
 
   entries.forEach((vote) => {
-    const truck = trucks.find((item) => item.id === vote.truckId);
+    const details = [
+      getVoteCategoryLabel(vote.category),
+      getContestAgeLabel(vote.ageRange),
+      getContestDistanceLabel(vote.distance),
+      formatDateTime(vote.createdAt),
+    ]
+      .filter((value) => value && value !== "-")
+      .join(" · ");
+
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td data-label="Ora">${escapeHtml(formatDateTime(vote.createdAt))}</td>
-      <td data-label="Nome"><strong>${escapeHtml(vote.voter || "Anonimo")}</strong></td>
-      <td data-label="Email">${escapeHtml(vote.email || "-")}</td>
-      <td data-label="Sesso">${escapeHtml(getContestGenderLabel(vote.gender))}</td>
-      <td data-label="Eta'">${escapeHtml(getContestAgeLabel(vote.ageRange))}</td>
-      <td data-label="Distanza">${escapeHtml(getContestDistanceLabel(vote.distance))}</td>
-      <td data-label="Categoria">${escapeHtml(getVoteCategoryLabel(vote.category))}</td>
-      <td data-label="Street chef">${escapeHtml(truck ? truck.name : vote.truckId)}</td>
+      <td data-label="Partecipante">
+        <div class="customer-cell">
+          <strong>${escapeHtml(vote.voter || "Anonimo")}</strong>
+          <span>${escapeHtml(getContestGenderLabel(vote.gender))}</span>
+        </div>
+      </td>
+      <td data-label="Contatto">
+        <div class="customer-cell compact">
+          <span>${escapeHtml(vote.email || "email non inserita")}</span>
+        </div>
+      </td>
+      <td data-label="Dettagli">${escapeHtml(details || "Nessun dettaglio disponibile")}</td>
     `;
     prizeEntriesTable.append(row);
   });
@@ -1899,36 +1937,32 @@ function renderPrizeSummary(entries) {
   const distanceStats = getTopCountLabel(
     entries.map((entry) => getContestDistanceLabel(entry.distance)).filter((value) => value !== "-"),
   );
-  const ageStats = getTopCountLabel(
-    entries.map((entry) => getContestAgeLabel(entry.ageRange)).filter((value) => value !== "-"),
-  );
+  const lastEntry = entries[0];
 
   const summaryRows = [
     { label: "Partecipanti", value: String(entries.length) },
     {
-      label: "Categoria piu' scelta",
+      label: "Categoria top",
       value: categoryStats[0] ? `${categoryStats[0].label} (${categoryStats[0].count})` : "Nessun dato",
     },
-    { label: "Area piu' presente", value: distanceStats ? `${distanceStats.label} (${distanceStats.count})` : "Nessun dato" },
-    { label: "Fascia eta' piu' presente", value: ageStats ? `${ageStats.label} (${ageStats.count})` : "Nessun dato" },
+    { label: "Ultimo voto", value: lastEntry ? formatDateTime(lastEntry.createdAt) : "Nessun dato" },
+    { label: "Area top", value: distanceStats ? `${distanceStats.label} (${distanceStats.count})` : "Nessun dato" },
   ];
 
-  prizeSummary.innerHTML = `
-    <div class="stats-list">
-      ${summaryRows
-        .map(
-          (row) => `
-            <div class="stats-row">
-              <div class="stats-row-main">
-                <strong>${escapeHtml(row.label)}</strong>
-                <span>${escapeHtml(row.value)}</span>
-              </div>
-            </div>
-          `,
-        )
-        .join("")}
-    </div>
-  `;
+    prizeSummary.innerHTML = `
+      <div class="prize-summary-grid">
+        ${summaryRows
+          .map(
+            (row) => `
+              <article class="prize-summary-card">
+                <span>${escapeHtml(row.label)}</span>
+                <strong>${escapeHtml(row.value)}</strong>
+              </article>
+            `,
+          )
+          .join("")}
+      </div>
+    `;
 }
 
 function drawPrizeWinner() {
@@ -1941,7 +1975,6 @@ function drawPrizeWinner() {
   }
 
   const winner = entries[Math.floor(Math.random() * entries.length)];
-  const truck = trucks.find((item) => item.id === winner.truckId);
 
   if (prizeWinnerName) {
     prizeWinnerName.textContent = winner.voter || "Anonimo";
@@ -1951,7 +1984,7 @@ function drawPrizeWinner() {
     const details = [
       winner.email || "email non inserita",
       getVoteCategoryLabel(winner.category),
-      truck ? truck.name : winner.truckId,
+      getContestDistanceLabel(winner.distance),
     ];
     prizeWinnerMeta.textContent = details.join(" · ");
   }
@@ -1966,11 +1999,11 @@ function drawPrizeWinner() {
 
 function resetPrizeWinnerCard() {
   if (prizeWinnerName) {
-    prizeWinnerName.textContent = "Nessun vincitore estratto";
+    prizeWinnerName.textContent = "In attesa di estrazione";
   }
 
   if (prizeWinnerMeta) {
-    prizeWinnerMeta.textContent = "Premi il pulsante e scegliamo un partecipante a caso dalla lista.";
+    prizeWinnerMeta.textContent = "";
   }
 
   document.querySelector("#prizeWinnerCard")?.classList.remove("is-highlighted");
@@ -2165,6 +2198,9 @@ function renderAdminAccess() {
   const unlocked = isAdminAuthenticated();
   adminLoginPanel.hidden = unlocked;
   staffWorkspace.hidden = !unlocked;
+  if (adminLogoutButton) {
+    adminLogoutButton.hidden = !unlocked;
+  }
   if (copyReportButton) {
     copyReportButton.disabled = !unlocked;
   }
@@ -2448,7 +2484,7 @@ function renderAnalyticsDashboard() {
     sectionStats,
     "Nessuna sezione tracciata.",
   );
-  renderStatsList("#clickStatsList", clickSectionStats, "Nessun click tracciato.");
+  renderClickStatsList("#clickStatsList", clickSectionStats, "Nessun click tracciato.");
   renderAnalyticsSummary(sectionStats, clickSectionStats, durationStats, sessions.size, sectionViews.length, clicks.length);
 }
 
@@ -2541,31 +2577,59 @@ function renderDurationTrendChart(rows) {
     return;
   }
 
-  const width = 320;
-  const height = 132;
+  const width = 820;
+  const height = 360;
+  const plotLeft = 54;
+  const plotRight = width - 12;
+  const chartTop = 18;
+  const chartBottom = 290;
+  const peakRow = chartRows.reduce((best, row) => (row.durationMs > best.durationMs ? row : best), chartRows[0]);
   const max = Math.max(...chartRows.map((row) => row.durationMs), 1);
   const points = chartRows.map((row, index) => {
-    const x = chartRows.length === 1 ? width / 2 : (index / (chartRows.length - 1)) * width;
-    const y = height - (row.durationMs / max) * (height - 18) - 9;
+    const x =
+      chartRows.length === 1
+        ? (plotLeft + plotRight) / 2
+        : plotLeft + (index / (chartRows.length - 1)) * (plotRight - plotLeft);
+    const y = chartBottom - (row.durationMs / max) * (chartBottom - chartTop);
     return { x, y, row };
   });
+  const guides = [1, 0.66, 0.33, 0].map((ratio) => {
+    const value = Math.round(max * ratio);
+    const y = chartBottom - (value / max) * (chartBottom - chartTop);
+    return { value, y, label: formatDuration(value) };
+  });
   const pointList = points.map((point) => `${point.x},${point.y}`).join(" ");
-  const areaList = `0,${height} ${pointList} ${width},${height}`;
+  const areaList = `${plotLeft},${chartBottom} ${pointList} ${plotRight},${chartBottom}`;
 
   element.innerHTML = `
-    <svg class="line-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Andamento permanenza sessioni">
-      <polygon points="${areaList}" class="line-chart-area"></polygon>
-      <polyline points="${pointList}" class="line-chart-line"></polyline>
+    <div class="line-chart-summary">
+      <strong>Picco alle ${escapeHtml(formatTimeLabel(peakRow.first))}</strong>
+      <span>${escapeHtml(formatDuration(peakRow.durationMs))} di permanenza</span>
+    </div>
+    <svg class="line-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Andamento permanenza sessioni per orario">
+        ${guides
+          .map(
+            (guide) => `
+              <line x1="${plotLeft}" y1="${guide.y}" x2="${plotRight}" y2="${guide.y}" class="line-chart-guide"></line>
+              <text x="0" y="${guide.y + 4}" class="line-chart-guide-label">${escapeHtml(guide.label)}</text>
+            `,
+          )
+          .join("")}
+        <polygon points="${areaList}" class="line-chart-area"></polygon>
+        <polyline points="${pointList}" class="line-chart-line"></polyline>
       ${points
         .map(
           (point) =>
-            `<circle cx="${point.x}" cy="${point.y}" r="4"><title>${escapeHtml(point.row.label)} - ${formatDuration(point.row.durationMs)}</title></circle>`,
+            `<circle cx="${point.x}" cy="${point.y}" r="4"><title>${escapeHtml(formatTimeLabel(point.row.first))} - ${formatDuration(point.row.durationMs)}</title></circle>`,
         )
         .join("")}
     </svg>
-    <div class="chart-caption">
-      <span>${formatDuration(chartRows[0].durationMs)}</span>
-      <span>${formatDuration(chartRows[chartRows.length - 1].durationMs)}</span>
+    <div class="chart-x-labels" style="grid-template-columns: repeat(${chartRows.length}, minmax(0, 1fr));">
+        ${chartRows
+          .map(
+            (row) => `<span title="${escapeHtml(new Date(row.first).toLocaleString("it-IT"))}">${escapeHtml(formatTimeLabel(row.first))}</span>`,
+          )
+        .join("")}
     </div>
   `;
 }
@@ -2643,6 +2707,39 @@ function renderStatsList(selector, rows, emptyText) {
         <span>${row.count}</span>
       </div>
       <div class="stats-bar" aria-hidden="true"><i style="width: ${percentage}%"></i></div>
+    `;
+    element.append(item);
+  });
+}
+
+function renderClickStatsList(selector, rows, emptyText) {
+  const element = document.querySelector(selector);
+  if (!element) return;
+  element.innerHTML = "";
+
+  if (!rows.length) {
+    element.innerHTML = `<div class="empty-state visible">${emptyText}</div>`;
+    return;
+  }
+
+  const total = rows.reduce((sum, row) => sum + row.count, 0);
+  const max = Math.max(...rows.map((row) => row.count), 1);
+
+  rows.slice(0, 6).forEach((row, index) => {
+    const percentage = Math.max(8, Math.round((row.count / max) * 100));
+    const share = total ? Math.round((row.count / total) * 100) : 0;
+    const item = document.createElement("article");
+    item.className = "click-stat-card";
+    item.innerHTML = `
+      <div class="click-stat-rank">${String(index + 1).padStart(2, "0")}</div>
+      <div class="click-stat-body">
+        <div class="click-stat-topline">
+          <strong title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</strong>
+          <span>${row.count}</span>
+        </div>
+        <div class="stats-bar" aria-hidden="true"><i style="width: ${percentage}%"></i></div>
+        <small>${share}% del totale click</small>
+      </div>
     `;
     element.append(item);
   });
@@ -2729,6 +2826,13 @@ function formatDuration(durationMs) {
 
   if (minutes > 0) return `${minutes}m ${seconds}s`;
   return `${seconds}s`;
+}
+
+function formatTimeLabel(timestamp) {
+  return new Date(timestamp).toLocaleTimeString("it-IT", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function getTopStats(events, key) {
@@ -3099,25 +3203,34 @@ function renderReservations() {
   const filtered = getFilteredReservations();
   reservationsTable.innerHTML = "";
   emptyState.classList.toggle("visible", filtered.length === 0);
+  updateBookingQuickViewSummary();
 
   filtered.forEach((reservation) => {
     const row = rowTemplate.content.firstElementChild.cloneNode(true);
     row.dataset.status = reservation.status;
     row.dataset.priority = getReservationPriority(reservation);
     const cells = row.querySelectorAll("td");
+    const infoTags = [
+      reservation.tables ? `Tavoli: ${reservation.tables}` : "",
+      reservation.area ? `Area: ${reservation.area}` : "",
+      reservation.arrival ? `Arrivo: ${reservation.arrival}` : "",
+    ]
+      .filter(Boolean)
+      .map((item) => `<span class="customer-tag">${escapeHtml(item)}</span>`)
+      .join("");
     const noteMarkup = reservation.notes
-      ? `<span class="note-line">${escapeHtml(reservation.notes)}</span>`
-      : "";
+        ? `<span class="note-line">${escapeHtml(reservation.notes)}</span>`
+        : "";
 
-    cells[0].innerHTML = `
-      <div class="customer-cell">
-        <strong>${escapeHtml(reservation.name)}</strong>
-        <span>${escapeHtml(reservation.phone || "-")}</span>
-        ${reservation.email ? `<span>${escapeHtml(reservation.email)}</span>` : ""}
-        ${reservation.arrival ? `<span>${escapeHtml(reservation.arrival)}</span>` : ""}
-        ${noteMarkup}
-      </div>
-    `;
+      cells[0].innerHTML = `
+        <div class="customer-cell">
+          <strong>${escapeHtml(reservation.name)}</strong>
+          <span>${escapeHtml(reservation.phone || "-")}</span>
+          ${reservation.email ? `<span>${escapeHtml(reservation.email)}</span>` : ""}
+          ${infoTags ? `<div class="customer-tags">${infoTags}</div>` : ""}
+          ${noteMarkup}
+        </div>
+      `;
     cells[1].textContent = getDayLabel(reservation.day, true);
     cells[2].textContent = reservation.slot;
     cells[3].textContent = String(reservation.guests);
@@ -3126,6 +3239,83 @@ function renderReservations() {
     cells[6].append(createActions(reservation));
 
     reservationsTable.append(row);
+  });
+}
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getBookingFocusDay() {
+  const today = getLocalDateKey();
+  if (eventDays.some((item) => item.value === today)) return today;
+  const upcoming = eventDays.find((item) => item.value >= today);
+  return upcoming?.value || eventDays[0]?.value || "all";
+}
+
+function inferActiveBookingView() {
+  const focusDay = getBookingFocusDay();
+  if (statusFilter?.value === "pending" && dayFilter?.value === "all") return "pending";
+  if (statusFilter?.value === "all" && dayFilter?.value === focusDay) return "today";
+  if (statusFilter?.value === "all" && dayFilter?.value === "all") return "all";
+  return "custom";
+}
+
+function applyBookingQuickView(view) {
+  if (!dayFilter || !statusFilter) return;
+
+  const focusDay = getBookingFocusDay();
+  if (view === "pending") {
+    statusFilter.value = "pending";
+    dayFilter.value = "all";
+  } else if (view === "today") {
+    statusFilter.value = "all";
+    dayFilter.value = focusDay;
+  } else {
+    statusFilter.value = "all";
+    dayFilter.value = "all";
+  }
+
+  activeBookingView = view;
+  renderReservations();
+}
+
+function handleBookingQuickViewClick(event) {
+  const button = event.target.closest("[data-booking-view]");
+  if (!button) return;
+  applyBookingQuickView(button.dataset.bookingView || "all");
+}
+
+function toggleBookingSearchPanel() {
+  if (!bookingSearchPanel || !bookingSearchToggle) return;
+  const shouldOpen = bookingSearchPanel.hidden;
+  bookingSearchPanel.hidden = !shouldOpen;
+  bookingSearchToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+  bookingSearchToggle.classList.toggle("is-active", shouldOpen);
+  if (shouldOpen) {
+    searchInput?.focus();
+  }
+}
+
+function updateBookingQuickViewSummary() {
+  const focusDay = getBookingFocusDay();
+  const activeReservations = reservations.filter((item) => item.status !== "cancelled");
+  const pendingReservations = reservations.filter((item) => item.status === "pending");
+  const todayReservations = activeReservations.filter((item) => item.day === focusDay);
+
+  if (bookingPendingCount) bookingPendingCount.textContent = String(pendingReservations.length);
+  if (bookingTodayCount) bookingTodayCount.textContent = String(todayReservations.length);
+  if (bookingAllCount) bookingAllCount.textContent = String(activeReservations.length);
+  if (bookingTodayLabel) bookingTodayLabel.textContent = getDayLabel(focusDay, true);
+
+  const currentView = inferActiveBookingView();
+  activeBookingView = currentView;
+
+  bookingQuickViews?.querySelectorAll("[data-booking-view]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.bookingView === activeBookingView);
   });
 }
 
@@ -3321,7 +3511,7 @@ function createActions(reservation) {
   wrapper.className = "row-actions";
 
   const whatsapp = document.createElement("a");
-  whatsapp.className = "small-button";
+  whatsapp.className = "small-button whatsapp";
   whatsapp.href = createWhatsAppUrl(reservation);
   whatsapp.target = "_blank";
   whatsapp.rel = "noreferrer";
@@ -3360,21 +3550,37 @@ function getFilteredReservations() {
   }
 
   const query = searchInput.value.trim().toLowerCase();
-  return reservations.filter((reservation) => {
-    const matchesQuery = [
-      reservation.name,
-      reservation.phone,
-      reservation.email,
-      reservation.notes,
-      reservation.area,
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(query);
-    const matchesDay = dayFilter.value === "all" || reservation.day === dayFilter.value;
-    const matchesStatus = statusFilter.value === "all" || reservation.status === statusFilter.value;
-    return matchesQuery && matchesDay && matchesStatus;
-  });
+  return reservations
+    .filter((reservation) => {
+      const matchesQuery = [
+        reservation.name,
+        reservation.phone,
+        reservation.email,
+        reservation.notes,
+        reservation.area,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+      const matchesDay = dayFilter.value === "all" || reservation.day === dayFilter.value;
+      const matchesStatus = statusFilter.value === "all" || reservation.status === statusFilter.value;
+      return matchesQuery && matchesDay && matchesStatus;
+    })
+    .slice()
+    .sort((left, right) => {
+      const statusWeight = {
+        pending: 0,
+        waiting: 1,
+        confirmed: 2,
+        cancelled: 3,
+      };
+      const leftWeight = statusWeight[left.status] ?? 99;
+      const rightWeight = statusWeight[right.status] ?? 99;
+      if (leftWeight !== rightWeight) return leftWeight - rightWeight;
+      if (left.day !== right.day) return left.day.localeCompare(right.day);
+      if (left.slot !== right.slot) return left.slot.localeCompare(right.slot);
+      return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+    });
 }
 
 function updateAvailabilityReadout() {
@@ -4199,5 +4405,3 @@ function showToast(message) {
     window.setTimeout(() => toast.remove(), 220);
   }, 2800);
 }
-
-

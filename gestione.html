@@ -37,6 +37,7 @@
         <div class="topbar-actions staff-topbar-actions">
           <button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">&#128276;</button>
           <a class="ghost-link" href="index.html">Web app pubblica</a>
+          <button class="ghost-link" id="adminLogoutButton" type="button" hidden>Logout</button>
           <button class="install-button" id="installButton" type="button" hidden>Installa staff</button>
           <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Apri il menu">
             <span></span>
@@ -78,19 +79,27 @@
                   <span class="section-label">Prenotazioni</span>
                   <h2 id="staff-bookings-title">Gestione tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2>
                 </div>
-                <div class="staff-actions compact">
-                  <button class="ghost-link" id="adminLogoutButton" type="button">Logout</button>
-                </div>
               </div>
               <div class="booking-layout">
                 <article class="reservations-panel">
                   <div class="reservations-heading">
                     <div>
-                      <span class="section-label">Vista completa</span>
+                      <span class="section-label">Coda operativa</span>
                       <h2>Elenco prenotazioni</h2>
                     </div>
-                    <div class="filters">
-                      <input id="searchInput" type="search" placeholder="Cerca nome, telefono, note" />
+                    <div class="booking-toolbar">
+                      <button class="icon-button booking-search-toggle" id="bookingSearchToggle" type="button" aria-expanded="false" aria-controls="bookingSearchPanel" aria-label="Apri ricerca prenotazioni">
+                        &#128269;
+                      </button>
+                      <div class="booking-search-panel" id="bookingSearchPanel" hidden>
+                        <label class="search-field" aria-label="Cerca prenotazioni">
+                          <span class="search-field-icon" aria-hidden="true">&#128269;</span>
+                          <input id="searchInput" type="search" placeholder="Nome, numero di cellulare, email, note..." />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="booking-hidden-filters" hidden aria-hidden="true">
                       <select id="dayFilter">
                         <option value="all">Tutti i giorni</option>
                         <option value="2026-06-26">26 giugno</option>
@@ -104,7 +113,23 @@
                         <option value="waiting">Lista attesa</option>
                         <option value="cancelled">Annullata</option>
                       </select>
-                    </div>
+                  </div>
+                  <div class="booking-ops-strip" id="bookingQuickViews" aria-label="Viste rapide prenotazioni">
+                    <button class="booking-ops-card" id="bookingViewPending" type="button" data-booking-view="pending">
+                      <span class="booking-ops-label">Da confermare</span>
+                      <strong id="bookingPendingCount">0</strong>
+                      <small>Le richieste che aspettano una risposta</small>
+                    </button>
+                    <button class="booking-ops-card" id="bookingViewToday" type="button" data-booking-view="today">
+                      <span class="booking-ops-label">Focus giorno</span>
+                      <strong id="bookingTodayCount">0</strong>
+                      <small id="bookingTodayLabel">Prenotazioni del giorno operativo</small>
+                    </button>
+                    <button class="booking-ops-card" id="bookingViewAll" type="button" data-booking-view="all">
+                      <span class="booking-ops-label">Tutte</span>
+                      <strong id="bookingAllCount">0</strong>
+                      <small>Panoramica completa sempre disponibile</small>
+                    </button>
                   </div>
                   <div class="table-wrap">
                     <table>
@@ -184,23 +209,29 @@
                 </div>
               </div>
               <div class="analytics-grid staff-prize-grid">
-                <article class="analytics-panel">
-                  <h3>Partecipazione rapida</h3>
-                  <div id="prizeSummary"></div>
-                  <div class="staff-prize-winner" id="prizeWinnerCard">
-                    <span class="section-label">Estrazione</span>
-                    <strong id="prizeWinnerName">Nessun vincitore estratto</strong>
-                    <p id="prizeWinnerMeta">Premi il pulsante e scegliamo un partecipante a caso dalla lista.</p>
-                  </div>
-                </article>
                 <article class="analytics-panel staff-prize-table-panel">
+                  <div class="staff-prize-table-heading">
+                    <div>
+                      <span class="section-label">Partecipanti</span>
+                      <h3>Persone che partecipano al contest</h3>
+                      <p class="staff-prize-table-meta"><strong id="prizeEntriesCount">0</strong> persone hanno votato per provare a vincere la maglia.</p>
+                    </div>
+                  </div>
                   <div class="table-wrap">
                     <table>
-                      <thead><tr><th>Ora</th><th>Nome</th><th>Email</th><th>Sesso</th><th>Eta'</th><th>Distanza</th><th>Categoria</th><th>Street chef</th></tr></thead>
+                      <thead><tr><th>Partecipante</th><th>Contatto</th><th>Dettagli</th></tr></thead>
                       <tbody id="prizeEntriesTable"></tbody>
                     </table>
                   </div>
                   <div class="empty-state" id="emptyPrizeEntries">Nessun partecipante all'estrazione registrato.</div>
+                </article>
+                <article class="analytics-panel staff-prize-control-panel">
+                  <div id="prizeSummary"></div>
+                  <div class="staff-prize-winner" id="prizeWinnerCard">
+                    <span class="section-label">Vincitore contest</span>
+                    <strong id="prizeWinnerName">In attesa di estrazione</strong>
+                    <p id="prizeWinnerMeta"></p>
+                  </div>
                 </article>
               </div>
             </section>
@@ -210,6 +241,18 @@
                   <span class="section-label">Statistiche</span>
                   <h2 id="staff-stats-title">Sintesi web app <span class="staff-count-badge olive"><span id="metricSessions">0</span> sessioni</span></h2>
                 </div>
+              </div>
+              <div class="analytics-chart-grid analytics-chart-grid-simple">
+                <article class="analytics-chart-card analytics-chart-card-wide">
+                  <div class="chart-heading">
+                    <div><span class="section-label">Permanenza</span><h3>Andamento sessioni</h3></div>
+                  </div>
+                  <div class="analytics-line-chart" id="durationTrendChart"></div>
+                </article>
+                <article class="analytics-panel analytics-panel-simple">
+                  <h3>Sezioni piu cliccate</h3>
+                  <div id="clickStatsList"></div>
+                </article>
               </div>
               <div class="analytics-overview analytics-overview-simple">
                 <article class="analytics-kpi-card">
@@ -223,18 +266,6 @@
                 <article class="analytics-kpi-card">
                   <span>Sezioni viste</span>
                   <strong id="metricSectionViews">0</strong>
-                </article>
-              </div>
-              <div class="analytics-chart-grid analytics-chart-grid-simple">
-                <article class="analytics-chart-card analytics-chart-card-wide">
-                  <div class="chart-heading">
-                    <div><span class="section-label">Permanenza</span><h3>Andamento sessioni</h3></div>
-                  </div>
-                  <div class="analytics-line-chart" id="durationTrendChart"></div>
-                </article>
-                <article class="analytics-panel analytics-panel-simple">
-                  <h3>Sezioni piu cliccate</h3>
-                  <div id="clickStatsList"></div>
                 </article>
               </div>
               <div class="staff-actions">
