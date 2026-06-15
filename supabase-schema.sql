@@ -51,6 +51,25 @@ create table if not exists public.votes (
   voter_name text not null default 'Anonimo'
 );
 
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conname = 'votes_category_check'
+      and conrelid = 'public.votes'::regclass
+  ) then
+    alter table public.votes drop constraint votes_category_check;
+  end if;
+exception
+  when undefined_table then null;
+end;
+$$;
+
+alter table public.votes
+add constraint votes_category_check
+check (category in ('best-street-chef', 'courtesy-award', 'tradition-award'));
+
 alter table public.votes
 add column if not exists voter_name text not null default 'Anonimo',
 add column if not exists prize_opt_in boolean not null default false,
@@ -98,6 +117,19 @@ create index if not exists analytics_events_created_at_idx on public.analytics_e
 create index if not exists analytics_events_type_idx on public.analytics_events (type);
 create index if not exists analytics_events_section_idx on public.analytics_events (section);
 create index if not exists analytics_events_session_id_idx on public.analytics_events (session_id);
+
+create table if not exists public.moments (
+  id text primary key,
+  created_at timestamptz not null default now(),
+  uploader_name text not null,
+  caption text,
+  image_path text not null unique,
+  image_url text not null,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected'))
+);
+
+create index if not exists moments_created_at_idx on public.moments (created_at desc);
+create index if not exists moments_status_idx on public.moments (status);
 
 create or replace view public.vote_leaderboard as
 select
@@ -187,6 +219,7 @@ alter table public.trucks enable row level security;
 alter table public.votes enable row level security;
 alter table public.reviews enable row level security;
 alter table public.analytics_events enable row level security;
+alter table public.moments enable row level security;
 
 grant insert on public.reservations to anon;
 grant select, update, delete on public.reservations to authenticated;
@@ -200,6 +233,8 @@ grant select, insert on public.reviews to anon, authenticated;
 grant delete on public.reviews to authenticated;
 grant insert on public.analytics_events to anon, authenticated;
 grant select, delete on public.analytics_events to authenticated;
+grant insert on public.moments to anon, authenticated;
+grant select, update, delete on public.moments to authenticated;
 grant select on public.vote_leaderboard to anon, authenticated;
 grant select on public.reservation_slot_usage to anon, authenticated;
 grant select on public.staff_members to authenticated;
@@ -380,12 +415,89 @@ for delete
 to authenticated
 using (public.is_staff());
 
+drop policy if exists "Public can create moments" on public.moments;
+create policy "Public can create moments"
+on public.moments
+for insert
+to anon, authenticated
+with check (
+  char_length(trim(uploader_name)) between 2 and 80
+  and char_length(coalesce(caption, '')) <= 220
+  and char_length(trim(image_path)) between 10 and 255
+  and image_path like 'public/%'
+  and char_length(trim(image_url)) between 20 and 500
+  and status = 'pending'
+);
+
+drop policy if exists "Staff can read moments" on public.moments;
+create policy "Staff can read moments"
+on public.moments
+for select
+to authenticated
+using (public.is_staff());
+
+drop policy if exists "Staff can update moments" on public.moments;
+create policy "Staff can update moments"
+on public.moments
+for update
+to authenticated
+using (public.is_staff())
+with check (public.is_staff() and status in ('pending', 'approved', 'rejected'));
+
+drop policy if exists "Staff can delete moments" on public.moments;
+create policy "Staff can delete moments"
+on public.moments
+for delete
+to authenticated
+using (public.is_staff());
+
 drop policy if exists "Staff can read push subscriptions" on public.push_subscriptions;
 create policy "Staff can read push subscriptions"
 on public.push_subscriptions
 for select
 to authenticated
 using (public.is_staff());
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'cssf-moments',
+  'cssf-moments',
+  true,
+  7340032,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Public can upload CSSF moments" on storage.objects;
+create policy "Public can upload CSSF moments"
+on storage.objects
+for insert
+to anon, authenticated
+with check (
+  bucket_id = 'cssf-moments'
+  and (storage.foldername(name))[1] = 'public'
+);
+
+drop policy if exists "Public can read CSSF moments" on storage.objects;
+create policy "Public can read CSSF moments"
+on storage.objects
+for select
+to anon, authenticated
+using (bucket_id = 'cssf-moments');
+
+drop policy if exists "Staff can delete CSSF moments" on storage.objects;
+create policy "Staff can delete CSSF moments"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'cssf-moments'
+  and public.is_staff()
+);
 
 insert into public.trucks (id, code, name, category, zone, menu, color, status, x, y, map_positions)
 values
@@ -453,6 +565,14 @@ $$;
 do $$
 begin
   alter publication supabase_realtime add table public.analytics_events;
+exception
+  when duplicate_object then null;
+end;
+$$;
+
+do $$
+begin
+  alter publication supabase_realtime add table public.moments;
 exception
   when duplicate_object then null;
 end;

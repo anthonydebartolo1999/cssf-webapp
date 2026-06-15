@@ -30,6 +30,7 @@
         <nav class="site-nav" id="primaryNav" aria-label="Navigazione staff">
           <a href="#prenotazioni">Prenotazioni</a>
           <a href="#comunicazioni">Comunicazioni</a>
+          <a href="#moments">CSSF Moments</a>
           <a href="#statistiche">Statistiche</a>
           <a href="#voti">Classifica stand</a>
           <a href="#estrazione">Estrazione contest</a>
@@ -77,28 +78,11 @@
               <div class="staff-area-heading">
                 <div>
                   <span class="section-label">Prenotazioni</span>
-                  <h2 id="staff-bookings-title">Gestione tavoli <span class="staff-count-badge" id="metricBookings">0</span></h2>
+                  <h2 id="staff-bookings-title">Elenco prenotazioni <span class="staff-count-badge" id="metricBookings">0</span></h2>
                 </div>
               </div>
               <div class="booking-layout">
                 <article class="reservations-panel">
-                  <div class="reservations-heading">
-                    <div>
-                      <span class="section-label">Coda operativa</span>
-                      <h2>Elenco prenotazioni</h2>
-                    </div>
-                    <div class="booking-toolbar">
-                      <button class="icon-button booking-search-toggle" id="bookingSearchToggle" type="button" aria-expanded="false" aria-controls="bookingSearchPanel" aria-label="Apri ricerca prenotazioni">
-                        &#128269;
-                      </button>
-                      <div class="booking-search-panel" id="bookingSearchPanel" hidden>
-                        <label class="search-field" aria-label="Cerca prenotazioni">
-                          <span class="search-field-icon" aria-hidden="true">&#128269;</span>
-                          <input id="searchInput" type="search" placeholder="Nome, numero di cellulare, email, note..." />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
                   <div class="booking-hidden-filters" hidden aria-hidden="true">
                       <select id="dayFilter">
                         <option value="all">Tutti i giorni</option>
@@ -114,32 +98,26 @@
                         <option value="cancelled">Annullata</option>
                       </select>
                   </div>
-                  <div class="booking-ops-strip" id="bookingQuickViews" aria-label="Viste rapide prenotazioni">
-                    <button class="booking-ops-card" id="bookingViewPending" type="button" data-booking-view="pending">
-                      <span class="booking-ops-label">Da confermare</span>
-                      <strong id="bookingPendingCount">0</strong>
-                      <small>Le richieste che aspettano una risposta</small>
-                    </button>
-                    <button class="booking-ops-card" id="bookingViewToday" type="button" data-booking-view="today">
-                      <span class="booking-ops-label">Focus giorno</span>
-                      <strong id="bookingTodayCount">0</strong>
-                      <small id="bookingTodayLabel">Prenotazioni del giorno operativo</small>
-                    </button>
-                    <button class="booking-ops-card" id="bookingViewAll" type="button" data-booking-view="all">
-                      <span class="booking-ops-label">Tutte</span>
-                      <strong id="bookingAllCount">0</strong>
-                      <small>Panoramica completa sempre disponibile</small>
-                    </button>
-                  </div>
                   <div class="table-wrap">
                     <table>
-                      <thead><tr><th>Cliente</th><th>Giorno</th><th>Turno</th><th>Persone</th><th>Tavoli</th><th>Stato</th><th>Azioni</th></tr></thead>
+                      <thead><tr><th>Giorno</th><th>Cliente</th><th>Persone</th><th>Tavoli</th><th>Stato</th><th>Azioni</th></tr></thead>
                       <tbody id="reservationsTable"></tbody>
                     </table>
                   </div>
                   <div class="empty-state" id="emptyState">Nessuna prenotazione trovata.</div>
                   <div class="staff-actions bookings-export-actions">
                     <button class="primary-action" id="exportCsvButton" type="button">Scarica report</button>
+                    <div class="booking-toolbar">
+                      <div class="booking-search-panel" id="bookingSearchPanel" hidden>
+                        <label class="search-field" aria-label="Cerca prenotazioni">
+                          <span class="search-field-icon" aria-hidden="true">&#128269;</span>
+                          <input id="searchInput" type="search" placeholder="Nome, numero di cellulare, email, note..." />
+                        </label>
+                      </div>
+                      <button class="icon-button booking-search-toggle" id="bookingSearchToggle" type="button" aria-expanded="false" aria-controls="bookingSearchPanel" aria-label="Apri ricerca prenotazioni">
+                        &#128269;
+                      </button>
+                    </div>
                   </div>
                 </article>
               </div>
@@ -175,6 +153,27 @@
                 <p class="auth-status" id="communicationStatus">Pronta per un invio broadcast ai dispositivi che hanno attivato le notifiche.</p>
               </article>
             </section>
+            <section class="staff-work-area staff-area-moments" id="moments" aria-labelledby="staff-moments-title">
+              <div class="staff-area-heading">
+                <div>
+                  <span class="section-label">CSSF Moments</span>
+                  <h2 id="staff-moments-title">Foto caricate dal pubblico <span class="staff-count-badge gold" id="metricMoments">0</span></h2>
+                </div>
+              </div>
+              <article class="analytics-panel staff-moments-panel">
+                <div class="staff-moments-head">
+                  <p>Qui trovi tutte le foto inviate dal pubblico tramite la card home dedicata a CSSF Moments.</p>
+                </div>
+                <div class="admin-moments-grid" id="adminMomentsGrid"></div>
+                <div class="empty-state" id="adminEmptyMoments">Ancora nessuna foto caricata.</div>
+                <div class="staff-actions moments-footer-actions">
+                  <div class="staff-actions moments-load-more" id="momentsLoadMoreWrap">
+                    <button class="ghost-link strong" id="loadMoreMomentsButton" type="button">Mostra altre foto</button>
+                  </div>
+                  <button class="primary-action" id="downloadAllMomentsButton" type="button">Scarica tutte le foto</button>
+                </div>
+              </article>
+            </section>
             <section class="staff-votes-panel staff-work-area staff-area-votes" id="voti" aria-labelledby="staff-votes-title">
               <div class="reservations-heading">
                 <div>
@@ -185,15 +184,11 @@
               </div>
               <div class="leaderboard-tabs" id="staffVoteTabs"></div>
               <div class="staff-vote-layout">
-                <article class="leaderboard-panel compact"><div class="leaderboard-list" id="staffVoteLeaderboard"></div></article>
-                <article class="staff-vote-detail">
-                  <div class="table-wrap">
-                    <table>
-                      <thead><tr><th>Ora</th><th>Nome</th><th>Categoria</th><th>Stand</th></tr></thead>
-                      <tbody id="staffVotesTable"></tbody>
-                    </table>
+                <article class="leaderboard-panel compact">
+                  <div class="leaderboard-list" id="staffVoteLeaderboard"></div>
+                  <div class="staff-actions staff-vote-more-actions" id="staffVoteMoreWrap" hidden>
+                    <button class="ghost-link strong" id="staffVoteMoreButton" type="button">Mostra tutti</button>
                   </div>
-                  <div class="empty-state" id="emptyStaffVotes">Nessun voto registrato.</div>
                 </article>
               </div>
             </section>
@@ -231,6 +226,29 @@
                     <span class="section-label">Vincitore contest</span>
                     <strong id="prizeWinnerName">In attesa di estrazione</strong>
                     <p id="prizeWinnerMeta"></p>
+                  </div>
+                </article>
+              </div>
+              <div class="analytics-chart-grid analytics-chart-grid-simple staff-review-insights-grid">
+                <article class="analytics-panel staff-review-summary-panel">
+                  <div class="staff-review-summary-head">
+                    <div>
+                      <span class="section-label">Recensioni</span>
+                      <h3>Osservatorio feedback</h3>
+                    </div>
+                    <div class="review-summary admin-review-summary">
+                      <strong id="adminReviewAverage">--</strong>
+                      <span id="adminReviewCount">0 recensioni</span>
+                    </div>
+                  </div>
+                  <div class="reviews-insights admin-reviews-insights" id="adminReviewsInsights"></div>
+                  <div class="staff-review-feed">
+                    <div class="staff-review-feed-head">
+                      <span class="section-label">Feed recensioni</span>
+                      <h4>Ultimi feedback raccolti</h4>
+                    </div>
+                    <div class="reviews-list admin-reviews-list" id="adminReviewsList"></div>
+                    <div class="empty-state" id="adminEmptyReviews">Ancora nessuna recensione.</div>
                   </div>
                 </article>
               </div>
@@ -278,8 +296,8 @@
       </main>
       <footer class="app-footer" aria-label="Crediti"><span>&copy; 2026 Cosenza Super Street Food</span><span>Gestione staff</span></footer>
     </div>
-    <template id="reservationRowTemplate"><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></template>
+    <template id="reservationRowTemplate"><tr><td class="reservation-day-cell"></td><td class="reservation-customer-cell"></td><td class="reservation-guests-cell"></td><td class="reservation-tables-cell"></td><td class="reservation-status-cell"></td><td class="reservation-actions-cell"></td></tr></template>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260611-pwa-v171"></script>
+    <script src="app.js?v=20260615-staff-table-v172"></script>
   </body>
 </html>

@@ -10,7 +10,8 @@ const TABLE_COUNT = 10;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v171";
+const ADMIN_MOMENTS_PAGE_SIZE = 24;
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v172";
 const SERVICE_WORKER_VERSION = "20260611-pwa-v171";
 const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
 const PUSH_SUBSCRIBE_ENDPOINT = "/api/push/subscribe";
@@ -26,8 +27,11 @@ const SUPABASE_TRUCKS_TABLE = "trucks";
 const SUPABASE_VOTES_TABLE = "votes";
 const SUPABASE_REVIEWS_TABLE = "reviews";
 const SUPABASE_ANALYTICS_TABLE = "analytics_events";
+const SUPABASE_MOMENTS_TABLE = "moments";
+const SUPABASE_MOMENTS_BUCKET = "cssf-moments";
 const SUPABASE_VOTE_LEADERBOARD_VIEW = "vote_leaderboard";
 const SUPABASE_RESERVATION_SLOT_USAGE_VIEW = "reservation_slot_usage";
+const MAX_MOMENT_FILE_SIZE = 7 * 1024 * 1024;
 
 const eventStart = new Date("2026-06-26T19:00:00+02:00");
 const countdownStart = new Date("2026-05-29T00:00:00+02:00");
@@ -263,6 +267,15 @@ const categoryLabels = {
   pizza: "Pizza",
 };
 
+const truckLegendAccentColors = {
+  carne: "#e2b11f",
+  pesce: "#9a4ab7",
+  dolci: "#d83f8d",
+  frittiForno: "#2f57b8",
+  birra: "#e68a1f",
+  cocktail: "#1ca4d8",
+};
+
 const truckStatusLabels = {
   open: "Aperto",
 };
@@ -376,6 +389,21 @@ const emptyReviews = document.querySelector("#emptyReviews");
 const reviewAverage = document.querySelector("#reviewAverage");
 const reviewCount = document.querySelector("#reviewCount");
 const reviewsInsights = document.querySelector("#reviewsInsights");
+const adminReviewAverage = document.querySelector("#adminReviewAverage");
+const adminReviewCount = document.querySelector("#adminReviewCount");
+const adminReviewsInsights = document.querySelector("#adminReviewsInsights");
+const adminReviewsList = document.querySelector("#adminReviewsList");
+const adminEmptyReviews = document.querySelector("#adminEmptyReviews");
+const momentsForm = document.querySelector("#momentsForm");
+const momentImageInput = document.querySelector("#momentImage");
+const momentPreview = document.querySelector("#momentPreview");
+const momentsFormStatus = document.querySelector("#momentsFormStatus");
+const adminMomentsGrid = document.querySelector("#adminMomentsGrid");
+const adminEmptyMoments = document.querySelector("#adminEmptyMoments");
+const metricMoments = document.querySelector("#metricMoments");
+const momentsLoadMoreWrap = document.querySelector("#momentsLoadMoreWrap");
+const loadMoreMomentsButton = document.querySelector("#loadMoreMomentsButton");
+const downloadAllMomentsButton = document.querySelector("#downloadAllMomentsButton");
 const installButton = document.querySelector("#installButton");
 const installHint = document.querySelector("#installHint");
 const mobileMenuToggle = document.querySelector("#mobileMenuToggle");
@@ -401,6 +429,8 @@ const leaderboardTabs = document.querySelector("#leaderboardTabs");
 const leaderboardList = document.querySelector("#leaderboardList");
 const staffVoteTabs = document.querySelector("#staffVoteTabs");
 const staffVoteLeaderboard = document.querySelector("#staffVoteLeaderboard");
+const staffVoteMoreWrap = document.querySelector("#staffVoteMoreWrap");
+const staffVoteMoreButton = document.querySelector("#staffVoteMoreButton");
 const staffVotesTable = document.querySelector("#staffVotesTable");
 const emptyStaffVotes = document.querySelector("#emptyStaffVotes");
 const prizeEntriesTable = document.querySelector("#prizeEntriesTable");
@@ -438,6 +468,7 @@ const PAGE_ROUTES = {
   prenota: "prenota.html",
   programma: "programma.html",
   recensioni: "recensioni.html",
+  moments: "moments.html",
   partner: "partner.html",
   privacy: "privacy.html",
   gestione: "gestione.html",
@@ -451,6 +482,7 @@ const LEGACY_HASH_ROUTES = {
   "#prenota": "prenota.html",
   "#programma": "programma.html",
   "#recensioni": "recensioni.html",
+  "#moments": "moments.html",
   "#partner": "partner.html",
   "#privacy": "privacy.html",
   "#staff": "gestione.html",
@@ -459,6 +491,8 @@ const LEGACY_HASH_ROUTES = {
 
 let reservations = loadReservations();
 let reviews = loadReviews();
+let moments = loadMoments();
+let visibleMomentsCount = ADMIN_MOMENTS_PAGE_SIZE;
 let trucks = loadTrucks();
 let votes = loadVotes();
 let analyticsEvents = loadAnalyticsEvents();
@@ -467,6 +501,7 @@ let deferredInstallPrompt = null;
 let selectedTruckId = sessionStorage.getItem("cssf-selected-truck") || trucks[0]?.id || "";
 let activeLeaderboardCategory = voteCategories[0].value;
 let activeStaffVoteCategory = voteCategories[0].value;
+let showAllStaffVoteRows = false;
 let sessionId = sessionStorage.getItem("cssf-session-id") || createId("SESSION");
 let supabaseClient = createSupabaseClient();
 let reservationsRealtimeChannel = null;
@@ -474,10 +509,12 @@ let trucksRealtimeChannel = null;
 let votesRealtimeChannel = null;
 let reviewsRealtimeChannel = null;
 let analyticsRealtimeChannel = null;
+let momentsRealtimeChannel = null;
 let staffSession = null;
 let lastReservationRemoteError = "";
 let lastTruckRemoteError = "";
 let lastVoteRemoteError = "";
+let lastMomentRemoteError = "";
 let voteLeaderboardRows = [];
 let remoteVoteLeaderboardSynced = false;
 let knownRemoteReservationIds = new Set(reservations.map((reservation) => reservation.id));
@@ -517,7 +554,15 @@ bindEvent(slotGuestsInput, "input", updateSlotModalAvailability);
 bindEvent(exportCsvButton, "click", exportCsv);
 bindEvent(copyReportButton, "click", copyReport);
 bindEvent(reviewForm, "submit", handleReviewSubmit);
+bindEvent(momentsForm, "submit", handleMomentSubmit);
+bindEvent(momentImageInput, "change", handleMomentImagePreview);
+bindEvent(loadMoreMomentsButton, "click", handleLoadMoreMoments);
+bindEvent(downloadAllMomentsButton, "click", handleDownloadAllMoments);
 bindEvent(installButton, "click", handleInstallClick);
+bindEvent(staffVoteMoreButton, "click", () => {
+  showAllStaffVoteRows = true;
+  renderStaffVotes();
+});
 bindEvent(truckSearchInput, "input", renderFestival);
 bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
@@ -573,6 +618,7 @@ setupSupabaseTrucks();
 setupSupabaseVotes();
 setupSupabaseReviews();
 setupSupabaseAnalytics();
+setupSupabaseMoments();
 
 function bindEvent(element, eventName, handler) {
   element?.addEventListener(eventName, handler);
@@ -582,6 +628,7 @@ function handlePageShow(event) {
   normalizeTruckFilters();
   render();
   renderReviews();
+  renderMomentsAdmin();
   setupReviewRating();
   syncMobileMenuState(false);
   closeMapImageModal();
@@ -605,6 +652,7 @@ function handlePageShow(event) {
       refreshReservationsFromRemote();
       refreshVotesFromRemote();
       refreshAnalyticsFromRemote();
+      refreshMomentsFromRemote();
     }
   }
 }
@@ -787,6 +835,146 @@ async function handleReviewSubmit(event) {
   showToast("Recensione pubblicata.");
 }
 
+function handleMomentImagePreview() {
+  const file = momentImageInput?.files?.[0] || null;
+  updateMomentPreview(file);
+}
+
+async function handleMomentSubmit(event) {
+  event.preventDefault();
+  if (!momentsForm) return;
+
+  const formData = new FormData(momentsForm);
+  const uploaderName = cleanText(formData.get("uploaderName"));
+  const caption = cleanText(formData.get("caption"));
+  const file = momentImageInput?.files?.[0] || null;
+
+  if (!uploaderName || uploaderName.length < 2) {
+    showToast("Inserisci il tuo nome.");
+    setMomentsFormStatus("Inserisci un nome valido prima dell'invio.");
+    return;
+  }
+
+  if (!file) {
+    showToast("Seleziona una foto da caricare.");
+    setMomentsFormStatus("Seleziona una foto JPG, PNG o WEBP.");
+    return;
+  }
+
+  if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+    showToast("Formato non supportato.");
+    setMomentsFormStatus("Usa solo file JPG, PNG o WEBP.");
+    return;
+  }
+
+  if (file.size > MAX_MOMENT_FILE_SIZE) {
+    showToast("La foto supera il limite di 7 MB.");
+    setMomentsFormStatus("Riduci il file sotto i 7 MB e riprova.");
+    return;
+  }
+
+  const momentId = createId("MOM");
+  setMomentsFormStatus("Upload in corso...");
+
+  const uploadedAsset = await uploadMomentAsset(momentId, file);
+  if (!uploadedAsset) {
+    showToast(`Foto non inviata: ${lastMomentRemoteError || "upload non riuscito"}.`);
+    setMomentsFormStatus(lastMomentRemoteError || "Upload non riuscito.");
+    return;
+  }
+
+  const moment = {
+    id: momentId,
+    createdAt: new Date().toISOString(),
+    uploaderName,
+    caption,
+    imagePath: uploadedAsset.path,
+    imageUrl: uploadedAsset.publicUrl,
+    status: "pending",
+  };
+
+  const remoteSaved = await saveMomentRemote(moment);
+  if (!remoteSaved) {
+    await removeMomentAsset(uploadedAsset.path);
+    showToast(`Foto non inviata: ${lastMomentRemoteError || "database non raggiungibile"}.`);
+    setMomentsFormStatus(lastMomentRemoteError || "Database non raggiungibile.");
+    return;
+  }
+
+  momentsForm.reset();
+  updateMomentPreview(null);
+  setMomentsFormStatus("Foto inviata correttamente allo staff CSSF Moments.");
+  trackEvent("conversion", "moments foto caricata", { section: "moments" });
+  showToast("Foto caricata.");
+}
+
+async function handleDownloadAllMoments() {
+  if (!moments.length) {
+    showToast("Non ci sono foto da scaricare.");
+    return;
+  }
+
+  if (downloadAllMomentsButton) {
+    downloadAllMomentsButton.disabled = true;
+    downloadAllMomentsButton.textContent = "Download in corso...";
+  }
+
+  let downloaded = 0;
+
+  for (const moment of moments) {
+    try {
+      const response = await fetch(moment.imageUrl, { mode: "cors" });
+      if (!response.ok) continue;
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const extension = getMomentDownloadExtension(moment.imageUrl, blob.type);
+
+      link.href = objectUrl;
+      link.download = `${moment.id || `cssf-moment-${downloaded + 1}`}.${extension}`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+      downloaded += 1;
+      await wait(180);
+    } catch {
+    }
+  }
+
+  if (downloadAllMomentsButton) {
+    downloadAllMomentsButton.disabled = false;
+    downloadAllMomentsButton.textContent = "Scarica tutte le foto";
+  }
+
+  showToast(
+    downloaded
+      ? `${downloaded} ${downloaded === 1 ? "foto scaricata" : "foto scaricate"}.`
+      : "Download non riuscito.",
+  );
+}
+
+async function handleDeleteMoment(moment) {
+  if (!moment?.id) return;
+
+  const confirmed = window.confirm("Vuoi eliminare questa foto?");
+  if (!confirmed) return;
+
+  const deleted = await deleteMomentRemote(moment);
+  if (!deleted) {
+    showToast(`Eliminazione non riuscita: ${lastMomentRemoteError || "riprova"}.`);
+    return;
+  }
+
+  moments = moments.filter((item) => item.id !== moment.id);
+  if (!moments.length) {
+    visibleMomentsCount = ADMIN_MOMENTS_PAGE_SIZE;
+  }
+  renderMomentsAdmin();
+  showToast("Foto eliminata.");
+}
+
 async function handleVoteSubmit(event) {
   event.preventDefault();
 
@@ -922,6 +1110,7 @@ function render() {
   renderStaffVotes();
   renderPrizeEntries();
   renderAnalyticsDashboard();
+  renderMomentsAdmin();
   updateAvailabilityReadout();
 }
 
@@ -982,6 +1171,17 @@ async function setupSupabaseAnalytics() {
 
   await refreshAnalyticsFromRemote();
   subscribeToAnalyticsChanges();
+}
+
+async function setupSupabaseMoments() {
+  if (!supabaseClient) return;
+  if (!momentsForm && !adminMomentsGrid) return;
+
+  if (adminMomentsGrid) {
+    if (!staffSession) return;
+    await refreshMomentsFromRemote();
+    subscribeToMomentChanges();
+  }
 }
 
 async function refreshReservationsFromRemote() {
@@ -1119,6 +1319,7 @@ async function refreshVotesFromRemote() {
     if (error || !Array.isArray(data)) return false;
 
     votes = data.map(mapVoteFromRemote);
+    showAllStaffVoteRows = false;
     voteLeaderboardRows = getLeaderboardFromVotes();
     remoteVoteLeaderboardSynced = true;
     saveVotes();
@@ -1225,6 +1426,38 @@ function subscribeToAnalyticsChanges() {
     .subscribe();
 }
 
+async function refreshMomentsFromRemote() {
+  if (!supabaseClient || !staffSession) return false;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_MOMENTS_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !Array.isArray(data)) return false;
+
+    moments = data.map(mapMomentFromRemote);
+    visibleMomentsCount = ADMIN_MOMENTS_PAGE_SIZE;
+    saveMoments();
+    renderMomentsAdmin();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function subscribeToMomentChanges() {
+  if (!supabaseClient || momentsRealtimeChannel || !staffSession) return;
+
+  momentsRealtimeChannel = supabaseClient
+    .channel("cssf-moments-realtime")
+    .on("postgres_changes", { event: "*", schema: "public", table: SUPABASE_MOMENTS_TABLE }, () =>
+      refreshMomentsFromRemote(),
+    )
+    .subscribe();
+}
+
 async function initializeStaffAuth() {
   if (!isStaffPage()) {
     renderAdminAccess();
@@ -1251,9 +1484,11 @@ async function initializeStaffAuth() {
       refreshReservationsFromRemote();
       refreshVotesFromRemote();
       refreshAnalyticsFromRemote();
+      refreshMomentsFromRemote();
       subscribeToReservationChanges();
       subscribeToVoteChanges();
       subscribeToAnalyticsChanges();
+      subscribeToMomentChanges();
     }
   });
 
@@ -1262,9 +1497,11 @@ async function initializeStaffAuth() {
     await refreshReservationsFromRemote();
     await refreshVotesFromRemote();
     await refreshAnalyticsFromRemote();
+    await refreshMomentsFromRemote();
     subscribeToReservationChanges();
     subscribeToVoteChanges();
     subscribeToAnalyticsChanges();
+    subscribeToMomentChanges();
   }
 }
 
@@ -1691,10 +1928,12 @@ function renderSelectedTruck() {
   const truck = trucks.find((item) => item.id === selectedTruckId);
 
   if (!truck) {
+    selectedTruckCard.style.removeProperty("--truck-accent");
     selectedTruckCard.innerHTML = "<p class=\"truck-menu\">Nessuno stand selezionato.</p>";
     return;
   }
 
+  selectedTruckCard.style.setProperty("--truck-accent", getTruckLegendAccentColor(truck));
   selectedTruckCard.innerHTML = createTruckCardMarkup(truck, true);
   selectedTruckCard.querySelector("[data-vote-truck]")?.addEventListener("click", () => {
     sessionStorage.setItem("cssf-selected-truck", truck.id);
@@ -1711,6 +1950,7 @@ function renderTruckGrid(filtered) {
   filtered.forEach((truck) => {
     const card = document.createElement("article");
     card.className = "truck-card";
+    card.style.setProperty("--truck-accent", getTruckLegendAccentColor(truck));
     card.innerHTML = createTruckCardMarkup(truck, false);
     card.querySelector("[data-map-truck]")?.addEventListener("click", () => {
       selectedTruckId = truck.id;
@@ -1731,6 +1971,7 @@ function createTruckCardMarkup(truck, selected) {
   const mapButton = selected
     ? ""
     : `<button class="small-button" type="button" data-map-truck="${escapeHtml(truck.id)}">Mappa</button>`;
+  const menuMarkup = formatTruckMenuAsList(truck.menu);
 
   return `
     <div class="truck-meta">
@@ -1738,7 +1979,7 @@ function createTruckCardMarkup(truck, selected) {
       <span>${escapeHtml(truck.zone)}</span>
     </div>
     <h3>${escapeHtml(truck.name)}</h3>
-    <p class="truck-menu">${escapeHtml(truck.menu)}</p>
+    <div class="truck-menu">${menuMarkup}</div>
     <div class="truck-meta">
       <span class="status-live ${escapeHtml(truck.status)}">${escapeHtml(truckStatusLabels[truck.status] || truck.status)}</span>
     </div>
@@ -1747,6 +1988,61 @@ function createTruckCardMarkup(truck, selected) {
       ${mapButton}
     </div>
   `;
+}
+
+function formatTruckMenuAsList(menu) {
+  const normalized = String(menu || "").trim();
+  if (!normalized) return "";
+
+  const items = normalized
+    .split(/\s*,\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (!items.length) {
+    return `<ul class="truck-menu-list"><li>${escapeHtml(normalized)}</li></ul>`;
+  }
+
+  return `
+    <ul class="truck-menu-list">
+      ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function getTruckLegendAccentColor(truck) {
+  const category = String(truck?.category || "").toLowerCase();
+  const searchable = `${truck?.name || ""} ${truck?.menu || ""}`.toLowerCase();
+
+  if (category === "cocktail" || searchable.includes("cocktail")) {
+    return truckLegendAccentColors.cocktail;
+  }
+
+  if (category === "birra" || searchable.includes("birra")) {
+    return truckLegendAccentColors.birra;
+  }
+
+  if (category === "dolci" || hasOneOf(searchable, ["gelat", "dolc", "churros", "pangocciol", "monoporzione"])) {
+    return truckLegendAccentColors.dolci;
+  }
+
+  if (category === "pesce" || hasOneOf(searchable, ["pesce", "calamari", "polp", "mare", "frittura"])) {
+    return truckLegendAccentColors.pesce;
+  }
+
+  if (["forno", "fritti", "pizza"].includes(category) || hasOneOf(searchable, ["fritt", "forno", "pizza", "focaccia", "arancin", "corn dog", "panzerott"])) {
+    return truckLegendAccentColors.frittiForno;
+  }
+
+  if (["carne", "bbq", "brace"].includes(category) || hasOneOf(searchable, ["carne", "hamburger", "asado", "pulled", "brisket", "salsiccia", "costolette", "alette", "arrosticini", "pecora", "bistecca"])) {
+    return truckLegendAccentColors.carne;
+  }
+
+  return truckLegendAccentColors.carne;
+}
+
+function hasOneOf(value, fragments) {
+  return fragments.some((fragment) => value.includes(fragment));
 }
 
 function renderVoteOptions() {
@@ -1786,18 +2082,7 @@ function renderStaffVoteTabs() {
   if (!staffVoteTabs) return;
 
   staffVoteTabs.innerHTML = "";
-  voteCategories.forEach((category) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "leaderboard-tab";
-    button.textContent = category.label;
-    button.dataset.category = category.value;
-    button.addEventListener("click", () => {
-      activeStaffVoteCategory = category.value;
-      renderStaffVotes();
-    });
-    staffVoteTabs.append(button);
-  });
+  staffVoteTabs.hidden = true;
 }
 
 function renderLeaderboard() {
@@ -1831,48 +2116,58 @@ function renderLeaderboard() {
 }
 
 function renderStaffVotes() {
-  if (!staffVoteTabs || !staffVoteLeaderboard || !staffVotesTable || !emptyStaffVotes) return;
-
-  staffVoteTabs.querySelectorAll(".leaderboard-tab").forEach((button) => {
-    button.classList.toggle("active", button.dataset.category === activeStaffVoteCategory);
-  });
-
-  const rows = getLeaderboard(activeStaffVoteCategory);
+  if (!staffVoteTabs || !staffVoteLeaderboard) return;
   staffVoteLeaderboard.innerHTML = "";
+  const rows = trucks
+    .map((truck) => {
+      const counts = Object.fromEntries(
+        voteCategories.map((category) => [
+          category.value,
+          votes.filter((vote) => vote.truckId === truck.id && vote.category === category.value).length,
+        ]),
+      );
+      const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
 
-  if (!rows.length) {
-    staffVoteLeaderboard.innerHTML = "<div class=\"empty-state visible\">Nessun voto in questa categoria.</div>";
-  } else {
-    rows.forEach((row, index) => {
-      const item = document.createElement("div");
-      item.className = "leaderboard-row";
-      item.innerHTML = `
-        <div class="leaderboard-rank">${index + 1}</div>
-        <div>
-          <strong>${escapeHtml(row.truck.name)}</strong>
-          <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)}</span>
+      return { truck, counts, total };
+    })
+    .sort((a, b) => b.total - a.total || a.truck.name.localeCompare(b.truck.name));
+  const visibleRows = showAllStaffVoteRows ? rows : rows.slice(0, 3);
+
+  const overview = document.createElement("div");
+  overview.className = "staff-vote-summary-card";
+
+  visibleRows.forEach((row, index) => {
+    const item = document.createElement("div");
+    item.className = "staff-vote-summary-row";
+    item.innerHTML = `
+      <div class="leaderboard-rank">${index + 1}</div>
+      <div class="staff-vote-summary-main">
+        <strong>${escapeHtml(row.truck.name)}</strong>
+        <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)}</span>
+      </div>
+      <div class="staff-vote-summary-breakdown">
+        <div class="staff-vote-pill">
+          <span>Street Chef</span>
+          <strong>${row.counts["best-street-chef"]}</strong>
         </div>
-        <div class="vote-count">${row.count} voti</div>
-      `;
-      staffVoteLeaderboard.append(item);
-    });
-  }
-
-  const filteredVotes = votes.filter((vote) => vote.category === activeStaffVoteCategory);
-  staffVotesTable.innerHTML = "";
-  emptyStaffVotes.classList.toggle("visible", filteredVotes.length === 0);
-
-  filteredVotes.forEach((vote) => {
-    const truck = trucks.find((item) => item.id === vote.truckId);
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td data-label="Ora">${escapeHtml(formatDateTime(vote.createdAt))}</td>
-      <td data-label="Nome"><strong>${escapeHtml(vote.voter || "Anonimo")}</strong></td>
-      <td data-label="Categoria">${escapeHtml(getVoteCategoryLabel(vote.category))}</td>
-      <td data-label="Stand">${escapeHtml(truck ? `${truck.code} - ${truck.name}` : vote.truckId)}</td>
+        <div class="staff-vote-pill">
+          <span>Cortesia</span>
+          <strong>${row.counts["courtesy-award"]}</strong>
+        </div>
+        <div class="staff-vote-pill">
+          <span>Tradizione</span>
+          <strong>${row.counts["tradition-award"]}</strong>
+        </div>
+      </div>
+      <div class="vote-count">${row.total} voti</div>
     `;
-    staffVotesTable.append(row);
+    overview.append(item);
   });
+
+  staffVoteLeaderboard.append(overview);
+  if (staffVoteMoreWrap) {
+    staffVoteMoreWrap.hidden = rows.length <= 3 || showAllStaffVoteRows;
+  }
 }
 
 function renderPrizeEntries() {
@@ -2042,12 +2337,8 @@ function renderTruckAdminTable() {
 }
 
 function getFilteredTrucks() {
-  if (!truckSearchInput || !categoryFilter) {
-    return trucks;
-  }
-
-  const query = truckSearchInput.value.trim().toLowerCase();
-  const category = categoryFilter.value;
+  const query = truckSearchInput ? truckSearchInput.value.trim().toLowerCase() : "";
+  const category = categoryFilter ? categoryFilter.value : "all";
 
   return trucks.filter((truck) => {
     const haystack = [truck.name, truck.code, truck.category, truck.zone, truck.menu]
@@ -2175,9 +2466,11 @@ async function handleAdminLogin(event) {
   await refreshReservationsFromRemote();
   await refreshVotesFromRemote();
   await refreshAnalyticsFromRemote();
+  await refreshMomentsFromRemote();
   subscribeToReservationChanges();
   subscribeToVoteChanges();
   subscribeToAnalyticsChanges();
+  subscribeToMomentChanges();
   showToast("Accesso staff effettuato.");
 }
 
@@ -2188,6 +2481,9 @@ async function handleAdminLogout() {
 
   staffSession = null;
   refreshVoteLeaderboardFromRemote();
+  moments = [];
+  visibleMomentsCount = ADMIN_MOMENTS_PAGE_SIZE;
+  renderMomentsAdmin();
   renderAdminAccess();
   showToast("Sessione admin chiusa.");
 }
@@ -3198,7 +3494,7 @@ function handleSlotQuickSubmit(event) {
 }
 
 function renderReservations() {
-  if (!reservationsTable || !emptyState || !rowTemplate) return;
+  if (!reservationsTable || !emptyState) return;
 
   const filtered = getFilteredReservations();
   reservationsTable.innerHTML = "";
@@ -3206,12 +3502,23 @@ function renderReservations() {
   updateBookingQuickViewSummary();
 
   filtered.forEach((reservation) => {
-    const row = rowTemplate.content.firstElementChild.cloneNode(true);
+    const row = document.createElement("tr");
     row.dataset.status = reservation.status;
     row.dataset.priority = getReservationPriority(reservation);
-    const cells = row.querySelectorAll("td");
+    const dayCell = document.createElement("td");
+    const customerCell = document.createElement("td");
+    const guestsCell = document.createElement("td");
+    const tablesCell = document.createElement("td");
+    const statusCell = document.createElement("td");
+    const actionsCell = document.createElement("td");
+
+    dayCell.className = "reservation-day-cell";
+    customerCell.className = "reservation-customer-cell";
+    guestsCell.className = "reservation-guests-cell";
+    tablesCell.className = "reservation-tables-cell";
+    statusCell.className = "reservation-status-cell";
+    actionsCell.className = "reservation-actions-cell";
     const infoTags = [
-      reservation.tables ? `Tavoli: ${reservation.tables}` : "",
       reservation.area ? `Area: ${reservation.area}` : "",
       reservation.arrival ? `Arrivo: ${reservation.arrival}` : "",
     ]
@@ -3222,21 +3529,25 @@ function renderReservations() {
         ? `<span class="note-line">${escapeHtml(reservation.notes)}</span>`
         : "";
 
-      cells[0].innerHTML = `
+    dayCell.innerHTML = `<div class="day-cell">${escapeHtml(formatReservationDayShort(reservation.day))}</div>`;
+    customerCell.innerHTML = `
         <div class="customer-cell">
-          <strong>${escapeHtml(reservation.name)}</strong>
-          <span>${escapeHtml(reservation.phone || "-")}</span>
-          ${reservation.email ? `<span>${escapeHtml(reservation.email)}</span>` : ""}
+          <div class="customer-inline-row">
+            <strong>${escapeHtml(reservation.name)}</strong>
+            <span class="customer-inline-meta">
+              / ${escapeHtml(reservation.phone || "-")}
+              ${reservation.email ? ` / ${escapeHtml(reservation.email)}` : ""}
+            </span>
+          </div>
           ${infoTags ? `<div class="customer-tags">${infoTags}</div>` : ""}
           ${noteMarkup}
         </div>
       `;
-    cells[1].textContent = getDayLabel(reservation.day, true);
-    cells[2].textContent = reservation.slot;
-    cells[3].textContent = String(reservation.guests);
-    cells[4].textContent = reservation.tables;
-    cells[5].append(createStatusSelect(reservation));
-    cells[6].append(createActions(reservation));
+    guestsCell.textContent = String(reservation.guests);
+    tablesCell.textContent = formatReservationTablesShort(reservation.tables);
+    statusCell.append(createStatusSelect(reservation));
+    actionsCell.append(createActions(reservation));
+    row.append(dayCell, customerCell, guestsCell, tablesCell, statusCell, actionsCell);
 
     reservationsTable.append(row);
   });
@@ -3289,6 +3600,11 @@ function handleBookingQuickViewClick(event) {
   applyBookingQuickView(button.dataset.bookingView || "all");
 }
 
+function handleLoadMoreMoments() {
+  visibleMomentsCount += ADMIN_MOMENTS_PAGE_SIZE;
+  renderMomentsAdmin();
+}
+
 function toggleBookingSearchPanel() {
   if (!bookingSearchPanel || !bookingSearchToggle) return;
   const shouldOpen = bookingSearchPanel.hidden;
@@ -3320,43 +3636,61 @@ function updateBookingQuickViewSummary() {
 }
 
 function renderReviews() {
-  if (!reviewsList || !emptyReviews || !reviewAverage || !reviewCount) return;
+  renderReviewSummaryPanels();
+  renderReviewFeed(reviewsList, emptyReviews);
+  renderReviewFeed(adminReviewsList, adminEmptyReviews, true);
+}
 
-  reviewsList.innerHTML = "";
-  emptyReviews.classList.toggle("visible", reviews.length === 0);
-  reviewAverage.textContent = reviews.length ? getAverageRating().toFixed(1) : "--";
-  reviewCount.textContent = `${reviews.length} ${reviews.length === 1 ? "recensione" : "recensioni"}`;
-  renderReviewInsights();
+function renderMomentsAdmin() {
+  if (!adminMomentsGrid || !adminEmptyMoments) return;
 
-  reviews.forEach((review) => {
-    const stars = Array.from({ length: 5 }, (_, index) =>
-      `<span class="${index < review.rating ? "is-filled" : ""}">&#9733;</span>`
-    ).join("");
-    const tags = [
-      getReviewLabel("ageRange", review.ageRange),
-      getReviewLabel("gender", review.gender),
-      getReviewLabel("originArea", review.originArea),
-      review.favoriteAspect ? `Top: ${getReviewLabel("favoriteAspect", review.favoriteAspect)}` : "",
-      review.improvementArea ? `Migliorare: ${getReviewLabel("improvementArea", review.improvementArea)}` : "",
-    ].filter(Boolean);
+  adminMomentsGrid.innerHTML = "";
+  adminEmptyMoments.classList.toggle("visible", moments.length === 0);
+  const visibleMoments = moments.slice(0, visibleMomentsCount);
+  const hasMoreMoments = moments.length > visibleMoments.length;
+  if (metricMoments) {
+    metricMoments.textContent = String(moments.length);
+  }
+  if (downloadAllMomentsButton) {
+    downloadAllMomentsButton.disabled = moments.length === 0;
+  }
+  if (momentsLoadMoreWrap) {
+    momentsLoadMoreWrap.hidden = !hasMoreMoments;
+  }
+
+  visibleMoments.forEach((moment) => {
     const card = document.createElement("article");
-    card.className = "review-card";
+    card.className = "moment-card";
     card.innerHTML = `
-      <header>
-        <div>
-          <strong>${escapeHtml(review.title)}</strong>
-          <div class="review-meta">${formatDate(review.createdAt)}</div>
+      <div class="moment-card-image-wrap">
+        <button class="moment-card-delete" type="button" aria-label="Elimina foto" data-delete-moment="${escapeHtml(moment.id)}">x</button>
+        <img src="${escapeHtml(moment.imageUrl)}" alt="Foto caricata da ${escapeHtml(moment.uploaderName)}" loading="lazy" />
+      </div>
+      <div class="moment-card-actions">
+        <div class="moment-card-meta">
+          <a href="${escapeHtml(moment.imageUrl)}" target="_blank" rel="noreferrer">Apri foto</a>
+          <a href="${escapeHtml(moment.imageUrl)}" download rel="noreferrer">Scarica foto</a>
         </div>
-        <div class="review-card-rating">
-          <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
-          <div class="review-rating-chip">${review.rating}/5</div>
-        </div>
-      </header>
-      ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
-      <p>${escapeHtml(review.body)}</p>
+      </div>
     `;
-    reviewsList.append(card);
+    card.querySelector("[data-delete-moment]")?.addEventListener("click", () => {
+      handleDeleteMoment(moment);
+    });
+    adminMomentsGrid.append(card);
   });
+}
+
+function renderReviewSummaryPanels() {
+  const averageText = reviews.length ? getAverageRating().toFixed(1) : "--";
+  const countText = `${reviews.length} ${reviews.length === 1 ? "recensione" : "recensioni"}`;
+
+  if (reviewAverage) reviewAverage.textContent = averageText;
+  if (reviewCount) reviewCount.textContent = countText;
+  if (adminReviewAverage) adminReviewAverage.textContent = averageText;
+  if (adminReviewCount) adminReviewCount.textContent = countText;
+
+  renderReviewInsights(reviewsInsights);
+  renderReviewInsights(adminReviewsInsights);
 }
 
 function setupReviewRating() {
@@ -3410,11 +3744,11 @@ function setupReviewRating() {
   applyRatingState(checkedValue);
 }
 
-function renderReviewInsights() {
-  if (!reviewsInsights) return;
+function renderReviewInsights(container) {
+  if (!container) return;
 
   if (!reviews.length) {
-    reviewsInsights.innerHTML = "";
+    container.innerHTML = "";
     return;
   }
 
@@ -3423,7 +3757,7 @@ function renderReviewInsights() {
   const topAge = getTopReviewStat("ageRange");
   const topOrigin = getTopReviewStat("originArea");
 
-  reviewsInsights.innerHTML = `
+  container.innerHTML = `
     <div class="review-insight-card main">
       <span>Media stelle</span>
       <strong>${getAverageRating().toFixed(1)}</strong>
@@ -3450,6 +3784,43 @@ function renderReviewInsights() {
       <small>${topOrigin ? `${topOrigin.count} risposte` : "Ancora pochi dati"}</small>
     </div>
   `;
+}
+
+function renderReviewFeed(container, emptyState, isCompact = false) {
+  if (!container || !emptyState) return;
+
+  container.innerHTML = "";
+  emptyState.classList.toggle("visible", reviews.length === 0);
+
+  reviews.forEach((review) => {
+    const stars = Array.from({ length: 5 }, (_, index) =>
+      `<span class="${index < review.rating ? "is-filled" : ""}">&#9733;</span>`
+    ).join("");
+    const tags = [
+      getReviewLabel("ageRange", review.ageRange),
+      getReviewLabel("gender", review.gender),
+      getReviewLabel("originArea", review.originArea),
+      review.favoriteAspect ? `Top: ${getReviewLabel("favoriteAspect", review.favoriteAspect)}` : "",
+      review.improvementArea ? `Migliorare: ${getReviewLabel("improvementArea", review.improvementArea)}` : "",
+    ].filter(Boolean);
+    const card = document.createElement("article");
+    card.className = `review-card${isCompact ? " review-card-compact" : ""}`;
+    card.innerHTML = `
+      <header>
+        <div>
+          <strong>${escapeHtml(review.title)}</strong>
+          <div class="review-meta">${formatDate(review.createdAt)}</div>
+        </div>
+        <div class="review-card-rating">
+          <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
+          <div class="review-rating-chip">${review.rating}/5</div>
+        </div>
+      </header>
+      ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+      <p>${escapeHtml(review.body)}</p>
+    `;
+    container.append(card);
+  });
 }
 
 function createStatusSelect(reservation) {
@@ -3970,6 +4341,13 @@ function loadReviews() {
 function saveReviews() {
 }
 
+function loadMoments() {
+  return [];
+}
+
+function saveMoments() {
+}
+
 async function saveReviewRemote(review) {
   if (!supabaseClient) return false;
 
@@ -4012,6 +4390,120 @@ function mapReviewFromRemote(row) {
     wouldReturn: row.would_return || row.wouldReturn || "",
     title: row.title || "",
     body: row.body || "",
+  };
+}
+
+async function uploadMomentAsset(momentId, file) {
+  lastMomentRemoteError = "";
+
+  if (!supabaseClient?.storage) {
+    lastMomentRemoteError = "Storage Supabase non disponibile.";
+    return null;
+  }
+
+  const extension = getFileExtension(file);
+  const path = `public/${momentId}.${extension}`;
+
+  try {
+    const { error } = await supabaseClient.storage
+      .from(SUPABASE_MOMENTS_BUCKET)
+      .upload(path, file, {
+        upsert: false,
+        contentType: file.type,
+        cacheControl: "3600",
+      });
+
+    if (error) {
+      lastMomentRemoteError = error.message || "Upload immagine rifiutato.";
+      return null;
+    }
+
+    const { data } = supabaseClient.storage.from(SUPABASE_MOMENTS_BUCKET).getPublicUrl(path);
+    return {
+      path,
+      publicUrl: data?.publicUrl || "",
+    };
+  } catch (error) {
+    lastMomentRemoteError = error?.message || "Upload immagine non riuscito.";
+    return null;
+  }
+}
+
+async function removeMomentAsset(path) {
+  if (!supabaseClient?.storage || !path) return;
+
+  try {
+    await supabaseClient.storage.from(SUPABASE_MOMENTS_BUCKET).remove([path]);
+  } catch {
+  }
+}
+
+async function deleteMomentRemote(moment) {
+  lastMomentRemoteError = "";
+
+  if (!supabaseClient) {
+    lastMomentRemoteError = "Client Supabase non caricato.";
+    return false;
+  }
+
+  try {
+    const { error } = await supabaseClient.from(SUPABASE_MOMENTS_TABLE).delete().eq("id", moment.id);
+    if (error) {
+      lastMomentRemoteError = error.message || "Cancellazione foto rifiutata.";
+      return false;
+    }
+
+    await removeMomentAsset(moment.imagePath);
+    return true;
+  } catch (error) {
+    lastMomentRemoteError = error?.message || "Supabase non raggiungibile.";
+    return false;
+  }
+}
+
+async function saveMomentRemote(moment) {
+  lastMomentRemoteError = "";
+
+  if (!supabaseClient) {
+    lastMomentRemoteError = "Client Supabase non caricato.";
+    return false;
+  }
+
+  try {
+    const { error } = await supabaseClient.from(SUPABASE_MOMENTS_TABLE).insert(mapMomentToRemote(moment));
+    if (error) {
+      lastMomentRemoteError = error.message || "Salvataggio Moments rifiutato.";
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    lastMomentRemoteError = error?.message || "Supabase non raggiungibile.";
+    return false;
+  }
+}
+
+function mapMomentToRemote(moment) {
+  return {
+    id: moment.id,
+    created_at: moment.createdAt,
+    uploader_name: moment.uploaderName,
+    caption: moment.caption || null,
+    image_path: moment.imagePath,
+    image_url: moment.imageUrl,
+    status: moment.status || "pending",
+  };
+}
+
+function mapMomentFromRemote(row) {
+  return {
+    id: row.id,
+    createdAt: row.created_at || new Date().toISOString(),
+    uploaderName: row.uploader_name || row.uploaderName || "Ospite",
+    caption: row.caption || "",
+    imagePath: row.image_path || row.imagePath || "",
+    imageUrl: row.image_url || row.imageUrl || "",
+    status: row.status || "pending",
   };
 }
 
@@ -4318,6 +4810,22 @@ function getDayLabel(value, long = false) {
   return day ? (long ? day.longLabel : day.label) : value;
 }
 
+function formatReservationDayShort(value) {
+  if (!value) return "-";
+  const [year, month, day] = String(value).split("-");
+  if (!year || !month || !day) return value;
+  return `${day}/${month}`;
+}
+
+function formatReservationTablesShort(value) {
+  const normalized = cleanText(value);
+  if (!normalized) return "-";
+
+  return normalized
+    .replace(/^(\d+)\s+tavol[oi]\s+da\s+/i, "$1 da ")
+    .replace(/^(\d+)\s+tav\.\s+da\s+/i, "$1 da ");
+}
+
 function normalizePhone(phone) {
   const digits = String(phone || "").replace(/\D/g, "");
   if (digits.startsWith("39")) return digits;
@@ -4335,9 +4843,69 @@ function createReviewTitle(body) {
   return `${normalized.slice(0, 69).trimEnd()}...`;
 }
 
+function getFileExtension(file) {
+  const nameExtension = String(file?.name || "").split(".").pop()?.toLowerCase();
+  if (nameExtension && ["jpg", "jpeg", "png", "webp"].includes(nameExtension)) {
+    return nameExtension;
+  }
+
+  if (file?.type === "image/png") return "png";
+  if (file?.type === "image/webp") return "webp";
+  return "jpg";
+}
+
+function getMomentDownloadExtension(url, mimeType = "") {
+  const cleanUrl = String(url || "").split("?")[0];
+  const urlExtension = cleanUrl.split(".").pop()?.toLowerCase();
+  if (urlExtension && ["jpg", "jpeg", "png", "webp"].includes(urlExtension)) {
+    return urlExtension;
+  }
+
+  if (mimeType === "image/png") return "png";
+  if (mimeType === "image/webp") return "webp";
+  return "jpg";
+}
+
+function updateMomentPreview(file) {
+  if (!momentPreview) return;
+
+  const previousUrl = momentPreview.dataset.objectUrl;
+  if (previousUrl) {
+    URL.revokeObjectURL(previousUrl);
+    delete momentPreview.dataset.objectUrl;
+  }
+
+  if (!file) {
+    momentPreview.innerHTML = "<p>Seleziona una foto per vedere qui l'anteprima prima dell'invio.</p>";
+    return;
+  }
+
+  const objectUrl = URL.createObjectURL(file);
+  momentPreview.dataset.objectUrl = objectUrl;
+  momentPreview.innerHTML = `<img src="${objectUrl}" alt="Anteprima foto selezionata" />`;
+}
+
+function setMomentsFormStatus(message) {
+  if (momentsFormStatus) {
+    momentsFormStatus.textContent = message;
+  }
+}
+
+function getMomentStatusLabel(status) {
+  return {
+    pending: "Da verificare",
+    approved: "Approvata",
+    rejected: "Scartata",
+  }[status] || "Da verificare";
+}
+
 function clampNumber(value, min, max) {
   if (Number.isNaN(value)) return min;
   return Math.min(max, Math.max(min, value));
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 function toCsvCell(value) {
