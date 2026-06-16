@@ -2869,6 +2869,7 @@ function renderDurationTrendChart(rows) {
     .slice(-8);
 
   if (!chartRows.length) {
+    element.classList.remove("single-point");
     element.innerHTML = `<div class="empty-state visible">Permanenza non ancora misurabile.</div>`;
     return;
   }
@@ -2881,9 +2882,10 @@ function renderDurationTrendChart(rows) {
   const chartBottom = 290;
   const peakRow = chartRows.reduce((best, row) => (row.durationMs > best.durationMs ? row : best), chartRows[0]);
   const max = Math.max(...chartRows.map((row) => row.durationMs), 1);
+  const isSinglePoint = chartRows.length === 1;
   const points = chartRows.map((row, index) => {
     const x =
-      chartRows.length === 1
+      isSinglePoint
         ? (plotLeft + plotRight) / 2
         : plotLeft + (index / (chartRows.length - 1)) * (plotRight - plotLeft);
     const y = chartBottom - (row.durationMs / max) * (chartBottom - chartTop);
@@ -2895,7 +2897,14 @@ function renderDurationTrendChart(rows) {
     return { value, y, label: formatDuration(value) };
   });
   const pointList = points.map((point) => `${point.x},${point.y}`).join(" ");
-  const areaList = `${plotLeft},${chartBottom} ${pointList} ${plotRight},${chartBottom}`;
+  const areaList = isSinglePoint
+    ? `${plotLeft},${chartBottom} ${plotLeft},${points[0].y} ${plotRight},${points[0].y} ${plotRight},${chartBottom}`
+    : `${plotLeft},${chartBottom} ${pointList} ${plotRight},${chartBottom}`;
+  const lineMarkup = isSinglePoint
+    ? `<line x1="${plotLeft}" y1="${points[0].y}" x2="${plotRight}" y2="${points[0].y}" class="line-chart-line"></line>`
+    : `<polyline points="${pointList}" class="line-chart-line"></polyline>`;
+
+  element.classList.toggle("single-point", isSinglePoint);
 
   element.innerHTML = `
     <div class="line-chart-summary">
@@ -2912,7 +2921,7 @@ function renderDurationTrendChart(rows) {
           )
           .join("")}
         <polygon points="${areaList}" class="line-chart-area"></polygon>
-        <polyline points="${pointList}" class="line-chart-line"></polyline>
+        ${lineMarkup}
       ${points
         .map(
           (point) =>

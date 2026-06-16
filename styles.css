@@ -3272,6 +3272,20 @@ td {
   color: rgba(32, 25, 22, 0.58);
 }
 
+#durationTrendChart.single-point .chart-x-labels {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#durationTrendChart.single-point .chart-x-labels span {
+  text-align: center;
+}
+
+#durationTrendChart.single-point .line-chart-summary {
+  justify-items: start;
+  text-align: left;
+}
+
 .analytics-column-chart {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -4165,7 +4179,7 @@ td {
 
 .staff-vote-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 0.38fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
@@ -4180,10 +4194,15 @@ td {
 
 .leaderboard-panel.compact {
   min-height: 0;
-  padding: 18px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.68);
+  padding: 20px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(250, 245, 236, 0.82)),
+    rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(32, 25, 22, 0.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 40px rgba(32, 25, 22, 0.05);
 }
 
 .staff-app .booking-layout,
@@ -4644,37 +4663,35 @@ td {
 }
 
 .staff-app .leaderboard-list {
-  padding: 4px 0 0;
+  padding: 0;
 }
 
 .staff-vote-summary-card {
   display: grid;
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid rgba(32, 25, 22, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 12px 26px rgba(32, 25, 22, 0.05);
+  gap: 12px;
+  padding: 0;
 }
 
 .staff-vote-summary-row {
   display: grid;
-  grid-template-columns: 38px minmax(180px, 1fr) minmax(280px, 1.2fr) auto;
+  grid-template-columns: 42px minmax(200px, 0.9fr) minmax(340px, 1.3fr) auto;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(247, 242, 233, 0.9);
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(247, 242, 233, 0.88);
+  border: 1px solid rgba(32, 25, 22, 0.05);
 }
 
 .staff-vote-summary-main strong {
   display: block;
   color: var(--ink);
+  font-size: 1rem;
 }
 
 .staff-vote-summary-main span {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 760;
 }
 
@@ -4687,9 +4704,9 @@ td {
 .staff-vote-pill {
   display: grid;
   gap: 4px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.88);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(32, 25, 22, 0.06);
 }
 
@@ -4701,12 +4718,12 @@ td {
 
 .staff-vote-pill strong {
   color: var(--ember-dark);
-  font-size: 1rem;
+  font-size: 1.08rem;
 }
 
 .staff-vote-more-actions {
   justify-content: center;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 @media (max-width: 1120px) {
@@ -6221,23 +6238,22 @@ td {
   grid-template-rows: auto auto auto 1fr auto;
 }
 
-.home-moments-badge {
-  display: grid;
-  gap: 4px;
+.home-moments-preview {
+  min-height: 180px;
   margin-top: auto;
-  padding: 14px 16px;
   border: 1px solid rgba(255, 250, 243, 0.14);
   border-radius: 16px;
+  overflow: hidden;
   background: rgba(255, 250, 243, 0.08);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.16);
 }
 
-.home-moments-badge strong {
-  color: #fffaf3;
-}
-
-.home-moments-badge span {
-  color: rgba(255, 250, 243, 0.72);
-  font-size: 0.9rem;
+.home-moments-preview img {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  object-fit: cover;
+  display: block;
 }
 
 .home-reach-map {
@@ -6332,6 +6348,31 @@ td {
 .staff-moments-panel {
   display: grid;
   gap: 16px;
+}
+
+.staff-moments-head,
+.staff-review-summary-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.staff-moments-head {
+  padding: 16px 18px;
+  border: 1px solid rgba(32, 25, 22, 0.06);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 242, 232, 0.94)),
+    #fffaf3;
+  box-shadow: 0 12px 28px rgba(32, 25, 22, 0.04);
+}
+
+.staff-moments-head p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 .admin-moments-grid {
@@ -6443,6 +6484,46 @@ td {
 .moments-actions {
   justify-content: flex-end;
   margin-top: 0;
+}
+
+.staff-review-summary-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.staff-review-summary-head {
+  padding: 16px 18px;
+  border: 1px solid rgba(32, 25, 22, 0.06);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(246, 242, 235, 0.94)),
+    #fffaf3;
+  box-shadow: 0 12px 28px rgba(32, 25, 22, 0.04);
+}
+
+.staff-review-summary-head h3 {
+  margin-top: 8px;
+  color: #171412;
+}
+
+.staff-review-feed {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px 18px;
+  border: 1px solid rgba(32, 25, 22, 0.06);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.staff-review-feed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.staff-review-feed-head h4 {
+  color: #171412;
 }
 
 @media (max-width: 780px) {
@@ -6865,9 +6946,14 @@ body[data-page="home"] .app-shell {
   }
 
   .partner-list,
-  .partner-list-patrocinio,
-  .partner-main-logos {
+  .partner-list-patrocinio {
     grid-template-columns: 1fr;
+  }
+
+  .partner-main-logos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 10px 0 6px;
   }
 
   .partner-brand {
@@ -6886,19 +6972,15 @@ body[data-page="home"] .app-shell {
     padding-top: 4px;
   }
 
-  .partner-main-logos {
-    gap: 14px;
-    padding: 10px 0 6px;
-  }
-
   .partner-main-logos img {
-    max-width: 178px;
-    max-height: 64px;
+    max-width: 140px;
+    max-height: 56px;
+    justify-self: center;
   }
 
   .partner-main-logos img:first-child {
-    max-width: 220px;
-    max-height: 88px;
+    max-width: 168px;
+    max-height: 72px;
   }
 
   .partner-brand strong {
@@ -8475,4 +8557,570 @@ body[data-page="vota"] .vote-form {
     top: calc(8px + env(safe-area-inset-top));
   }
 
+}
+
+@media (max-width: 780px) {
+  body[data-page="gestione"] .app-shell {
+    width: min(100% - 10px, 720px);
+  }
+
+  body[data-page="gestione"] .staff-section {
+    padding-top: 10px;
+  }
+
+  body[data-page="gestione"] .staff-topbar {
+    padding: 10px 12px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(13, 16, 15, 0.96), rgba(28, 33, 31, 0.94));
+    box-shadow: 0 16px 32px rgba(13, 16, 15, 0.22);
+  }
+
+  body[data-page="gestione"] .staff-topbar .site-nav {
+    gap: 8px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(12, 15, 14, 0.92);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+  }
+
+  body[data-page="gestione"] .staff-topbar .site-nav a {
+    width: 100%;
+    justify-content: flex-start;
+    min-height: 44px;
+    padding-inline: 14px;
+    border-radius: 12px;
+  }
+
+  body[data-page="gestione"] .staff-topbar-actions {
+    gap: 8px;
+  }
+
+  body[data-page="gestione"] .notification-bell,
+  body[data-page="gestione"] .mobile-menu-toggle {
+    width: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    border-radius: 12px;
+    background: rgba(255, 250, 243, 0.06);
+  }
+
+  body[data-page="gestione"] .staff-hero {
+    padding: 16px 14px;
+    border-radius: 18px;
+    gap: 12px;
+    box-shadow: 0 18px 36px rgba(13, 16, 15, 0.16);
+  }
+
+  body[data-page="gestione"] .staff-hero p {
+    max-width: none;
+    font-size: 0.95rem;
+  }
+
+  body[data-page="gestione"] .staff-hero-status {
+    width: fit-content;
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+
+  body[data-page="gestione"] .staff-work-area {
+    padding: 16px 14px;
+    border-radius: 18px;
+    box-shadow: 0 14px 28px rgba(32, 25, 22, 0.06);
+  }
+
+  body[data-page="gestione"] .staff-area-heading,
+  body[data-page="gestione"] .reservations-heading {
+    gap: 10px;
+  }
+
+  body[data-page="gestione"] .staff-area-heading h2,
+  body[data-page="gestione"] .reservations-heading h2 {
+    line-height: 1.02;
+  }
+
+  body[data-page="gestione"] .section-label {
+    font-size: 0.73rem;
+    padding: 8px 11px;
+    border-radius: 999px;
+  }
+
+  body[data-page="gestione"] .staff-count-badge {
+    min-width: 34px;
+    min-height: 26px;
+    padding: 2px 8px;
+    font-size: 0.82rem;
+  }
+
+  body[data-page="gestione"] .reservations-panel,
+  body[data-page="gestione"] .analytics-panel,
+  body[data-page="gestione"] .leaderboard-panel.compact,
+  body[data-page="gestione"] .staff-prize-table-panel {
+    border-radius: 18px;
+  }
+
+  body[data-page="gestione"] .table-wrap {
+    border-radius: 18px;
+  }
+
+  body[data-page="gestione"] .empty-state {
+    padding: 22px 14px;
+    border-radius: 16px;
+    font-size: 0.96rem;
+    line-height: 1.45;
+  }
+
+  body[data-page="gestione"] .staff-moments-head,
+  body[data-page="gestione"] .staff-review-summary-head,
+  body[data-page="gestione"] .staff-review-feed {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .staff-moments-head,
+  body[data-page="gestione"] .staff-review-summary-head,
+  body[data-page="gestione"] .staff-review-feed-head {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  body[data-page="gestione"] .leaderboard-panel.compact {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-card {
+    gap: 10px;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-row {
+    grid-template-columns: 36px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px 12px;
+    padding: 12px;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-main {
+    min-width: 0;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-breakdown {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  body[data-page="gestione"] .vote-count {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  body[data-page="gestione"] .leaderboard-rank {
+    width: 36px;
+    height: 36px;
+    font-size: 0.88rem;
+  }
+
+  body[data-page="gestione"] .staff-vote-pill {
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  }
+
+  body[data-page="gestione"] .admin-moments-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  body[data-page="gestione"] .moment-card {
+    border-radius: 8px;
+  }
+
+  body[data-page="gestione"] .moment-card-delete {
+    top: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+  }
+
+  body[data-page="gestione"] .moments-footer-actions,
+  body[data-page="gestione"] .staff-vote-more-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  body[data-page="gestione"] .moments-footer-actions button,
+  body[data-page="gestione"] .moments-footer-actions a,
+  body[data-page="gestione"] .staff-vote-more-actions button,
+  body[data-page="gestione"] .staff-vote-more-actions a {
+    width: auto;
+  }
+
+  body[data-page="gestione"] .moments-load-more {
+    flex: 1 1 auto;
+  }
+
+  body[data-page="gestione"] .staff-area-prize .staff-actions.compact,
+  body[data-page="gestione"] .staff-area-stats > .staff-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  body[data-page="gestione"] .staff-area-prize .staff-actions.compact button,
+  body[data-page="gestione"] .staff-area-stats > .staff-actions button {
+    width: 100%;
+  }
+
+  body[data-page="gestione"] .staff-prize-grid {
+    gap: 14px;
+  }
+
+  body[data-page="gestione"] .staff-prize-grid > article,
+  body[data-page="gestione"] .staff-review-insights-grid > article,
+  body[data-page="gestione"] .analytics-chart-grid-simple > article,
+  body[data-page="gestione"] .analytics-overview-simple > article {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body[data-page="gestione"] .staff-prize-table-panel,
+  body[data-page="gestione"] .staff-prize-control-panel,
+  body[data-page="gestione"] .staff-review-summary-panel,
+  body[data-page="gestione"] .analytics-chart-card,
+  body[data-page="gestione"] .analytics-panel-simple {
+    border-radius: 18px;
+    box-shadow: 0 14px 28px rgba(32, 25, 22, 0.05);
+  }
+
+  body[data-page="gestione"] .staff-prize-table-panel,
+  body[data-page="gestione"] .staff-prize-control-panel,
+  body[data-page="gestione"] .staff-review-summary-panel {
+    display: grid;
+    width: 100%;
+  }
+
+  body[data-page="gestione"] .staff-prize-table-heading {
+    padding: 14px 14px 10px;
+  }
+
+  body[data-page="gestione"] #prizeSummary {
+    display: grid;
+    gap: 10px;
+  }
+
+  body[data-page="gestione"] #prizeSummary .prize-summary-card {
+    min-height: 84px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .staff-prize-winner {
+    min-height: 168px;
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(243, 182, 63, 0.12);
+  }
+
+  body[data-page="gestione"] #emptyPrizeEntries,
+  body[data-page="gestione"] #adminEmptyReviews {
+    width: 100%;
+    min-height: 124px;
+  }
+
+  body[data-page="gestione"] .analytics-chart-grid-simple {
+    gap: 14px;
+  }
+
+  body[data-page="gestione"] .analytics-chart-card {
+    padding: 16px;
+  }
+
+  body[data-page="gestione"] .analytics-chart-grid-simple .analytics-chart-card-wide {
+    min-height: 400px;
+  }
+
+  body[data-page="gestione"] #statistiche .staff-area-heading {
+    margin-bottom: 12px;
+  }
+
+  body[data-page="gestione"] #statistiche .staff-area-heading h2 {
+    max-width: 100%;
+  }
+
+  body[data-page="gestione"] #statistiche .staff-count-badge.olive {
+    width: fit-content;
+  }
+
+  body[data-page="gestione"] .analytics-overview-simple {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  body[data-page="gestione"] .analytics-kpi-card {
+    min-height: 0;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .analytics-kpi-card span {
+    font-size: 0.76rem;
+  }
+
+  body[data-page="gestione"] .analytics-kpi-card strong {
+    font-size: clamp(1.35rem, 6vw, 1.9rem);
+  }
+}
+
+@media (max-width: 560px) {
+  body[data-page="gestione"] .staff-topbar {
+    padding: 9px 10px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .staff-hero {
+    padding: 14px 12px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .staff-work-area {
+    padding: 14px 12px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .staff-area-heading h2,
+  body[data-page="gestione"] .reservations-heading h2 {
+    font-size: clamp(1.35rem, 8vw, 2rem);
+  }
+
+  body[data-page="gestione"] .staff-area-heading > div,
+  body[data-page="gestione"] .reservations-heading > div {
+    width: 100%;
+  }
+
+  body[data-page="gestione"] .staff-hero-status {
+    width: 100%;
+  }
+
+  body[data-page="gestione"] .section-label {
+    font-size: 0.68rem;
+    padding: 7px 10px;
+  }
+
+  body[data-page="gestione"] .staff-count-badge {
+    min-height: 24px;
+    padding: 2px 7px;
+    font-size: 0.76rem;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-row {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 9px 10px;
+    padding: 11px;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-main strong {
+    font-size: 0.94rem;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-main span {
+    font-size: 0.76rem;
+  }
+
+  body[data-page="gestione"] .staff-vote-summary-breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-page="gestione"] .staff-vote-pill {
+    padding: 8px 10px;
+  }
+
+  body[data-page="gestione"] .staff-area-prize .staff-actions.compact,
+  body[data-page="gestione"] .staff-area-stats > .staff-actions {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-page="gestione"] .staff-area-prize .staff-actions.compact {
+    margin-top: 6px;
+  }
+
+  body[data-page="gestione"] .staff-prize-grid,
+  body[data-page="gestione"] .staff-review-insights-grid,
+  body[data-page="gestione"] .analytics-chart-grid-simple,
+  body[data-page="gestione"] .analytics-overview-simple {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  body[data-page="gestione"] .staff-moments-head,
+  body[data-page="gestione"] .staff-review-summary-head,
+  body[data-page="gestione"] .staff-review-feed,
+  body[data-page="gestione"] .staff-prize-table-heading {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  body[data-page="gestione"] .staff-prize-table-meta,
+  body[data-page="gestione"] .staff-moments-head p {
+    font-size: 0.85rem;
+  }
+
+  body[data-page="gestione"] #prizeSummary .prize-summary-card {
+    min-height: 76px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  body[data-page="gestione"] .staff-prize-winner {
+    min-height: 150px;
+    padding: 16px 12px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .staff-prize-grid,
+  body[data-page="gestione"] .staff-review-insights-grid {
+    gap: 12px;
+  }
+
+  body[data-page="gestione"] .staff-prize-table-panel,
+  body[data-page="gestione"] .staff-prize-control-panel,
+  body[data-page="gestione"] .staff-review-summary-panel {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-self: stretch;
+  }
+
+  body[data-page="gestione"] .analytics-chart-card,
+  body[data-page="gestione"] .analytics-panel-simple,
+  body[data-page="gestione"] .analytics-kpi-card {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-self: stretch;
+  }
+
+  body[data-page="gestione"] .staff-prize-winner strong {
+    font-size: clamp(1.15rem, 7vw, 1.45rem);
+  }
+
+  body[data-page="gestione"] .analytics-chart-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  body[data-page="gestione"] .analytics-chart-grid-simple .analytics-chart-card-wide {
+    min-height: 390px;
+  }
+
+  body[data-page="gestione"] .analytics-line-chart {
+    min-height: 210px;
+  }
+
+  body[data-page="gestione"] .line-chart-svg {
+    height: 160px;
+  }
+
+  body[data-page="gestione"] .chart-heading strong,
+  body[data-page="gestione"] .analytics-panel-simple h3,
+  body[data-page="gestione"] .staff-review-summary-head h3 {
+    font-size: 1rem;
+  }
+
+  body[data-page="gestione"] .chart-heading {
+    gap: 6px;
+  }
+
+  body[data-page="gestione"] .line-chart-summary {
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+
+  body[data-page="gestione"] .line-chart-summary strong {
+    font-size: 0.84rem;
+  }
+
+  body[data-page="gestione"] .line-chart-summary span {
+    font-size: 0.72rem;
+  }
+
+  body[data-page="gestione"] .chart-x-labels {
+    margin-top: 2px;
+    padding-left: 12px;
+    padding-right: 2px;
+    font-size: 0.62rem;
+  }
+
+  body[data-page="gestione"] #durationTrendChart.single-point .chart-x-labels {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  body[data-page="gestione"] .analytics-panel-simple {
+    padding: 12px !important;
+  }
+
+  body[data-page="gestione"] .click-stat-card {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  body[data-page="gestione"] .click-stat-rank {
+    min-height: 30px;
+    border-radius: 9px;
+    font-size: 0.7rem;
+  }
+
+  body[data-page="gestione"] .click-stat-topline strong {
+    font-size: 0.84rem;
+  }
+
+  body[data-page="gestione"] .click-stat-body small {
+    font-size: 0.7rem;
+  }
+
+  body[data-page="gestione"] .analytics-kpi-card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  body[data-page="gestione"] .analytics-kpi-card strong {
+    font-size: 1.3rem;
+  }
+
+  body[data-page="gestione"] .admin-moments-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  body[data-page="gestione"] .moment-card {
+    border-radius: 7px;
+  }
+
+  body[data-page="gestione"] .empty-state {
+    padding: 18px 12px;
+    font-size: 0.9rem;
+  }
+
+  body[data-page="gestione"] #emptyPrizeEntries,
+  body[data-page="gestione"] #adminEmptyReviews {
+    min-height: 112px;
+  }
+
+  body[data-page="gestione"] .moments-footer-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body[data-page="gestione"] .moments-load-more,
+  body[data-page="gestione"] .staff-vote-more-actions {
+    justify-content: stretch;
+    width: 100%;
+  }
+
+  body[data-page="gestione"] .moments-footer-actions button,
+  body[data-page="gestione"] .moments-footer-actions a,
+  body[data-page="gestione"] .staff-vote-more-actions button,
+  body[data-page="gestione"] .staff-vote-more-actions a {
+    width: 100%;
+    text-align: center;
+  }
 }
