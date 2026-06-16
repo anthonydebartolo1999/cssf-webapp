@@ -185,7 +185,16 @@
               <div class="leaderboard-tabs" id="staffVoteTabs"></div>
               <div class="staff-vote-layout">
                 <article class="leaderboard-panel compact">
-                  <div class="leaderboard-list" id="staffVoteLeaderboard"></div>
+                  <div class="staff-vote-awards" id="staffVoteLeaderboard"></div>
+                  <div class="staff-vote-category-detail">
+                    <div class="staff-vote-category-head">
+                      <div>
+                        <span class="section-label" id="staffVoteDetailLabel">Dettaglio premio</span>
+                        <h3 id="staffVoteDetailTitle">Classifica categoria</h3>
+                      </div>
+                    </div>
+                    <div class="leaderboard-list" id="staffVoteDetailList"></div>
+                  </div>
                   <div class="staff-actions staff-vote-more-actions" id="staffVoteMoreWrap" hidden>
                     <button class="ghost-link strong" id="staffVoteMoreButton" type="button">Mostra tutti</button>
                   </div>
@@ -236,9 +245,12 @@
                       <span class="section-label">Recensioni</span>
                       <h3>Osservatorio feedback</h3>
                     </div>
-                    <div class="review-summary admin-review-summary">
-                      <strong id="adminReviewAverage">--</strong>
-                      <span id="adminReviewCount">0 recensioni</span>
+                    <div class="staff-review-summary-actions">
+                      <div class="review-summary admin-review-summary">
+                        <strong id="adminReviewAverage">--</strong>
+                        <span id="adminReviewCount">0 recensioni</span>
+                      </div>
+                      <button class="ghost-link" id="clearReviewsButton" type="button">Azzera feedback</button>
                     </div>
                   </div>
                   <div class="reviews-insights admin-reviews-insights" id="adminReviewsInsights"></div>
@@ -270,20 +282,6 @@
                 <article class="analytics-panel analytics-panel-simple">
                   <h3>Sezioni piu cliccate</h3>
                   <div id="clickStatsList"></div>
-                </article>
-              </div>
-              <div class="analytics-overview analytics-overview-simple">
-                <article class="analytics-kpi-card">
-                  <span>Click utili</span>
-                  <strong id="metricClicks">0</strong>
-                </article>
-                <article class="analytics-kpi-card">
-                  <span>Tempo medio</span>
-                  <strong id="metricAvgDuration">0s</strong>
-                </article>
-                <article class="analytics-kpi-card">
-                  <span>Sezioni viste</span>
-                  <strong id="metricSectionViews">0</strong>
                 </article>
               </div>
               <div class="staff-actions">

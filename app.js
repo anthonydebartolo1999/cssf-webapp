@@ -11,6 +11,9 @@ const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
 const ADMIN_MOMENTS_PAGE_SIZE = 24;
+const MAX_STAFF_RESERVATIONS = 150;
+const MAX_STAFF_PRIZE_ENTRIES = 500;
+const REVIEW_FEED_BATCH_SIZE = 3;
 const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v172";
 const SERVICE_WORKER_VERSION = "20260611-pwa-v171";
 const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
@@ -394,6 +397,7 @@ const adminReviewCount = document.querySelector("#adminReviewCount");
 const adminReviewsInsights = document.querySelector("#adminReviewsInsights");
 const adminReviewsList = document.querySelector("#adminReviewsList");
 const adminEmptyReviews = document.querySelector("#adminEmptyReviews");
+const clearReviewsButton = document.querySelector("#clearReviewsButton");
 const momentsForm = document.querySelector("#momentsForm");
 const momentImageInput = document.querySelector("#momentImage");
 const momentPreview = document.querySelector("#momentPreview");
@@ -429,6 +433,9 @@ const leaderboardTabs = document.querySelector("#leaderboardTabs");
 const leaderboardList = document.querySelector("#leaderboardList");
 const staffVoteTabs = document.querySelector("#staffVoteTabs");
 const staffVoteLeaderboard = document.querySelector("#staffVoteLeaderboard");
+const staffVoteDetailTitle = document.querySelector("#staffVoteDetailTitle");
+const staffVoteDetailLabel = document.querySelector("#staffVoteDetailLabel");
+const staffVoteDetailList = document.querySelector("#staffVoteDetailList");
 const staffVoteMoreWrap = document.querySelector("#staffVoteMoreWrap");
 const staffVoteMoreButton = document.querySelector("#staffVoteMoreButton");
 const staffVotesTable = document.querySelector("#staffVotesTable");
@@ -508,12 +515,15 @@ let reservationsRealtimeChannel = null;
 let trucksRealtimeChannel = null;
 let votesRealtimeChannel = null;
 let reviewsRealtimeChannel = null;
+let visiblePublicReviewsCount = REVIEW_FEED_BATCH_SIZE;
+let visibleAdminReviewsCount = REVIEW_FEED_BATCH_SIZE;
 let analyticsRealtimeChannel = null;
 let momentsRealtimeChannel = null;
 let staffSession = null;
 let lastReservationRemoteError = "";
 let lastTruckRemoteError = "";
 let lastVoteRemoteError = "";
+let lastReviewRemoteError = "";
 let lastMomentRemoteError = "";
 let voteLeaderboardRows = [];
 let remoteVoteLeaderboardSynced = false;
@@ -525,6 +535,8 @@ let reservationSlotUsageRefreshTimer = null;
 let serviceWorkerRegistrationPromise = null;
 let staffPushSubscribed = false;
 let activeBookingView = "pending";
+let remoteMomentsTotal = 0;
+let remoteMomentsHasMore = false;
 sessionStorage.setItem("cssf-session-id", sessionId);
 
 redirectLegacyHashRoute();
@@ -577,6 +589,7 @@ bindEvent(publicNotificationButton, "click", requestPublicNotifications);
 bindEvent(communicationForm, "submit", handleCommunicationSubmit);
 bindEvent(exportAnalyticsButton, "click", exportAnalyticsCsv);
 bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
+bindEvent(clearReviewsButton, "click", clearReviewsRemote);
 bindEvent(exportPrizeCsvButton, "click", exportPrizeEntriesCsv);
 bindEvent(drawPrizeWinnerButton, "click", drawPrizeWinner);
 bindEvent(clearVotesButton, "click", clearVotesRemote);
@@ -820,9 +833,24 @@ async function handleReviewSubmit(event) {
     body: reviewBody,
   };
 
+  if (review.body.length < 10) {
+    showToast("La recensione deve contenere almeno 10 caratteri.");
+    return;
+  }
+
+  if (review.body.length > 800) {
+    showToast("La recensione e' troppo lunga. Resta sotto 800 caratteri.");
+    return;
+  }
+
+  if (review.title.length < 2 || review.title.length > 120) {
+    showToast("Il testo inserito non genera un titolo valido per la recensione.");
+    return;
+  }
+
   const remoteSaved = await saveReviewRemote(review);
   if (!remoteSaved) {
-    showToast("Recensione non pubblicata: Supabase non raggiungibile. Riprova.");
+    showToast(`Recensione non pubblicata: ${lastReviewRemoteError || "Supabase non raggiungibile"}.`);
     return;
   }
 
@@ -1160,7 +1188,7 @@ async function setupSupabaseVotes() {
 
 async function setupSupabaseReviews() {
   if (!supabaseClient) return;
-  if (!reviewForm && !reviewsList) return;
+  if (!reviewForm && !reviewsList && !adminReviewsList) return;
 
   await refreshReviewsFromRemote();
   subscribeToReviewChanges();
@@ -1191,7 +1219,8 @@ async function refreshReservationsFromRemote() {
     const { data, error } = await supabaseClient
       .from(SUPABASE_RESERVATIONS_TABLE)
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(MAX_STAFF_RESERVATIONS);
 
     if (error || !Array.isArray(data)) return false;
 
@@ -1311,16 +1340,25 @@ async function refreshVotesFromRemote() {
   if (!supabaseClient) return false;
 
   try {
-    const { data, error } = await supabaseClient
-      .from(SUPABASE_VOTES_TABLE)
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [contestResponse, leaderboardResponse] = await Promise.all([
+      supabaseClient
+        .from(SUPABASE_VOTES_TABLE)
+        .select("*")
+        .eq("prize_opt_in", true)
+        .order("created_at", { ascending: false })
+        .limit(MAX_STAFF_PRIZE_ENTRIES),
+      supabaseClient
+        .from(SUPABASE_VOTE_LEADERBOARD_VIEW)
+        .select("*")
+        .order("vote_count", { ascending: false }),
+    ]);
 
-    if (error || !Array.isArray(data)) return false;
+    if (contestResponse.error || !Array.isArray(contestResponse.data)) return false;
+    if (leaderboardResponse.error || !Array.isArray(leaderboardResponse.data)) return false;
 
-    votes = data.map(mapVoteFromRemote);
+    votes = contestResponse.data.map(mapVoteFromRemote);
     showAllStaffVoteRows = false;
-    voteLeaderboardRows = getLeaderboardFromVotes();
+    voteLeaderboardRows = leaderboardResponse.data.map(mapVoteLeaderboardFromRemote);
     remoteVoteLeaderboardSynced = true;
     saveVotes();
     render();
@@ -1430,15 +1468,43 @@ async function refreshMomentsFromRemote() {
   if (!supabaseClient || !staffSession) return false;
 
   try {
-    const { data, error } = await supabaseClient
+    const { data, error, count } = await supabaseClient
       .from(SUPABASE_MOMENTS_TABLE)
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(0, ADMIN_MOMENTS_PAGE_SIZE - 1);
 
     if (error || !Array.isArray(data)) return false;
 
     moments = data.map(mapMomentFromRemote);
-    visibleMomentsCount = ADMIN_MOMENTS_PAGE_SIZE;
+    visibleMomentsCount = moments.length;
+    remoteMomentsTotal = Number(count) || moments.length;
+    remoteMomentsHasMore = moments.length < remoteMomentsTotal;
+    saveMoments();
+    renderMomentsAdmin();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function loadMoreMomentsFromRemote() {
+  if (!supabaseClient || !staffSession || !remoteMomentsHasMore) return false;
+
+  try {
+    const from = moments.length;
+    const to = from + ADMIN_MOMENTS_PAGE_SIZE - 1;
+    const { data, error } = await supabaseClient
+      .from(SUPABASE_MOMENTS_TABLE)
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error || !Array.isArray(data) || !data.length) return false;
+
+    moments = [...moments, ...data.map(mapMomentFromRemote)];
+    visibleMomentsCount = moments.length;
+    remoteMomentsHasMore = moments.length < remoteMomentsTotal;
     saveMoments();
     renderMomentsAdmin();
     return true;
@@ -1514,6 +1580,8 @@ async function requestPublicNotifications() {
 }
 
 async function requestPushNotificationsForScope(scope) {
+  dismissConsentBannerPermanently();
+
   const isStaffScope = scope === STAFF_PUSH_SCOPE;
   const successMessage = isStaffScope ? "Notifiche staff attive." : "Notifiche evento attive.";
   const existingMessage = isStaffScope ? "Notifiche staff gia attive." : "Notifiche evento gia attive.";
@@ -1756,11 +1824,11 @@ async function syncPushSubscription(scope, subscription) {
 }
 
 function getPushScopeState(scope) {
-  return localStorage.getItem(getPushStatusKey(scope)) === "yes";
+  return getPersistentPreference(getPushStatusKey(scope)) === "yes";
 }
 
 function setPushScopeState(scope, enabled) {
-  localStorage.setItem(getPushStatusKey(scope), enabled ? "yes" : "no");
+  setPersistentPreference(getPushStatusKey(scope), enabled ? "yes" : "no");
 }
 
 function getPushStatusKey(scope) {
@@ -1773,6 +1841,41 @@ function getPushDeviceLabel() {
   if (/Windows/i.test(navigator.userAgent)) return "Windows";
   if (/Macintosh|Mac OS X/i.test(navigator.userAgent)) return "Mac";
   return "Dispositivo staff";
+}
+
+function getPersistentPreference(key) {
+  try {
+    const localValue = localStorage.getItem(key);
+    if (localValue !== null) return localValue;
+  } catch {}
+
+  const cookieMatch = document.cookie.match(
+    new RegExp(`(?:^|; )${key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`),
+  );
+  return cookieMatch ? decodeURIComponent(cookieMatch[1]) : "";
+}
+
+function setPersistentPreference(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+
+  document.cookie = `${key}=${encodeURIComponent(value)}; path=/; max-age=31536000; samesite=lax`;
+}
+
+function removePersistentPreference(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+
+  document.cookie = `${key}=; path=/; max-age=0; samesite=lax`;
+}
+
+function dismissConsentBannerPermanently() {
+  setPersistentPreference(PRIVACY_BANNER_SEEN_KEY, "yes");
+  if (consentBanner) {
+    consentBanner.hidden = true;
+  }
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -2116,57 +2219,75 @@ function renderLeaderboard() {
 }
 
 function renderStaffVotes() {
-  if (!staffVoteTabs || !staffVoteLeaderboard) return;
+  if (!staffVoteTabs || !staffVoteLeaderboard || !staffVoteDetailList || !staffVoteDetailTitle || !staffVoteDetailLabel) return;
   staffVoteLeaderboard.innerHTML = "";
-  const rows = trucks
-    .map((truck) => {
-      const counts = Object.fromEntries(
-        voteCategories.map((category) => [
-          category.value,
-          votes.filter((vote) => vote.truckId === truck.id && vote.category === category.value).length,
-        ]),
-      );
-      const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+  const awardGrid = document.createElement("div");
+  awardGrid.className = "staff-vote-awards-grid";
 
-      return { truck, counts, total };
-    })
-    .sort((a, b) => b.total - a.total || a.truck.name.localeCompare(b.truck.name));
-  const visibleRows = showAllStaffVoteRows ? rows : rows.slice(0, 3);
+  voteCategories.forEach((category) => {
+    const rows = getLeaderboard(category.value);
+    const winner = rows[0] || null;
+    const runnerUp = rows[1] || null;
+    const totalVotes = rows.reduce((sum, row) => sum + row.count, 0);
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "staff-vote-award-card";
+    if (activeStaffVoteCategory === category.value) {
+      card.classList.add("is-active");
+    }
+    card.addEventListener("click", () => {
+      activeStaffVoteCategory = category.value;
+      showAllStaffVoteRows = false;
+      renderStaffVotes();
+    });
 
-  const overview = document.createElement("div");
-  overview.className = "staff-vote-summary-card";
-
-  visibleRows.forEach((row, index) => {
-    const item = document.createElement("div");
-    item.className = "staff-vote-summary-row";
-    item.innerHTML = `
-      <div class="leaderboard-rank">${index + 1}</div>
-      <div class="staff-vote-summary-main">
-        <strong>${escapeHtml(row.truck.name)}</strong>
-        <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)}</span>
+    card.innerHTML = `
+      <span class="staff-vote-award-label">${escapeHtml(category.label)}</span>
+      <strong>${escapeHtml(winner?.truck?.name || "Nessun voto")}</strong>
+      <span class="staff-vote-award-meta">${winner ? `${escapeHtml(winner.truck.code)} - ${escapeHtml(categoryLabels[winner.truck.category] || winner.truck.category)}` : "In attesa di voti"}</span>
+      <div class="staff-vote-award-count">
+        <span>Voti</span>
+        <b>${winner ? winner.count : 0}</b>
       </div>
-      <div class="staff-vote-summary-breakdown">
-        <div class="staff-vote-pill">
-          <span>Street Chef</span>
-          <strong>${row.counts["best-street-chef"]}</strong>
-        </div>
-        <div class="staff-vote-pill">
-          <span>Cortesia</span>
-          <strong>${row.counts["courtesy-award"]}</strong>
-        </div>
-        <div class="staff-vote-pill">
-          <span>Tradizione</span>
-          <strong>${row.counts["tradition-award"]}</strong>
-        </div>
+      <div class="staff-vote-award-foot">
+        <span>${runnerUp ? `Secondo: ${escapeHtml(runnerUp.truck.name)} (${runnerUp.count})` : "Secondo non disponibile"}</span>
+        <em>${totalVotes} voti totali</em>
       </div>
-      <div class="vote-count">${row.total} voti</div>
     `;
-    overview.append(item);
+
+    awardGrid.append(card);
   });
 
-  staffVoteLeaderboard.append(overview);
+  staffVoteLeaderboard.append(awardGrid);
+
+  const activeCategory = voteCategories.find((category) => category.value === activeStaffVoteCategory) || voteCategories[0];
+  const detailRows = getLeaderboard(activeCategory.value);
+  const visibleRows = showAllStaffVoteRows ? detailRows : detailRows.slice(0, 5);
+
+  staffVoteDetailLabel.textContent = activeCategory.label;
+  staffVoteDetailTitle.textContent = `Voti ${activeCategory.label}`;
+  staffVoteDetailList.innerHTML = "";
+
+  if (!detailRows.length) {
+    staffVoteDetailList.innerHTML = `<div class="empty-state visible">Nessun voto registrato per questa categoria.</div>`;
+  } else {
+    visibleRows.forEach((row, index) => {
+      const item = document.createElement("div");
+      item.className = "staff-vote-detail-row";
+      item.innerHTML = `
+        <div class="leaderboard-rank">${index + 1}</div>
+        <div class="staff-vote-detail-main">
+          <strong>${escapeHtml(row.truck.name)}</strong>
+          <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)} - ${escapeHtml(row.truck.zone)}</span>
+        </div>
+        <div class="vote-count">${row.count} voti</div>
+      `;
+      staffVoteDetailList.append(item);
+    });
+  }
+
   if (staffVoteMoreWrap) {
-    staffVoteMoreWrap.hidden = rows.length <= 3 || showAllStaffVoteRows;
+    staffVoteMoreWrap.hidden = detailRows.length <= 5 || showAllStaffVoteRows;
   }
 }
 
@@ -2655,7 +2776,7 @@ let trackedSections = new Set(JSON.parse(sessionStorage.getItem("cssf-tracked-se
 function setupAnalytics() {
   const consent = getAnalyticsConsent();
   if (consentBanner) {
-    consentBanner.hidden = Boolean(consent) || localStorage.getItem(PRIVACY_BANNER_SEEN_KEY) === "yes";
+    consentBanner.hidden = Boolean(consent) || getPersistentPreference(PRIVACY_BANNER_SEEN_KEY) === "yes";
   }
 
   document.addEventListener(
@@ -2685,11 +2806,8 @@ function setupAnalytics() {
 }
 
 function setAnalyticsConsent(value) {
-  localStorage.setItem(ANALYTICS_CONSENT_KEY, value);
-  localStorage.setItem(PRIVACY_BANNER_SEEN_KEY, "yes");
-  if (consentBanner) {
-    consentBanner.hidden = true;
-  }
+  setPersistentPreference(ANALYTICS_CONSENT_KEY, value);
+  dismissConsentBannerPermanently();
 
   if (value === "accepted") {
     startSectionAnalytics();
@@ -2703,13 +2821,13 @@ function setAnalyticsConsent(value) {
 }
 
 function getAnalyticsConsent() {
-  const value = localStorage.getItem(ANALYTICS_CONSENT_KEY);
+  const value = getPersistentPreference(ANALYTICS_CONSENT_KEY);
   return value === "accepted" || value === "rejected" ? value : "";
 }
 
 function resetPrivacyPreferences() {
-  localStorage.removeItem(ANALYTICS_CONSENT_KEY);
-  localStorage.removeItem(PRIVACY_BANNER_SEEN_KEY);
+  removePersistentPreference(ANALYTICS_CONSENT_KEY);
+  removePersistentPreference(PRIVACY_BANNER_SEEN_KEY);
   if (consentBanner) {
     consentBanner.hidden = false;
   }
@@ -2759,7 +2877,7 @@ function trackEvent(type, label, details = {}) {
 }
 
 function renderAnalyticsDashboard() {
-  if (!document.querySelector("#metricAvgDuration")) return;
+  if (!document.querySelector("#durationTrendChart") && !document.querySelector("#clickStatsList")) return;
 
   const sessions = new Set(analyticsEvents.map((event) => event.sessionId));
   const clicks = analyticsEvents.filter((event) => event.type === "click");
@@ -2882,6 +3000,9 @@ function renderDurationTrendChart(rows) {
   const chartBottom = 290;
   const peakRow = chartRows.reduce((best, row) => (row.durationMs > best.durationMs ? row : best), chartRows[0]);
   const max = Math.max(...chartRows.map((row) => row.durationMs), 1);
+  const averageMs = chartRows.length
+    ? Math.round(chartRows.reduce((sum, row) => sum + row.durationMs, 0) / chartRows.length)
+    : 0;
   const isSinglePoint = chartRows.length === 1;
   const points = chartRows.map((row, index) => {
     const x =
@@ -2908,8 +3029,16 @@ function renderDurationTrendChart(rows) {
 
   element.innerHTML = `
     <div class="line-chart-summary">
-      <strong>Picco alle ${escapeHtml(formatTimeLabel(peakRow.first))}</strong>
-      <span>${escapeHtml(formatDuration(peakRow.durationMs))} di permanenza</span>
+      <article class="line-chart-summary-item">
+        <small>Picco</small>
+        <strong>${escapeHtml(formatTimeLabel(peakRow.first))}</strong>
+        <span>${escapeHtml(formatDuration(peakRow.durationMs))}</span>
+      </article>
+      <article class="line-chart-summary-item">
+        <small>Permanenza media</small>
+        <strong>${escapeHtml(formatDuration(averageMs))}</strong>
+        <span>${chartRows.length} sessioni rilevate</span>
+      </article>
     </div>
     <svg class="line-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Andamento permanenza sessioni per orario">
         ${guides
@@ -3261,6 +3390,34 @@ async function clearAnalyticsEvents() {
   showToast("Analytics svuotati.");
 }
 
+async function clearReviewsRemote() {
+  const confirmed = window.confirm("Azzera tutti i feedback raccolti? Usa questa azione solo se vuoi cancellare tutte le recensioni.");
+  if (!confirmed) return;
+
+  if (!supabaseClient || !staffSession) {
+    showToast("Accedi con Supabase per azzerare i feedback.");
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.from(SUPABASE_REVIEWS_TABLE).delete().neq("id", "");
+    if (error) {
+      showToast(`Supabase non ha cancellato i feedback: ${error.message || "policy non valida"}.`);
+      return;
+    }
+
+    reviews = [];
+    visiblePublicReviewsCount = REVIEW_FEED_BATCH_SIZE;
+    visibleAdminReviewsCount = REVIEW_FEED_BATCH_SIZE;
+    saveReviews();
+    renderReviews();
+    await refreshReviewsFromRemote();
+    showToast("Feedback azzerati.");
+  } catch {
+    showToast("Supabase non raggiungibile: feedback non cancellati.");
+  }
+}
+
 async function clearVotesRemote() {
   const confirmed = window.confirm("Svuotare tutti i voti registrati? Usa questa azione solo per cancellare test.");
   if (!confirmed) return;
@@ -3376,6 +3533,9 @@ function updateMetrics() {
 }
 
 function getVoteTotal() {
+  if (remoteVoteLeaderboardSynced && voteLeaderboardRows.length) {
+    return voteLeaderboardRows.reduce((sum, row) => sum + Number(row.count || 0), 0);
+  }
   if (votes.length) return votes.length;
   return voteLeaderboardRows.reduce((sum, row) => sum + Number(row.count || 0), 0);
 }
@@ -3527,6 +3687,12 @@ function renderReservations() {
     tablesCell.className = "reservation-tables-cell";
     statusCell.className = "reservation-status-cell";
     actionsCell.className = "reservation-actions-cell";
+    dayCell.dataset.label = "Giorno";
+    customerCell.dataset.label = "Cliente";
+    guestsCell.dataset.label = "Persone";
+    tablesCell.dataset.label = "Tavoli";
+    statusCell.dataset.label = "Stato";
+    actionsCell.dataset.label = "Azioni";
     const infoTags = [
       reservation.area ? `Area: ${reservation.area}` : "",
       reservation.arrival ? `Arrivo: ${reservation.arrival}` : "",
@@ -3610,8 +3776,9 @@ function handleBookingQuickViewClick(event) {
 }
 
 function handleLoadMoreMoments() {
-  visibleMomentsCount += ADMIN_MOMENTS_PAGE_SIZE;
-  renderMomentsAdmin();
+  loadMoreMomentsFromRemote().catch(() => {
+    showToast("Altre foto non disponibili al momento.");
+  });
 }
 
 function toggleBookingSearchPanel() {
@@ -3650,15 +3817,49 @@ function renderReviews() {
   renderReviewFeed(adminReviewsList, adminEmptyReviews, true);
 }
 
+function ensureReviewFeedControls(container, emptyState, isCompact) {
+  if (!container || !emptyState || !emptyState.parentElement) return { wrap: null, button: null };
+
+  const feedKey = isCompact ? "admin" : "public";
+  let wrap = emptyState.parentElement.querySelector(`[data-review-more-wrap="${feedKey}"]`);
+
+  if (!wrap) {
+    wrap = document.createElement("div");
+    wrap.className = "reviews-more-wrap";
+    wrap.dataset.reviewMoreWrap = feedKey;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ghost-link reviews-more-button";
+    button.dataset.reviewMoreButton = feedKey;
+    button.addEventListener("click", () => {
+      if (isCompact) {
+        visibleAdminReviewsCount += REVIEW_FEED_BATCH_SIZE;
+      } else {
+        visiblePublicReviewsCount += REVIEW_FEED_BATCH_SIZE;
+      }
+      renderReviews();
+    });
+
+    wrap.append(button);
+    emptyState.insertAdjacentElement("afterend", wrap);
+  }
+
+  return {
+    wrap,
+    button: wrap.querySelector("[data-review-more-button]"),
+  };
+}
+
 function renderMomentsAdmin() {
   if (!adminMomentsGrid || !adminEmptyMoments) return;
 
   adminMomentsGrid.innerHTML = "";
   adminEmptyMoments.classList.toggle("visible", moments.length === 0);
   const visibleMoments = moments.slice(0, visibleMomentsCount);
-  const hasMoreMoments = moments.length > visibleMoments.length;
+  const hasMoreMoments = remoteMomentsHasMore;
   if (metricMoments) {
-    metricMoments.textContent = String(moments.length);
+    metricMoments.textContent = String(remoteMomentsTotal || moments.length);
   }
   if (downloadAllMomentsButton) {
     downloadAllMomentsButton.disabled = moments.length === 0;
@@ -3800,8 +4001,17 @@ function renderReviewFeed(container, emptyState, isCompact = false) {
 
   container.innerHTML = "";
   emptyState.classList.toggle("visible", reviews.length === 0);
+  const visibleCount = isCompact ? visibleAdminReviewsCount : visiblePublicReviewsCount;
+  const visibleReviews = reviews.slice(0, visibleCount);
+  const remainingReviews = Math.max(reviews.length - visibleReviews.length, 0);
+  const reviewControls = ensureReviewFeedControls(container, emptyState, isCompact);
 
-  reviews.forEach((review) => {
+  if (reviewControls.wrap && reviewControls.button) {
+    reviewControls.wrap.hidden = reviews.length === 0 || remainingReviews === 0;
+    reviewControls.button.textContent = `Mostra altro (${remainingReviews})`;
+  }
+
+  visibleReviews.forEach((review) => {
     const stars = Array.from({ length: 5 }, (_, index) =>
       `<span class="${index < review.rating ? "is-filled" : ""}">&#9733;</span>`
     ).join("");
@@ -4358,12 +4568,26 @@ function saveMoments() {
 }
 
 async function saveReviewRemote(review) {
-  if (!supabaseClient) return false;
+  lastReviewRemoteError = "";
+
+  if (!supabaseClient) {
+    lastReviewRemoteError = "Client Supabase non caricato";
+    return false;
+  }
 
   try {
     const { error } = await supabaseClient.from(SUPABASE_REVIEWS_TABLE).insert(mapReviewToRemote(review));
-    return !error;
-  } catch {
+    if (error) {
+      lastReviewRemoteError = error.message || "Salvataggio recensione rifiutato";
+      if (/row-level security policy/i.test(lastReviewRemoteError)) {
+        lastReviewRemoteError = "controlla che il testo recensione abbia almeno 10 caratteri e che i campi selezionati siano validi";
+      }
+      console.warn("CSSF Supabase review insert failed:", error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    lastReviewRemoteError = error?.message || "Supabase non raggiungibile";
     return false;
   }
 }
