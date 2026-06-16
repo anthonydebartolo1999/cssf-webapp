@@ -60,7 +60,7 @@ const defaultTrucks = [
     name: "Afterlife Cocktail",
     category: "cocktail",
     zone: "Area drink",
-    menu: "Cocktail zone con drink dedicati per accompagnare food, musica e serata.",
+    menu: "Cocktail Zone, dove potrai gustare tutti i grandi classici della mixology preparati al momento.",
     color: "#8b5cf6",
     mapPositions: [{ x: 65.6, y: 12.9 }],
     status: "open",
@@ -73,7 +73,7 @@ const defaultTrucks = [
     name: "Armonia dei gusti",
     category: "dolci",
     zone: "Passeggiata dolce",
-    menu: "Gelati, monoporzioni, pangoccioli e frutta realistica.",
+    menu: "Frutta realistica, gelati artigianali, monoporzioni, granite, pancakes, crepes.",
     color: "#ec4899",
     mapPositions: [{ x: 44.5, y: 52.8 }],
     status: "open",
@@ -86,7 +86,7 @@ const defaultTrucks = [
     name: "Birra Cala",
     category: "birra",
     zone: "Area drink",
-    menu: "Esclusiva birra artigianale per la parte beverage del festival.",
+    menu: "Birrificio ufficiale del CSSF26 - birra artigianale.",
     color: "#f59e0b",
     mapPositions: [
       { x: 75.8, y: 13.4 },
@@ -102,7 +102,7 @@ const defaultTrucks = [
     name: "Caracas",
     category: "sudamericano",
     zone: "Area world food",
-    menu: "Cucina latina e churros per una tappa dal gusto sudamericano.",
+    menu: "Arepas, burritos, tequenos, churros.",
     color: "#14b8a6",
     mapPositions: [{ x: 18.4, y: 74.4 }],
     status: "open",
@@ -115,7 +115,7 @@ const defaultTrucks = [
     name: "Bar Centrale",
     category: "tradizione",
     zone: "Via centrale",
-    menu: "Cullurielli, cuddrurieddri e gnocco fritto in chiave street.",
+    menu: "Cullurielli, cuddruriaddri, gnocco fritto con salumi e formaggi.",
     color: "#3b82f6",
     mapPositions: [{ x: 18.2, y: 17.8 }],
     status: "open",
@@ -128,7 +128,7 @@ const defaultTrucks = [
     name: "CHIMI",
     category: "carne",
     zone: "Area brace",
-    menu: "Carne argentina, asado e hamburger.",
+    menu: "Piatto carne argentina asado, panini con hamburger di carne argentina.",
     color: "#ef4444",
     mapPositions: [{ x: 88.7, y: 77.2 }],
     status: "open",
@@ -141,7 +141,7 @@ const defaultTrucks = [
     name: "GamRo",
     category: "pesce",
     zone: "Area mare",
-    menu: "Frittura, cuoppo di calamari, panino polpami, panino squiddi e panino crusco.",
+    menu: "Frittura, cuoppo di calamari, panino polpami (polipo), panino squiddi (calamari), panino crusco (baccala).",
     color: "#06b6d4",
     mapPositions: [{ x: 28.8, y: 15.8 }],
     status: "open",
@@ -154,7 +154,7 @@ const defaultTrucks = [
     name: "La Forneria",
     category: "forno",
     zone: "Via centrale",
-    menu: "Focaccia, cuoppo di polpette, pizze rustiche, arancini e patatine.",
+    menu: "Focaccia, cuoppo di polpette, pizze rustiche, arancini, grupariata.",
     color: "#eab308",
     mapPositions: [{ x: 84.2, y: 14.8 }],
     status: "open",
@@ -167,7 +167,7 @@ const defaultTrucks = [
     name: "La Verace",
     category: "fritti",
     zone: "Area novita",
-    menu: "Cuzzitiello, corn dog e patatine fritte.",
+    menu: "Cuzzitiello, corn dog, patatine fritte.",
     color: "#f97316",
     mapPositions: [{ x: 40.8, y: 75.8 }],
     status: "open",
@@ -180,7 +180,7 @@ const defaultTrucks = [
     name: "Panzerotto on the road",
     category: "fritti",
     zone: "Via centrale",
-    menu: "Panzerotti e burrate fritte.",
+    menu: "Panzerotti, burrate fritte.",
     color: "#22c55e",
     mapPositions: [{ x: 6.3, y: 20.7 }],
     status: "open",
@@ -193,7 +193,7 @@ const defaultTrucks = [
     name: "Sam's Food Truck",
     category: "bbq",
     zone: "Area BBQ",
-    menu: "Panino con pulled pork e brisket.",
+    menu: "Panino con pulled pork, panino con brisket.",
     color: "#9f1239",
     mapPositions: [{ x: 60.5, y: 74.9 }],
     status: "open",
@@ -206,7 +206,7 @@ const defaultTrucks = [
     name: "The butchers",
     category: "carne",
     zone: "Area brace",
-    menu: "Cuoppo di carne, panino con salsiccia e hamburger, cuoppo costolette e alette di pollo.",
+    menu: "Cipollotto (panino con hamburger di scottona), Salsicciotto (panino con hamburger di salsiccia), Porchetto (panino con porchetta), Cuoppo The Butchers (misto carne), Cuoppo Ribs - esclusiva CSSF26, Cuoppo Alette di Pollo - limited edition CSSF26.",
     color: "#6366f1",
     mapPositions: [{ x: 44.5, y: 15.4 }],
     status: "open",
@@ -219,7 +219,7 @@ const defaultTrucks = [
     name: "Trattoria da Ciardullo",
     category: "tradizione",
     zone: "Area tradizione",
-    menu: "Patate mbacchiuse, pasta casereccia e vino casereccio.",
+    menu: "Patate mbacchiuse (con cipolla / con funghi porcini / peperoni), maccarruni con carne, funghi porcini.",
     color: "#65a30d",
     mapPositions: [{ x: 54.8, y: 11.7 }],
     status: "open",
@@ -232,7 +232,7 @@ const defaultTrucks = [
     name: "Willy Crak",
     category: "brace",
     zone: "Area brace",
-    menu: "Arrosticini, caciocavallo impiccato, panino con bistecca di pecora, pulled di pecora e patata alla brace con pulled.",
+    menu: "Arrosticini, cacio cavallo impiccato, patata conzata (pulled di pecora, crema di parmigiano e cipolla caramellata), patate fritte e pulled di pecora, panino con pulled di pecora, verdure, cacio, cipolla e salsa sweet chilli.",
     color: "#c2410c",
     mapPositions: [{ x: 6.1, y: 72.8 }],
     status: "open",
@@ -245,7 +245,7 @@ const defaultTrucks = [
     name: "ZIA NE'",
     category: "pizza",
     zone: "Area pizza",
-    menu: "Pizza a portafoglio e frittatine di pasta.",
+    menu: "Pizza a portafoglio (Margherita), pan ventaglio (pomodoro, mozzarella e pesto).",
     color: "#f43f5e",
     mapPositions: [{ x: 74.2, y: 76.2 }],
     status: "open",
@@ -301,14 +301,15 @@ const reviewLabels = {
   gender: {
     female: "Donna",
     male: "Uomo",
-    "non-binary": "Non binario",
     "prefer-not": "Non specificato",
   },
   originArea: {
     luzzi: "Luzzi",
-    "province-cosenza": "Provincia di Cosenza",
-    calabria: "Resto della Calabria",
-    "outside-calabria": "Fuori Calabria",
+    "nearby-towns": "Paesi limitrofi",
+    rende: "Rende",
+    cosenza: "Cosenza",
+    "over-25km": "+ di 25 km",
+    "over-50km": "+ di 50 km",
   },
   favoriteAspect: {
     food: "Qualita' del cibo",
@@ -337,6 +338,11 @@ const reviewLabels = {
 
 const contestDistanceLabels = {
   luzzi: "Luzzi",
+  "nearby-towns": "Paesi limitrofi",
+  rende: "Rende",
+  cosenza: "Cosenza",
+  "over-25km": "+ di 25 km",
+  "over-50km": "+ di 50 km",
   "province-cosenza": "Provincia di Cosenza",
   calabria: "Resto della Calabria",
   "outside-calabria": "Fuori Calabria",
@@ -549,6 +555,8 @@ bindEvent(bookingForm, "submit", handleBookingSubmit);
 bindEvent(bookingForm?.day, "change", updateAvailabilityReadout);
 bindEvent(bookingForm?.slot, "change", updateAvailabilityReadout);
 bindEvent(bookingForm?.guests, "input", updateAvailabilityReadout);
+bindEvent(bookingForm, "input", handleFieldValidationStateChange);
+bindEvent(bookingForm, "change", handleFieldValidationStateChange);
 bindEvent(searchInput, "input", renderReservations);
 bindEvent(bookingSearchToggle, "click", toggleBookingSearchPanel);
 bindEvent(dayFilter, "change", () => {
@@ -566,6 +574,8 @@ bindEvent(slotGuestsInput, "input", updateSlotModalAvailability);
 bindEvent(exportCsvButton, "click", exportCsv);
 bindEvent(copyReportButton, "click", copyReport);
 bindEvent(reviewForm, "submit", handleReviewSubmit);
+bindEvent(reviewForm, "input", handleFieldValidationStateChange);
+bindEvent(reviewForm, "change", handleFieldValidationStateChange);
 bindEvent(momentsForm, "submit", handleMomentSubmit);
 bindEvent(momentImageInput, "change", handleMomentImagePreview);
 bindEvent(loadMoreMomentsButton, "click", handleLoadMoreMoments);
@@ -578,6 +588,8 @@ bindEvent(staffVoteMoreButton, "click", () => {
 bindEvent(truckSearchInput, "input", renderFestival);
 bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
+bindEvent(voteForm, "input", handleFieldValidationStateChange);
+bindEvent(voteForm, "change", handleFieldValidationStateChange);
 bindEvent(voteCategory, "change", renderVoteOptions);
 bindEvent(prizeOptIn, "change", toggleVoteExtraFields);
 bindEvent(truckForm, "submit", handleTruckFormSubmit);
@@ -635,6 +647,53 @@ setupSupabaseMoments();
 
 function bindEvent(element, eventName, handler) {
   element?.addEventListener(eventName, handler);
+}
+
+function getFormValidationFields(form) {
+  if (!form) return [];
+  return Array.from(form.querySelectorAll("input, select, textarea")).filter((field) => field.willValidate);
+}
+
+function updateFieldValidationState(field) {
+  if (!field || !field.willValidate) return true;
+
+  const isInvalid = !field.checkValidity();
+  field.classList.toggle("is-invalid", isInvalid);
+  field.setAttribute("aria-invalid", isInvalid ? "true" : "false");
+  field.closest("label")?.classList.toggle("field-invalid", isInvalid);
+  return !isInvalid;
+}
+
+function validateFormFields(form) {
+  const fields = getFormValidationFields(form);
+  let firstInvalidField = null;
+
+  fields.forEach((field) => {
+    const isValid = updateFieldValidationState(field);
+    if (!isValid && !firstInvalidField) {
+      firstInvalidField = field;
+    }
+  });
+
+  if (firstInvalidField) {
+    firstInvalidField.focus({ preventScroll: true });
+    firstInvalidField.scrollIntoView({ behavior: "smooth", block: "center" });
+    return false;
+  }
+
+  return true;
+}
+
+function clearFormValidationState(form) {
+  getFormValidationFields(form).forEach((field) => {
+    field.classList.remove("is-invalid");
+    field.removeAttribute("aria-invalid");
+    field.closest("label")?.classList.remove("field-invalid");
+  });
+}
+
+function handleFieldValidationStateChange(event) {
+  updateFieldValidationState(event.target);
 }
 
 function handlePageShow(event) {
@@ -768,6 +827,11 @@ function redirectLegacyHashRoute() {
 async function handleBookingSubmit(event) {
   event.preventDefault();
 
+  if (!validateFormFields(bookingForm)) {
+    showToast("Compila i campi obbligatori evidenziati in rosso.");
+    return;
+  }
+
   const formData = new FormData(bookingForm);
   const guests = clampNumber(Number(formData.get("guests")), 1, 30);
   const day = String(formData.get("day"));
@@ -801,6 +865,7 @@ async function handleBookingSubmit(event) {
   saveReservations();
   incrementReservationSlotUsage(day, slot, guests);
   bookingForm.reset();
+  clearFormValidationState(bookingForm);
   bookingForm.guests.value = 4;
   render();
   refreshReservationSlotUsageFromRemote();
@@ -816,6 +881,11 @@ async function handleBookingSubmit(event) {
 
 async function handleReviewSubmit(event) {
   event.preventDefault();
+
+  if (!validateFormFields(reviewForm)) {
+    showToast("Compila i campi obbligatori evidenziati in rosso.");
+    return;
+  }
 
   const formData = new FormData(reviewForm);
   const reviewBody = cleanText(formData.get("body"));
@@ -857,6 +927,7 @@ async function handleReviewSubmit(event) {
   reviews.unshift(review);
   saveReviews();
   reviewForm.reset();
+  clearFormValidationState(reviewForm);
   setupReviewRating();
   renderReviews();
   trackEvent("conversion", "recensione pubblicata", { section: "recensioni", rating: review.rating });
@@ -1006,6 +1077,11 @@ async function handleDeleteMoment(moment) {
 async function handleVoteSubmit(event) {
   event.preventDefault();
 
+  if (!validateFormFields(voteForm)) {
+    showToast("Compila i campi obbligatori evidenziati in rosso.");
+    return;
+  }
+
   const formData = new FormData(voteForm);
   const truckId = String(formData.get("truckId"));
   const truck = trucks.find((item) => item.id === truckId);
@@ -1028,9 +1104,15 @@ async function handleVoteSubmit(event) {
     distance: String(formData.get("distance") || ""),
   };
 
-  if (vote.prizeOptIn && !vote.email) {
-    showToast("Inserisci l'email per partecipare all'estrazione.");
+  const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+  if (!vote.email || !emailPattern.test(vote.email)) {
+    showToast("Inserisci un'email valida.");
     return;
+  }
+
+  if (!vote.voter) {
+    vote.voter = "Anonimo";
   }
 
   const remoteSaved = await saveVoteRemote(vote);
@@ -1045,6 +1127,7 @@ async function handleVoteSubmit(event) {
   activeLeaderboardCategory = String(formData.get("category"));
   remoteVoteLeaderboardSynced = false;
   voteForm.reset();
+  clearFormValidationState(voteForm);
   toggleVoteExtraFields();
   render();
   refreshVoteLeaderboardFromRemote();
@@ -2077,10 +2160,10 @@ function createTruckCardMarkup(truck, selected) {
   const menuMarkup = formatTruckMenuAsList(truck.menu);
 
   return `
-    <div class="truck-meta">
-      <span>${escapeHtml(categoryLabels[truck.category] || truck.category)}</span>
-      <span>${escapeHtml(truck.zone)}</span>
-    </div>
+      <div class="truck-meta truck-meta-top">
+        <span>${escapeHtml(categoryLabels[truck.category] || truck.category)}</span>
+        <span>${escapeHtml(truck.zone)}</span>
+      </div>
     <h3>${escapeHtml(truck.name)}</h3>
     <div class="truck-menu">${menuMarkup}</div>
     <div class="truck-meta">
@@ -2097,10 +2180,26 @@ function formatTruckMenuAsList(menu) {
   const normalized = String(menu || "").trim();
   if (!normalized) return "";
 
-  const items = normalized
-    .split(/\s*,\s*/)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  const items = [];
+  let current = "";
+  let depth = 0;
+
+  for (const char of normalized) {
+    if (char === "(") depth += 1;
+    if (char === ")" && depth > 0) depth -= 1;
+
+    if (char === "," && depth === 0) {
+      if (current.trim()) items.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += char;
+  }
+
+  if (current.trim()) {
+    items.push(current.trim());
+  }
 
   if (!items.length) {
     return `<ul class="truck-menu-list"><li>${escapeHtml(normalized)}</li></ul>`;
@@ -2362,7 +2461,7 @@ function renderPrizeSummary(entries) {
       value: categoryStats[0] ? `${categoryStats[0].label} (${categoryStats[0].count})` : "Nessun dato",
     },
     { label: "Ultimo voto", value: lastEntry ? formatDateTime(lastEntry.createdAt) : "Nessun dato" },
-    { label: "Area top", value: distanceStats ? `${distanceStats.label} (${distanceStats.count})` : "Nessun dato" },
+    { label: "Provenienza top", value: distanceStats ? `${distanceStats.label} (${distanceStats.count})` : "Nessun dato" },
   ];
 
     prizeSummary.innerHTML = `
@@ -3334,7 +3433,7 @@ function exportPrizeEntriesCsv() {
     return;
   }
 
-  const headers = ["ora", "nome", "email", "sesso", "eta", "distanza", "categoria", "street_chef"];
+  const headers = ["ora", "nome", "email", "sesso", "eta", "provenienza", "categoria", "street_chef"];
   const rows = entries.map((entry) => {
     const truck = trucks.find((item) => item.id === entry.truckId);
     return [
@@ -4385,7 +4484,21 @@ function registerServiceWorker() {
       serviceWorkerRegistrationPromise = null;
       updateInstallUi();
       refreshStaffPushUi();
-    });
+      });
+}
+
+function setInstallButtonContent(label = "Installa") {
+  if (!installButton) return;
+
+  installButton.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 3v12" />
+      <path d="m8 11 4 4 4-4" />
+      <path d="M8 21h8" />
+    </svg>
+    <span class="install-button-label">${escapeHtml(label)}</span>
+  `;
+  installButton.setAttribute("aria-label", label);
 }
 
 function updateInstallUi() {
@@ -4399,21 +4512,14 @@ function updateInstallUi() {
 
   if (!isInstallSecureContext()) {
     installButton.hidden = false;
-    installButton.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 3v12" />
-        <path d="m8 11 4 4 4-4" />
-        <path d="M8 21h8" />
-      </svg>
-      <span class="install-button-label">Installa</span>
-    `;
+    setInstallButtonContent("Installa");
     setInstallHint("Per installarla usa il sito pubblicato in HTTPS.");
     return;
   }
 
   if (isIosDevice()) {
     installButton.hidden = false;
-    installButton.textContent = isSafariBrowser() ? "Aggiungi a Home" : "Apri in Safari";
+    setInstallButtonContent("Installa");
     setInstallHint(
       isSafariBrowser()
         ? "Su iPhone e iPad apri Condividi e scegli Aggiungi a Home."
@@ -4424,7 +4530,7 @@ function updateInstallUi() {
 
   if (deferredInstallPrompt) {
     installButton.hidden = false;
-    installButton.textContent = "Installa app";
+    setInstallButtonContent("Installa");
     setInstallHint("Su PC e Android puoi installarla come app con un tap.");
     return;
   }

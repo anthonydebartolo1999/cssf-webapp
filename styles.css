@@ -27,6 +27,15 @@
   }
 }
 
+@keyframes typingLine {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
 @keyframes downloadArrow {
   0%, 100% {
     transform: translateY(-4px);
@@ -41,6 +50,15 @@
     border-right-color: #f7f3ed;
   }
   96%, 100% {
+    border-right-color: transparent;
+  }
+}
+
+@keyframes blinkLine {
+  0%, 92% {
+    border-right-color: #f7f3ed;
+  }
+  93%, 100% {
     border-right-color: transparent;
   }
 }
@@ -158,10 +176,38 @@ a {
 }
 
 .brand-mini strong {
+  display: grid;
+  gap: 1px;
   font-size: 0.86rem;
   font-weight: 800;
   letter-spacing: 0;
+  line-height: 0.92;
+  white-space: normal;
+}
+
+.brand-mini strong span {
+  display: block;
+}
+
+.premium-topbar .brand-mini strong span {
+  display: block;
+  width: 0;
+  overflow: hidden;
   white-space: nowrap;
+  border-right: 2px solid #f7f3ed;
+  animation: typingLine 1.1s steps(14, end) forwards, blinkLine 1.1s step-end forwards;
+}
+
+.premium-topbar .brand-mini strong span:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.premium-topbar .brand-mini strong span:nth-child(2) {
+  animation-delay: 1.15s;
+}
+
+.premium-topbar .brand-mini strong span:nth-child(3) {
+  animation-delay: 2.2s;
 }
 
 .site-nav {
@@ -1694,6 +1740,8 @@ body[data-page="mappa"] .map-marker {
 .selected-truck-card,
 .truck-card {
   display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  align-content: start;
   gap: 13px;
 }
 
@@ -1716,20 +1764,34 @@ body[data-page="mappa"] .map-marker {
 .leaderboard-tabs {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
 .truck-meta span,
 .status-live {
-  min-height: 30px;
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
-  padding: 6px 9px;
+  padding: 5px 10px;
   border-radius: 999px;
   background: #f5eadc;
   color: #5c4f49;
-  font-size: 0.8rem;
-  font-weight: 850;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.truck-meta-top {
+  gap: 7px;
+}
+
+.truck-meta-top span {
+  min-height: 24px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  font-weight: 780;
+  white-space: nowrap;
 }
 
 .status-live.open {
@@ -1746,7 +1808,7 @@ body[data-page="mappa"] .map-marker {
   margin: 0;
   padding-left: 18px;
   display: grid;
-  gap: 4px;
+  gap: 5px;
 }
 
 .truck-menu-list li::marker {
@@ -1760,8 +1822,12 @@ body[data-page="mappa"] .map-marker {
 }
 
 .truck-card {
-  min-height: 250px;
+  min-height: 262px;
   padding: 20px;
+}
+
+.truck-actions {
+  margin-top: auto;
 }
 
 .redirect-section {
@@ -1981,6 +2047,25 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(8, 127, 140, 0.14);
 }
 
+label.field-invalid {
+  color: #c2412d;
+}
+
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+  border-color: #d14b36;
+  background: #fff5f2;
+  box-shadow: 0 0 0 3px rgba(209, 75, 54, 0.16);
+}
+
+input.is-invalid:focus,
+select.is-invalid:focus,
+textarea.is-invalid:focus {
+  border-color: #c2412d;
+  box-shadow: 0 0 0 3px rgba(194, 65, 45, 0.2);
+}
+
 .privacy-check {
   display: flex;
   align-items: start;
@@ -1992,6 +2077,11 @@ textarea:focus {
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.45;
+}
+
+.privacy-check.field-invalid {
+  border-color: rgba(194, 65, 45, 0.45);
+  background: #fff5f2;
 }
 
 .privacy-check input {
@@ -3221,6 +3311,12 @@ td {
 .small-button.danger {
   border-color: rgba(232, 75, 42, 0.3);
   color: var(--ember-dark);
+}
+
+.field-optional {
+  color: var(--muted);
+  font-size: 0.82em;
+  font-weight: 700;
 }
 
 .icon-button.danger {
@@ -5576,10 +5672,6 @@ td {
   grid-column: auto !important;
 }
 
-.hero-countdown-bar #installHint:empty {
-  display: none;
-}
-
 @media (max-width: 780px) {
   .hero-countdown-bar {
     gap: 12px !important;
@@ -5697,7 +5789,6 @@ td {
     flex-wrap: nowrap;
   }
 
-  .topbar-actions .insta-orbit,
   .topbar-actions .home-topbar-cta {
     display: none;
   }
@@ -6371,14 +6462,16 @@ td {
 
 .hero-secondary-action {
   border-color: rgba(243, 182, 63, 0.42);
-  background: rgba(12, 10, 9, 0.42);
-  color: #fffaf3;
+  background: linear-gradient(180deg, rgba(12, 10, 9, 0.96), rgba(22, 20, 18, 0.96));
+  color: #ffd338;
+  box-shadow: 0 18px 32px rgba(12, 10, 9, 0.28);
 }
 
 .hero-secondary-action:hover,
 .hero-secondary-action:focus-visible {
-  border-color: rgba(243, 182, 63, 0.62);
-  background: rgba(12, 10, 9, 0.58);
+  border-color: rgba(255, 211, 56, 0.72);
+  background: linear-gradient(180deg, rgba(22, 20, 18, 0.98), rgba(33, 29, 24, 0.98));
+  color: #ffdc60;
 }
 
 .hero-facts {
@@ -7336,17 +7429,17 @@ body[data-page="home"] .app-shell {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-family: "Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 1.18rem;
+  font-size: 1.02rem;
   font-weight: 700;
-  letter-spacing: 1.2px;
-  line-height: 1.15;
+  letter-spacing: 0.8px;
+  line-height: 0.92;
   text-transform: uppercase;
   text-shadow: none;
-  overflow: hidden;
-  white-space: nowrap;
-  border-right: 2px solid #f7f3ed;
-  width: 15.5em;
-  animation: typing 5.5s steps(22, end) 0.8s 1 forwards, blink 5.5s 0.8s 1 forwards, waveFlow 6s ease-in-out infinite;
+  overflow: visible;
+  white-space: normal;
+  border-right: 0;
+  width: auto;
+  animation: waveFlow 6s ease-in-out infinite;
 }
 
 .premium-topbar .brand-mini img {
@@ -8239,12 +8332,14 @@ body[data-page="home"] .home-map-card .primary-action {
     row-gap: 0;
     align-items: center;
     min-height: 72px;
-    padding: 8px 10px;
+    padding: 9px 10px 7px;
   }
 
   .premium-topbar .brand-mini {
     min-width: 0;
     gap: 8px;
+    align-items: center;
+    transform: translateY(3px);
   }
 
   .premium-topbar .brand-mini img {
@@ -8261,7 +8356,7 @@ body[data-page="home"] .home-map-card .primary-action {
     overflow-wrap: normal;
     border-right: 0;
     animation: none;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     line-height: 1;
     letter-spacing: 0.04em;
     text-overflow: ellipsis;
@@ -8295,6 +8390,8 @@ body[data-page="home"] .home-map-card .primary-action {
 
   .premium-topbar .topbar-actions {
     gap: 8px;
+    align-items: center;
+    transform: translateY(3px);
   }
 
   .premium-topbar .topbar-actions #installButton {
@@ -8315,16 +8412,16 @@ body[data-page="home"] .home-map-card .primary-action {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     border-radius: 10px;
   }
 
   .mobile-menu-toggle span {
-    width: 5px;
-    height: 5px;
+    width: 18px;
+    height: 2px;
     margin: 0;
-  border-radius: 999px;
-}
+    border-radius: 999px;
+  }
 
 .analytics-overview {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -8663,8 +8760,8 @@ body[data-page="home"] .home-map-card .primary-action {
 
 @media (max-width: 560px) {
   .premium-topbar .brand-mini strong {
-    max-width: 176px;
-    font-size: 0.68rem;
+    max-width: 152px;
+    font-size: 0.6rem;
     line-height: 1;
   }
 

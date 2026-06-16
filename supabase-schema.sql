@@ -339,10 +339,10 @@ to anon, authenticated
 with check (
   category in ('best-street-chef', 'courtesy-award', 'tradition-award')
   and char_length(trim(voter_name)) between 1 and 80
-  and (email is null or email = '' or email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')
-  and coalesce(gender, '') in ('', 'female', 'male', 'non-binary', 'prefer-not')
+  and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+  and coalesce(gender, '') in ('', 'female', 'male', 'prefer-not')
   and coalesce(age_range, '') in ('', 'under-18', '18-24', '25-34', '35-44', '45-54', '55-plus')
-  and coalesce(distance, '') in ('', 'luzzi', 'province-cosenza', 'calabria', 'outside-calabria')
+  and coalesce(distance, '') in ('', 'luzzi', 'nearby-towns', 'rende', 'cosenza', 'over-25km', 'over-50km')
   and exists (
     select 1
     from public.trucks
@@ -375,8 +375,8 @@ with check (
   and char_length(trim(title)) between 2 and 120
   and char_length(trim(body)) between 10 and 800
   and coalesce(age_range, '') in ('', 'under-18', '18-24', '25-34', '35-44', '45-54', '55-plus')
-  and coalesce(gender, '') in ('', 'female', 'male', 'non-binary', 'prefer-not')
-  and coalesce(origin_area, '') in ('', 'luzzi', 'province-cosenza', 'calabria', 'outside-calabria')
+  and coalesce(gender, '') in ('', 'female', 'male', 'prefer-not')
+  and coalesce(origin_area, '') in ('', 'luzzi', 'nearby-towns', 'rende', 'cosenza', 'over-25km', 'over-50km')
   and coalesce(favorite_aspect, '') in ('', 'food', 'stand-variety', 'atmosphere', 'music', 'organization', 'location')
   and coalesce(improvement_area, '') in ('', 'queues', 'seating', 'prices', 'signage', 'payment', 'cleanliness', 'more-stands', 'nothing')
   and coalesce(would_return, '') in ('', 'yes', 'maybe', 'no')
@@ -501,21 +501,21 @@ using (
 
 insert into public.trucks (id, code, name, category, zone, menu, color, status, x, y, map_positions)
 values
-  ('stand-afterlife', 'S01', 'Afterlife Cocktail', 'cocktail', 'Area drink', 'Cocktail zone con drink dedicati per accompagnare food, musica e serata.', '#7c3aed', 'open', 52.3, 16.1, null),
-  ('stand-armonia-gusti', 'S02', 'Armonia dei gusti', 'dolci', 'Passeggiata dolce', 'Gelati, monoporzioni, pangoccioli e frutta realistica.', '#db2777', 'open', 47.1, 29.5, null),
-  ('stand-birra-cala', 'S03', 'Birra Cala', 'birra', 'Area drink', 'Esclusiva birra artigianale per la parte beverage del festival.', '#d97706', 'open', 58.9, 16.9, '[{"x":58.9,"y":16.9},{"x":26.3,"y":36.4}]'::jsonb),
-  ('stand-caracas-bistro-25', 'S04', 'Caracas', 'sudamericano', 'Area world food', 'Cucina latina e churros per una tappa dal gusto sudamericano.', '#059669', 'open', 19.1, 34.5, null),
-  ('stand-che-gnocchi', 'S05', 'Bar Centrale', 'tradizione', 'Via centrale', 'Cullurielli, cuddrurieddri e gnocco fritto in chiave street.', '#2563eb', 'open', 16.7, 15.5, null),
-  ('stand-chimi', 'S06', 'CHIMI', 'carne', 'Area brace', 'Carne argentina, asado e hamburger.', '#dc2626', 'open', 64.4, 67.8, null),
-  ('stand-gamro', 'S07', 'GamRo', 'pesce', 'Area mare', 'Frittura, cuoppo di calamari, panino polpami, panino squiddi e panino crusco.', '#0891b2', 'open', 25.3, 16.8, null),
-  ('stand-la-forneria', 'S08', 'La Forneria', 'forno', 'Via centrale', 'Focaccia, cuoppo di polpette, pizze rustiche, arancini e patatine.', '#ca8a04', 'open', 65.7, 16.8, null),
-  ('stand-la-verace', 'S09', 'La Verace', 'fritti', 'Area novita', 'Cuzzitiello, corn dog e patatine fritte.', '#ea580c', 'open', 34.4, 38.7, null),
-  ('stand-panzerotto-on-the-road', 'S10', 'Panzerotto on the road', 'fritti', 'Via centrale', 'Panzerotti e burrate fritte.', '#16a34a', 'open', 8.8, 16.7, null),
-  ('stand-sams-food-truck', 'S11', 'Sam''s Food Truck', 'bbq', 'Area BBQ', 'Panino con pulled pork e brisket.', '#be123c', 'open', 49.4, 53.4, null),
-  ('stand-the-butchers', 'S12', 'The butchers', 'carne', 'Area brace', 'Cuoppo di carne, panino con salsiccia e hamburger, cuoppo costolette e alette di pollo.', '#9333ea', 'open', 37.4, 20.1, null),
-  ('stand-trattoria-da-ciardullo', 'S13', 'Trattoria da Ciardullo', 'tradizione', 'Area tradizione', 'Patate mbacchiuse, pasta casereccia e vino casereccio.', '#4d7c0f', 'open', 43.5, 15.3, null),
-  ('stand-willy-crak', 'S14', 'Willy Crak', 'brace', 'Area brace', 'Arrosticini, caciocavallo impiccato, panino con bistecca di pecora, pulled di pecora e patata alla brace con pulled.', '#b45309', 'open', 10.7, 30.6, null),
-  ('stand-zia-ne', 'S15', 'ZIA NE''', 'pizza', 'Area pizza', 'Pizza a portafoglio e frittatine di pasta.', '#e11d48', 'open', 56.3, 61, null)
+  ('stand-afterlife', 'S01', 'Afterlife Cocktail', 'cocktail', 'Area drink', 'Cocktail Zone, dove potrai gustare tutti i grandi classici della mixology preparati al momento.', '#7c3aed', 'open', 52.3, 16.1, null),
+  ('stand-armonia-gusti', 'S02', 'Armonia dei gusti', 'dolci', 'Passeggiata dolce', 'Frutta realistica, gelati artigianali, monoporzioni, granite, pancakes, crepes.', '#db2777', 'open', 47.1, 29.5, null),
+  ('stand-birra-cala', 'S03', 'Birra Cala', 'birra', 'Area drink', 'Birrificio ufficiale del CSSF26 - birra artigianale.', '#d97706', 'open', 58.9, 16.9, '[{"x":58.9,"y":16.9},{"x":26.3,"y":36.4}]'::jsonb),
+  ('stand-caracas-bistro-25', 'S04', 'Caracas', 'sudamericano', 'Area world food', 'Arepas, burritos, tequenos, churros.', '#059669', 'open', 19.1, 34.5, null),
+  ('stand-che-gnocchi', 'S05', 'Bar Centrale', 'tradizione', 'Via centrale', 'Cullurielli, cuddruriaddri, gnocco fritto con salumi e formaggi.', '#2563eb', 'open', 16.7, 15.5, null),
+  ('stand-chimi', 'S06', 'CHIMI', 'carne', 'Area brace', 'Piatto carne argentina asado, panini con hamburger di carne argentina.', '#dc2626', 'open', 64.4, 67.8, null),
+  ('stand-gamro', 'S07', 'GamRo', 'pesce', 'Area mare', 'Frittura, cuoppo di calamari, panino polpami (polipo), panino squiddi (calamari), panino crusco (baccala).', '#0891b2', 'open', 25.3, 16.8, null),
+  ('stand-la-forneria', 'S08', 'La Forneria', 'forno', 'Via centrale', 'Focaccia, cuoppo di polpette, pizze rustiche, arancini, grupariata.', '#ca8a04', 'open', 65.7, 16.8, null),
+  ('stand-la-verace', 'S09', 'La Verace', 'fritti', 'Area novita', 'Cuzzitiello, corn dog, patatine fritte.', '#ea580c', 'open', 34.4, 38.7, null),
+  ('stand-panzerotto-on-the-road', 'S10', 'Panzerotto on the road', 'fritti', 'Via centrale', 'Panzerotti, burrate fritte.', '#16a34a', 'open', 8.8, 16.7, null),
+  ('stand-sams-food-truck', 'S11', 'Sam''s Food Truck', 'bbq', 'Area BBQ', 'Panino con pulled pork, panino con brisket.', '#be123c', 'open', 49.4, 53.4, null),
+  ('stand-the-butchers', 'S12', 'The butchers', 'carne', 'Area brace', 'Cipollotto (panino con hamburger di scottona), Salsicciotto (panino con hamburger di salsiccia), Porchetto (panino con porchetta), Cuoppo The Butchers (misto carne), Cuoppo Ribs - esclusiva CSSF26, Cuoppo Alette di Pollo - limited edition CSSF26.', '#9333ea', 'open', 37.4, 20.1, null),
+  ('stand-trattoria-da-ciardullo', 'S13', 'Trattoria da Ciardullo', 'tradizione', 'Area tradizione', 'Patate mbacchiuse (con cipolla / con funghi porcini / peperoni), maccarruni con carne, funghi porcini.', '#4d7c0f', 'open', 43.5, 15.3, null),
+  ('stand-willy-crak', 'S14', 'Willy Crak', 'brace', 'Area brace', 'Arrosticini, cacio cavallo impiccato, patata conzata (pulled di pecora, crema di parmigiano e cipolla caramellata), patate fritte e pulled di pecora, panino con pulled di pecora, verdure, cacio, cipolla e salsa sweet chilli.', '#b45309', 'open', 10.7, 30.6, null),
+  ('stand-zia-ne', 'S15', 'ZIA NE''', 'pizza', 'Area pizza', 'Pizza a portafoglio (Margherita), pan ventaglio (pomodoro, mozzarella e pesto).', '#e11d48', 'open', 56.3, 61, null)
 on conflict (id) do update
 set
   code = excluded.code,
