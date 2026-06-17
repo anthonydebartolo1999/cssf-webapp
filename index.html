@@ -5,24 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta
       name="description"
-      content="Sito e web app installabile per Cosenza Super Street Food, quarta edizione a Luzzi dal 26 al 28 giugno 2026."
+      content="Cosenza Super Street Food 2026 a Luzzi: street chef, menu, contest, prenotazioni e programma ufficiale del festival dal 26 al 28 giugno 2026."
     />
+    <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#161412" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="CSSF" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta property="og:title" content="Cosenza Super Street Food" />
+    <meta property="og:title" content="Cosenza Super Street Food 2026 | Sito Ufficiale" />
     <meta
       property="og:description"
-      content="Home ufficiale di Cosenza Super Street Food: countdown, presentazione e accesso rapido alle pagine evento."
+      content="Scopri il sito ufficiale di Cosenza Super Street Food 2026: programma, street chef, mappa, contest e prenotazioni."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="icons/logo-photoroom.png?v=20260605-logo" />
+    <meta property="og:url" content="https://www.cosenzasuperstreetfood.it/" />
+    <meta property="og:site_name" content="Cosenza Super Street Food" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:image" content="https://www.cosenzasuperstreetfood.it/assets/locandina-2026.jpeg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cosenza Super Street Food 2026 | Sito Ufficiale" />
+    <meta
+      name="twitter:description"
+      content="Programma, street chef, mappa, contest e prenotazioni ufficiali di Cosenza Super Street Food 2026."
+    />
+    <meta name="twitter:image" content="https://www.cosenzasuperstreetfood.it/assets/locandina-2026.jpeg" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Cosenza Super Street Food | Home</title>
+    <link rel="canonical" href="https://www.cosenzasuperstreetfood.it/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -287,6 +299,44 @@
         tick();
         window.setInterval(tick, 1000);
       })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Festival",
+        "name": "Cosenza Super Street Food 2026",
+        "alternateName": "CSSF 2026",
+        "description": "Festival ufficiale di street food a Luzzi con street chef, musica live, contest e area food dal 26 al 28 giugno 2026.",
+        "startDate": "2026-06-26T19:00:00+02:00",
+        "endDate": "2026-06-28T23:59:00+02:00",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "url": "https://www.cosenzasuperstreetfood.it/",
+        "image": [
+          "https://www.cosenzasuperstreetfood.it/assets/locandina-2026.jpeg",
+          "https://www.cosenzasuperstreetfood.it/foto%20live.png"
+        ],
+        "location": {
+          "@type": "Place",
+          "name": "Piazza Sacri Cuori",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Piazza Sacri Cuori, Localita Gidora",
+            "addressLocality": "Luzzi",
+            "addressRegion": "Calabria",
+            "postalCode": "87040",
+            "addressCountry": "IT"
+          }
+        },
+        "organizer": {
+          "@type": "Organization",
+          "name": "Cosenza Super Street Food",
+          "url": "https://www.cosenzasuperstreetfood.it/",
+          "sameAs": [
+            "https://www.instagram.com/cosenzasuperstreetfood/"
+          ]
+        }
+      }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js?v=20260611-pwa-v171"></script>
