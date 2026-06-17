@@ -34,7 +34,7 @@ const SUPABASE_MOMENTS_TABLE = "moments";
 const SUPABASE_MOMENTS_BUCKET = "cssf-moments";
 const SUPABASE_VOTE_LEADERBOARD_VIEW = "vote_leaderboard";
 const SUPABASE_RESERVATION_SLOT_USAGE_VIEW = "reservation_slot_usage";
-const MAX_MOMENT_FILE_SIZE = 7 * 1024 * 1024;
+const MAX_MOMENT_FILE_SIZE = 2 * 1024 * 1024;
 
 const eventStart = new Date("2026-06-26T19:00:00+02:00");
 const countdownStart = new Date("2026-05-29T00:00:00+02:00");
@@ -219,7 +219,7 @@ const defaultTrucks = [
     name: "Trattoria da Ciardullo",
     category: "tradizione",
     zone: "Area tradizione",
-    menu: "Tagliatelle ai funghi Porcini, Maccarruni della nomma (costine carne e polpette al sugo), Scialatelli alla Silana (salsiccia, porcini, pomodorini e ricotta affumicata), Patate mbacchiuse con cipolla, Patate mbacchiuse con funghi porcini, Patate mbacchiuse con peperoni",
+    menu: "Tagliatelle ai funghi Porcini, Maccarruni della nonna (costine carne e polpette al sugo), Scialatelli alla Silana (salsiccia, porcini, pomodorini e ricotta affumicata), Patate mbacchiuse con cipolla, Patate mbacchiuse con funghi porcini, Patate mbacchiuse con peperoni",
     color: "#65a30d",
     mapPositions: [{ x: 54.8, y: 11.7 }],
     status: "open",
@@ -711,10 +711,10 @@ function handlePageShow(event) {
     if (festivalMap || truckGrid || voteTruck || leaderboardList || staffVoteLeaderboard) {
       refreshTrucksFromRemote();
     }
-    if (reviewsList || reviewForm) {
+    if (reviewsList) {
       refreshReviewsFromRemote();
     }
-    if (voteForm || leaderboardList) {
+    if (leaderboardList) {
       refreshVoteLeaderboardFromRemote();
     }
     if (bookingForm || slotsGrid || availabilityReadout) {
@@ -967,8 +967,8 @@ async function handleMomentSubmit(event) {
   }
 
   if (file.size > MAX_MOMENT_FILE_SIZE) {
-    showToast("La foto supera il limite di 7 MB.");
-    setMomentsFormStatus("Riduci il file sotto i 7 MB e riprova.");
+    showToast("La foto supera il limite di 2 MB.");
+    setMomentsFormStatus("Riduci il file sotto i 2 MB e riprova.");
     return;
   }
 
@@ -1130,7 +1130,6 @@ async function handleVoteSubmit(event) {
   clearFormValidationState(voteForm);
   toggleVoteExtraFields();
   render();
-  refreshVoteLeaderboardFromRemote();
   trackEvent("conversion", "voto inviato", {
     section: "vota",
     category: String(formData.get("category")),
@@ -1254,7 +1253,9 @@ async function setupSupabaseTrucks() {
   if (!festivalMap && !selectedTruckCard && !truckGrid && !voteTruck && !leaderboardList && !staffVoteLeaderboard && !truckAdminTable) return;
 
   await refreshTrucksFromRemote();
-  subscribeToTruckChanges();
+  if (isStaffPage() && staffSession) {
+    subscribeToTruckChanges();
+  }
 }
 
 async function setupSupabaseVotes() {
@@ -1263,18 +1264,24 @@ async function setupSupabaseVotes() {
 
   if (staffSession) {
     await refreshVotesFromRemote();
-  } else {
+  } else if (leaderboardList) {
     await refreshVoteLeaderboardFromRemote();
   }
-  subscribeToVoteChanges();
+  if (staffSession) {
+    subscribeToVoteChanges();
+  }
 }
 
 async function setupSupabaseReviews() {
   if (!supabaseClient) return;
   if (!reviewForm && !reviewsList && !adminReviewsList) return;
 
-  await refreshReviewsFromRemote();
-  subscribeToReviewChanges();
+  if (reviewsList || adminReviewsList) {
+    await refreshReviewsFromRemote();
+  }
+  if (isStaffPage() && staffSession) {
+    subscribeToReviewChanges();
+  }
 }
 
 async function setupSupabaseAnalytics() {
@@ -1630,12 +1637,16 @@ async function initializeStaffAuth() {
     staffSession = session || null;
     renderAdminAccess();
     if (staffSession) {
+      refreshTrucksFromRemote();
       refreshReservationsFromRemote();
       refreshVotesFromRemote();
+      refreshReviewsFromRemote();
       refreshAnalyticsFromRemote();
       refreshMomentsFromRemote();
+      subscribeToTruckChanges();
       subscribeToReservationChanges();
       subscribeToVoteChanges();
+      subscribeToReviewChanges();
       subscribeToAnalyticsChanges();
       subscribeToMomentChanges();
     }
@@ -1643,12 +1654,16 @@ async function initializeStaffAuth() {
 
   renderAdminAccess();
   if (staffSession) {
+    await refreshTrucksFromRemote();
     await refreshReservationsFromRemote();
     await refreshVotesFromRemote();
+    await refreshReviewsFromRemote();
     await refreshAnalyticsFromRemote();
     await refreshMomentsFromRemote();
+    subscribeToTruckChanges();
     subscribeToReservationChanges();
     subscribeToVoteChanges();
+    subscribeToReviewChanges();
     subscribeToAnalyticsChanges();
     subscribeToMomentChanges();
   }
@@ -2162,7 +2177,6 @@ function createTruckCardMarkup(truck, selected) {
   return `
       <div class="truck-meta truck-meta-top">
         <span>${escapeHtml(categoryLabels[truck.category] || truck.category)}</span>
-        <span>${escapeHtml(truck.zone)}</span>
       </div>
     <h3>${escapeHtml(truck.name)}</h3>
     <div class="truck-menu">${menuMarkup}</div>
@@ -2683,12 +2697,16 @@ async function handleAdminLogin(event) {
   staffSession = data.session;
   adminLoginForm.reset();
   renderAdminAccess();
+  await refreshTrucksFromRemote();
   await refreshReservationsFromRemote();
   await refreshVotesFromRemote();
+  await refreshReviewsFromRemote();
   await refreshAnalyticsFromRemote();
   await refreshMomentsFromRemote();
+  subscribeToTruckChanges();
   subscribeToReservationChanges();
   subscribeToVoteChanges();
+  subscribeToReviewChanges();
   subscribeToAnalyticsChanges();
   subscribeToMomentChanges();
   showToast("Accesso staff effettuato.");

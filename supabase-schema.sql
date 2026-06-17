@@ -463,7 +463,7 @@ values (
   'cssf-moments',
   'cssf-moments',
   true,
-  7340032,
+  2097152,
   array['image/jpeg', 'image/png', 'image/webp']
 )
 on conflict (id) do update
@@ -513,7 +513,7 @@ values
   ('stand-panzerotto-on-the-road', 'S10', 'Panzerotto on the road', 'fritti', 'Via centrale', 'Panzerotti, Burrate fritte', '#16a34a', 'open', 8.8, 16.7, null),
   ('stand-sams-food-truck', 'S11', 'Sam''s Food Truck', 'bbq', 'Area BBQ', 'Panino con Pulled Pork, Panino con Brisket', '#be123c', 'open', 49.4, 53.4, null),
   ('stand-the-butchers', 'S12', 'The butchers', 'carne', 'Area brace', 'Cipollotto (panino con hamburgher di scottona), Salsicciotto (panino con hamburgher di salsiccia), Porchetto ( panino con porchetta), Cuoppo The Butchers (misto carne), Cuoppo Ribs - {ESCLUSIVA CSSF26}, Cuoppo Alette di Pollo #LimitedEdition', '#9333ea', 'open', 37.4, 20.1, null),
-  ('stand-trattoria-da-ciardullo', 'S13', 'Trattoria da Ciardullo', 'tradizione', 'Area tradizione', 'Tagliatelle ai funghi Porcini, Maccarruni della nomma (costine carne e polpette al sugo), Scialatelli alla Silana (salsiccia, porcini, pomodorini e ricotta affumicata), Patate mbacchiuse con cipolla, Patate mbacchiuse con funghi porcini, Patate mbacchiuse con peperoni', '#4d7c0f', 'open', 43.5, 15.3, null),
+  ('stand-trattoria-da-ciardullo', 'S13', 'Trattoria da Ciardullo', 'tradizione', 'Area tradizione', 'Tagliatelle ai funghi Porcini, Maccarruni della nonna (costine carne e polpette al sugo), Scialatelli alla Silana (salsiccia, porcini, pomodorini e ricotta affumicata), Patate mbacchiuse con cipolla, Patate mbacchiuse con funghi porcini, Patate mbacchiuse con peperoni', '#4d7c0f', 'open', 43.5, 15.3, null),
   ('stand-willy-crak', 'S14', 'Willy Crak', 'brace', 'Area brace', 'Arrosticini di pecora, Cacio cavallo impiccato, Patata Conzata (Pulled di pecora, crema di parmigiano e cipolla caramellata), Patate fritte e Pulled di pecora, Panino con pulled di pecora (verdure - cacio - cipolla e salsa sweet chilli)', '#b45309', 'open', 10.7, 30.6, null),
   ('stand-zia-ne', 'S15', 'ZIA NE''', 'pizza', 'Area pizza', 'Pizza a portafoglio (Margherita), Pizza Portafoglio Fredda (Pomodoro - Mozzarella e Pesto), Pizza Fritta (Margherita)', '#e11d48', 'open', 56.3, 61, null)
 on conflict (id) do update
