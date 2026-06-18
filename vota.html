@@ -57,7 +57,7 @@
           <a href="programma.html" data-view-link="programma">Programma</a>
           <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
           <a href="partner.html" data-view-link="partner">Partner</a>
-          <a href="prenota.html" data-view-link="prenota">Prenota ora</a>
+          <a href="supporters.html" data-view-link="supporters">Supporters</a>
         </nav>
         <div class="topbar-actions">
           <button class="install-button" id="installButton" type="button" hidden aria-label="Installa la PWA">
@@ -68,7 +68,7 @@
             </svg>
             <span class="install-button-label">Installa</span>
           </button>
-          <a class="primary-action home-topbar-cta" href="prenota.html">Prenota ora</a>
+          <a class="primary-action home-topbar-cta" href="prenota.html">Prenota Tavolo</a>
           <a class="insta-orbit" href="https://www.instagram.com/cosenzasuperstreetfood/" target="_blank" rel="noreferrer" aria-label="Apri Instagram CSSF" title="Instagram CSSF">
             <span class="insta-orbit-center" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
@@ -95,19 +95,56 @@
       </header>
       <main>
         <section class="vote-section" id="vota" aria-labelledby="vota-title">
-          <div class="view-hero"><span class="section-label">Contest 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli una delle categorie ufficiali del contest e assegna il tuo voto alla realta' che ti ha colpito di piu'.</p></div>
+          <div class="view-hero"><span class="section-label">Contest 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli il tuo street chef e assegna due voti rapidi per decretare il Miglior Street Chef e il Premio Cortesia.</p></div>
           <div class="vote-layout">
             <form class="vote-form" id="voteForm">
-              <label>Categoria<select id="voteCategory" name="category"><option value="best-street-chef">Miglior Street Chef 2026</option><option value="courtesy-award">Premio Cortesia</option><option value="tradition-award">Premio Tradizione</option></select></label>
               <label>Street chef<select id="voteTruck" name="truckId"></select></label>
-                <label>Email<input name="email" type="email" placeholder="La tua email" required /></label>
-                <label class="privacy-check"><input id="prizeOptIn" name="prizeOptIn" type="checkbox" /><span>Opzionale: partecipa all'estrazione e prova a vincere una t-shirt personalizzata con il tuo nome.</span></label>
-                <div class="vote-extra-fields" id="voteExtraFields" hidden>
-                  <label>Nome<input name="voter" type="text" placeholder="Il tuo nome" /></label>
-                  <label>Sesso<select name="gender"><option value="">Seleziona</option><option value="female">Donna</option><option value="male">Uomo</option><option value="prefer-not">Preferisco non dirlo</option></select></label>
-                  <label>Eta'<select name="ageRange"><option value="">Seleziona</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
-                  <label>Provenienza<select name="distance"><option value="">Seleziona</option><option value="luzzi">Luzzi</option><option value="nearby-towns">Paesi limitrofi</option><option value="rende">Rende</option><option value="cosenza">Cosenza</option><option value="over-25km">+ di 25 km</option><option value="over-50km">+ di 50 km</option></select></label>
+              <section class="vote-rating-panel" aria-labelledby="vote-rating-title">
+                <div class="vote-rating-head">
+                  <span class="section-label">Valutazioni</span>
+                  <h3 id="vote-rating-title">Esprimi il tuo voto</h3>
                 </div>
+                <div class="vote-score-grid">
+                  <fieldset class="vote-score-card">
+                    <legend>Miglior Street Chef</legend>
+                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Miglior Street Chef da 1 a 5">
+                      <input id="bestStreetChef1" name="bestStreetChefScore" type="radio" value="1" required />
+                      <label for="bestStreetChef1" aria-label="1 su 5">1</label>
+                      <input id="bestStreetChef2" name="bestStreetChefScore" type="radio" value="2" />
+                      <label for="bestStreetChef2" aria-label="2 su 5">2</label>
+                      <input id="bestStreetChef3" name="bestStreetChefScore" type="radio" value="3" />
+                      <label for="bestStreetChef3" aria-label="3 su 5">3</label>
+                      <input id="bestStreetChef4" name="bestStreetChefScore" type="radio" value="4" />
+                      <label for="bestStreetChef4" aria-label="4 su 5">4</label>
+                      <input id="bestStreetChef5" name="bestStreetChefScore" type="radio" value="5" />
+                      <label for="bestStreetChef5" aria-label="5 su 5">5</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="vote-score-card">
+                    <legend>Premio Cortesia</legend>
+                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Premio Cortesia da 1 a 5">
+                      <input id="courtesyAward1" name="courtesyScore" type="radio" value="1" required />
+                      <label for="courtesyAward1" aria-label="1 su 5">1</label>
+                      <input id="courtesyAward2" name="courtesyScore" type="radio" value="2" />
+                      <label for="courtesyAward2" aria-label="2 su 5">2</label>
+                      <input id="courtesyAward3" name="courtesyScore" type="radio" value="3" />
+                      <label for="courtesyAward3" aria-label="3 su 5">3</label>
+                      <input id="courtesyAward4" name="courtesyScore" type="radio" value="4" />
+                      <label for="courtesyAward4" aria-label="4 su 5">4</label>
+                      <input id="courtesyAward5" name="courtesyScore" type="radio" value="5" />
+                      <label for="courtesyAward5" aria-label="5 su 5">5</label>
+                    </div>
+                  </fieldset>
+                </div>
+              </section>
+              <label>Email<input name="email" type="email" placeholder="La tua email" required /></label>
+              <label class="privacy-check"><input id="prizeOptIn" name="prizeOptIn" type="checkbox" /><span>Opzionale: partecipa all'estrazione e prova a vincere una t-shirt personalizzata con il tuo nome.</span></label>
+              <div class="vote-extra-fields" id="voteExtraFields" hidden>
+                <label>Nome<input name="voter" type="text" placeholder="Il tuo nome" /></label>
+                <label>Sesso<select name="gender"><option value="">Seleziona</option><option value="female">Donna</option><option value="male">Uomo</option><option value="prefer-not">Preferisco non dirlo</option></select></label>
+                <label>Eta'<select name="ageRange"><option value="">Seleziona</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
+                <label>Provenienza<select name="distance"><option value="">Seleziona</option><option value="luzzi">Luzzi</option><option value="nearby-towns">Paesi limitrofi</option><option value="rende">Rende</option><option value="cosenza">Cosenza</option><option value="over-25km">+ di 25 km</option><option value="over-50km">+ di 50 km</option></select></label>
+              </div>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
               <button class="primary-action" type="submit">Invia voto</button>
             </form>
@@ -122,9 +159,9 @@
           </div>
         </section>
       </main>
-      <footer class="app-footer" aria-label="Crediti"><span>&copy; 2026 Cosenza Super Street Food</span><span><a href="privacy.html">Privacy</a></span><span>Designed &amp; Developed by Anthony De Bartolo</span></footer>
+      <footer class="app-footer" aria-label="Crediti"><span>&copy; 2026 Cosenza Super Street Food</span><span><a href="privacy.html">Privacy</a></span><span>Designed &amp; Developed by ADB99</span></footer>
     </div>
-    <div class="consent-banner" id="consentBanner" hidden><div><strong>Cookie e statistiche</strong><p>Usiamo statistiche anonime, solo con consenso, per migliorare la web app dell'evento. Se vuoi puoi anche attivare le notifiche per ricevere aggiornamenti e comunicazioni evento. Leggi l'<a href="privacy.html">informativa privacy</a>.</p></div><div class="consent-actions"><button class="ghost-link" id="publicNotificationButton" type="button">Attiva notifiche</button><button class="ghost-link" id="rejectAnalyticsButton" type="button">Rifiuta</button><button class="primary-action" id="acceptAnalyticsButton" type="button">Accetta</button></div></div>
+    <div class="consent-banner" id="consentBanner" hidden><div><strong>Aiutaci a migliorare</strong><p>Usiamo statistiche anonime, solo con consenso, per migliorare la web app dell'evento. Se vuoi puoi anche attivare le notifiche per ricevere aggiornamenti e comunicazioni evento. Leggi l'<a href="privacy.html">informativa privacy</a>.</p></div><div class="consent-actions"><button class="ghost-link" id="publicNotificationButton" type="button">Attiva notifiche</button><button class="ghost-link" id="rejectAnalyticsButton" type="button">Rifiuta</button><button class="primary-action" id="acceptAnalyticsButton" type="button">Accetta</button></div></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js?v=20260611-pwa-v171"></script>
   </body>

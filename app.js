@@ -60,8 +60,8 @@ const defaultTrucks = [
     name: "Afterlife Cocktail",
     category: "cocktail",
     zone: "Area drink",
-    menu: "Cocktail Zone - dove potrai gustare tutti i grandi classici della mixology preparati al momento.",
-    color: "#8b5cf6",
+    menu: "Cocktail Zone - dove potrai gustare tutti i grandi classici della mixology preparati al momento, CAFFE' AIELLO",
+    color: "#38bdf8",
     mapPositions: [{ x: 65.6, y: 12.9 }],
     status: "open",
     x: 65.6,
@@ -103,7 +103,7 @@ const defaultTrucks = [
     category: "sudamericano",
     zone: "Area world food",
     menu: "Arepas, Burritos, Tequenos, Churros, Tutto #GlutenFree",
-    color: "#14b8a6",
+    color: "#facc15",
     mapPositions: [{ x: 18.4, y: 74.4 }],
     status: "open",
     x: 18.4,
@@ -129,7 +129,7 @@ const defaultTrucks = [
     category: "carne",
     zone: "Area brace",
     menu: "Piatto Carne Argentina ASADO, Panini con Hamburger di carne argentina",
-    color: "#ef4444",
+    color: "#facc15",
     mapPositions: [{ x: 88.7, y: 77.2 }],
     status: "open",
     x: 88.7,
@@ -142,7 +142,7 @@ const defaultTrucks = [
     category: "pesce",
     zone: "Area mare",
     menu: "Frittura cuoppo di calamari - #GlutenFree., Panino polpami (polipo), Panino squiddi (calamari), Panino Crusco (baccala)",
-    color: "#06b6d4",
+    color: "#9333ea",
     mapPositions: [{ x: 28.8, y: 15.8 }],
     status: "open",
     x: 28.8,
@@ -154,8 +154,8 @@ const defaultTrucks = [
     name: "La Forneria",
     category: "forno",
     zone: "Via centrale",
-    menu: "Focaccia (Mortadella, Stracchino e pistacchio), Focaccia (Porchetta e crema ai 4 formaggi), Arancini (Classici al ragu/ Bianco zafferano e mozzarella), Cuoppo Polpette (Melanzane e carne), Sua maesta \"A Grupariata\"",
-    color: "#eab308",
+    menu: "Focaccia (Mortadella, Stracchino e pistacchio), Focaccia (Porchetta e crema ai 4 formaggi), Focaccia (Crudo e crema di noci), Arancini (Classici al ragu/ Bianco zafferano e mozzarella), Cuoppo Polpette (Melanzane e carne), Sua maesta \"A Grupariata\"",
+    color: "#2563eb",
     mapPositions: [{ x: 84.2, y: 14.8 }],
     status: "open",
     x: 84.2,
@@ -168,7 +168,7 @@ const defaultTrucks = [
     category: "fritti",
     zone: "Area novita",
     menu: "Cuzzitiello, Corn Dog, patatine fritte",
-    color: "#f97316",
+    color: "#2563eb",
     mapPositions: [{ x: 40.8, y: 75.8 }],
     status: "open",
     x: 40.8,
@@ -180,8 +180,8 @@ const defaultTrucks = [
     name: "Panzerotto on the road",
     category: "fritti",
     zone: "Via centrale",
-    menu: "Panzerotti, Burrate fritte",
-    color: "#22c55e",
+    menu: "Panzerotti Caldi (Classico o Silano), Panzerotti Freddi (Primavera o Bolognese), Burrate fritte (Burrata Crudo o Burrata Mortadella)",
+    color: "#2563eb",
     mapPositions: [{ x: 6.3, y: 20.7 }],
     status: "open",
     x: 6.3,
@@ -194,7 +194,7 @@ const defaultTrucks = [
     category: "bbq",
     zone: "Area BBQ",
     menu: "Panino con Pulled Pork, Panino con Brisket",
-    color: "#9f1239",
+    color: "#facc15",
     mapPositions: [{ x: 60.5, y: 74.9 }],
     status: "open",
     x: 60.5,
@@ -207,7 +207,7 @@ const defaultTrucks = [
     category: "carne",
     zone: "Area brace",
     menu: "Cipollotto (panino con hamburgher di scottona), Salsicciotto (panino con hamburgher di salsiccia), Porchetto ( panino con porchetta), Cuoppo The Butchers (misto carne), Cuoppo Ribs - {ESCLUSIVA CSSF26}, Cuoppo Alette di Pollo #LimitedEdition",
-    color: "#6366f1",
+    color: "#facc15",
     mapPositions: [{ x: 44.5, y: 15.4 }],
     status: "open",
     x: 44.5,
@@ -220,7 +220,7 @@ const defaultTrucks = [
     category: "tradizione",
     zone: "Area tradizione",
     menu: "Tagliatelle ai funghi Porcini, Maccarruni della nonna (costine carne e polpette al sugo), Scialatelli alla Silana (salsiccia, porcini, pomodorini e ricotta affumicata), Patate mbacchiuse con cipolla, Patate mbacchiuse con funghi porcini, Patate mbacchiuse con peperoni",
-    color: "#65a30d",
+    color: "#facc15",
     mapPositions: [{ x: 54.8, y: 11.7 }],
     status: "open",
     x: 54.8,
@@ -233,7 +233,7 @@ const defaultTrucks = [
     category: "brace",
     zone: "Area brace",
     menu: "Arrosticini di pecora, Cacio cavallo impiccato, Patata Conzata (Pulled di pecora, crema di parmigiano e cipolla caramellata), Patate fritte e Pulled di pecora, Panino con pulled di pecora (verdure - cacio - cipolla e salsa sweet chilli)",
-    color: "#c2410c",
+    color: "#facc15",
     mapPositions: [{ x: 6.1, y: 72.8 }],
     status: "open",
     x: 6.1,
@@ -246,7 +246,7 @@ const defaultTrucks = [
     category: "pizza",
     zone: "Area pizza",
     menu: "Pizza a portafoglio (Margherita), Pizza Portafoglio Fredda (Pomodoro - Mozzarella e Pesto), Pizza Fritta (Margherita)",
-    color: "#f43f5e",
+    color: "#2563eb",
     mapPositions: [{ x: 74.2, y: 76.2 }],
     status: "open",
     x: 74.2,
@@ -286,8 +286,13 @@ const truckStatusLabels = {
 const voteCategories = [
   { value: "best-street-chef", label: "Miglior Street Chef 2026" },
   { value: "courtesy-award", label: "Premio Cortesia" },
-  { value: "tradition-award", label: "Premio Tradizione" },
 ];
+
+const voteCategoryLabels = {
+  "best-street-chef": "Miglior Street Chef 2026",
+  "courtesy-award": "Premio Cortesia",
+  "tradition-award": "Premio Tradizione",
+};
 
 const reviewLabels = {
   ageRange: {
@@ -431,7 +436,6 @@ const selectedTruckCard = document.querySelector("#selectedTruckCard");
 const truckGrid = document.querySelector("#truckGrid");
 const emptyTrucks = document.querySelector("#emptyTrucks");
 const voteForm = document.querySelector("#voteForm");
-const voteCategory = document.querySelector("#voteCategory");
 const voteTruck = document.querySelector("#voteTruck");
 const prizeOptIn = document.querySelector("#prizeOptIn");
 const voteExtraFields = document.querySelector("#voteExtraFields");
@@ -590,7 +594,6 @@ bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
 bindEvent(voteForm, "input", handleFieldValidationStateChange);
 bindEvent(voteForm, "change", handleFieldValidationStateChange);
-bindEvent(voteCategory, "change", renderVoteOptions);
 bindEvent(prizeOptIn, "change", toggleVoteExtraFields);
 bindEvent(truckForm, "submit", handleTruckFormSubmit);
 bindEvent(resetTruckFormButton, "click", resetTruckForm);
@@ -1091,40 +1094,72 @@ async function handleVoteSubmit(event) {
     return;
   }
 
-  const vote = {
-    id: createId("VOTE"),
-    createdAt: new Date().toISOString(),
-    category: String(formData.get("category")),
-    truckId,
-    voter: cleanText(formData.get("voter")),
-    prizeOptIn: formData.get("prizeOptIn") === "on",
-    email: cleanText(formData.get("email")),
-    gender: String(formData.get("gender") || ""),
-    ageRange: String(formData.get("ageRange") || ""),
-    distance: String(formData.get("distance") || ""),
-  };
+  const createdAt = new Date().toISOString();
+  const voter = cleanText(formData.get("voter")) || "Anonimo";
+  const prizeOptIn = formData.get("prizeOptIn") === "on";
+  const email = cleanText(formData.get("email"));
+  const gender = String(formData.get("gender") || "");
+  const ageRange = String(formData.get("ageRange") || "");
+  const distance = String(formData.get("distance") || "");
+  const bestStreetChefScore = Number(formData.get("bestStreetChefScore"));
+  const courtesyScore = Number(formData.get("courtesyScore"));
 
   const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-  if (!vote.email || !emailPattern.test(vote.email)) {
+  if (!email || !emailPattern.test(email)) {
     showToast("Inserisci un'email valida.");
     return;
   }
 
-  if (!vote.voter) {
-    vote.voter = "Anonimo";
+  if (!Number.isInteger(bestStreetChefScore) || bestStreetChefScore < 1 || bestStreetChefScore > 5) {
+    showToast("Assegna un punteggio a Miglior Street Chef.");
+    return;
   }
 
-  const remoteSaved = await saveVoteRemote(vote);
-  if (!remoteSaved) {
+  if (!Number.isInteger(courtesyScore) || courtesyScore < 1 || courtesyScore > 5) {
+    showToast("Assegna un punteggio al Premio Cortesia.");
+    return;
+  }
+
+  const submittedVotes = [
+    {
+      id: createId("VOTE"),
+      createdAt,
+      category: "best-street-chef",
+      truckId,
+      voter,
+      prizeOptIn,
+      email,
+      gender,
+      ageRange,
+      distance,
+      score: bestStreetChefScore,
+    },
+    {
+      id: createId("VOTE"),
+      createdAt,
+      category: "courtesy-award",
+      truckId,
+      voter,
+      prizeOptIn,
+      email,
+      gender,
+      ageRange,
+      distance,
+      score: courtesyScore,
+    },
+  ];
+
+  const remoteSaved = await Promise.all(submittedVotes.map((vote) => saveVoteRemote(vote)));
+  if (remoteSaved.some((saved) => !saved)) {
     showToast(`Voto non inviato: ${lastVoteRemoteError || "Supabase non raggiungibile"}. Riprova.`);
     return;
   }
 
-  votes.unshift(vote);
+  votes.unshift(...submittedVotes);
   saveVotes();
   selectedTruckId = truckId;
-  activeLeaderboardCategory = String(formData.get("category"));
+  activeLeaderboardCategory = "best-street-chef";
   remoteVoteLeaderboardSynced = false;
   voteForm.reset();
   clearFormValidationState(voteForm);
@@ -1132,10 +1167,12 @@ async function handleVoteSubmit(event) {
   render();
   trackEvent("conversion", "voto inviato", {
     section: "vota",
-    category: String(formData.get("category")),
+    category: "contest-dual-score",
     truckId,
+    bestStreetChefScore,
+    courtesyScore,
   });
-  showToast(`Voto registrato per ${truck.name}.`);
+  showToast(`Voti registrati per ${truck.name}.`);
 }
 
 function toggleVoteExtraFields() {
@@ -1440,6 +1477,7 @@ async function refreshVotesFromRemote() {
       supabaseClient
         .from(SUPABASE_VOTE_LEADERBOARD_VIEW)
         .select("*")
+        .order("avg_score", { ascending: false })
         .order("vote_count", { ascending: false }),
     ]);
 
@@ -1465,6 +1503,7 @@ async function refreshVoteLeaderboardFromRemote() {
     const { data, error } = await supabaseClient
       .from(SUPABASE_VOTE_LEADERBOARD_VIEW)
       .select("*")
+      .order("avg_score", { ascending: false })
       .order("vote_count", { ascending: false });
 
     if (error || !Array.isArray(data)) return false;
@@ -2227,6 +2266,11 @@ function formatTruckMenuAsList(menu) {
 }
 
 function getTruckLegendAccentColor(truck) {
+  const explicitColor = String(truck?.color || "").trim();
+  if (explicitColor) {
+    return explicitColor;
+  }
+
   const category = String(truck?.category || "").toLowerCase();
   const searchable = `${truck?.name || ""} ${truck?.menu || ""}`.toLowerCase();
 
@@ -2325,7 +2369,7 @@ function renderLeaderboard() {
         <strong>${escapeHtml(row.truck.name)}</strong>
         <span>${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)} - ${escapeHtml(row.truck.zone)}</span>
       </div>
-      <div class="vote-count">${row.count} voti</div>
+      <div class="vote-count">Media ${formatVoteScore(row.avgScore)} · ${row.count} voti</div>
     `;
     leaderboardList.append(item);
   });
@@ -2359,11 +2403,11 @@ function renderStaffVotes() {
       <strong>${escapeHtml(winner?.truck?.name || "Nessun voto")}</strong>
       <span class="staff-vote-award-meta">${winner ? `${escapeHtml(winner.truck.code)} - ${escapeHtml(categoryLabels[winner.truck.category] || winner.truck.category)}` : "In attesa di voti"}</span>
       <div class="staff-vote-award-count">
-        <span>Voti</span>
-        <b>${winner ? winner.count : 0}</b>
+        <span>Media</span>
+        <b>${winner ? formatVoteScore(winner.avgScore) : "0,0/5"}</b>
       </div>
       <div class="staff-vote-award-foot">
-        <span>${runnerUp ? `Secondo: ${escapeHtml(runnerUp.truck.name)} (${runnerUp.count})` : "Secondo non disponibile"}</span>
+        <span>${runnerUp ? `Secondo: ${escapeHtml(runnerUp.truck.name)} (${formatVoteScore(runnerUp.avgScore)})` : "Secondo non disponibile"}</span>
         <em>${totalVotes} voti totali</em>
       </div>
     `;
@@ -2387,16 +2431,16 @@ function renderStaffVotes() {
     visibleRows.forEach((row, index) => {
       const item = document.createElement("div");
       item.className = "staff-vote-detail-row";
-      item.innerHTML = `
-        <div class="leaderboard-rank">${index + 1}</div>
-        <div class="staff-vote-detail-main">
-          <strong>${escapeHtml(row.truck.name)}</strong>
-          <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)} - ${escapeHtml(row.truck.zone)}</span>
-        </div>
-        <div class="vote-count">${row.count} voti</div>
-      `;
-      staffVoteDetailList.append(item);
-    });
+        item.innerHTML = `
+          <div class="leaderboard-rank">${index + 1}</div>
+          <div class="staff-vote-detail-main">
+            <strong>${escapeHtml(row.truck.name)}</strong>
+            <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)} - ${escapeHtml(row.truck.zone)}</span>
+          </div>
+          <div class="vote-count">${formatVoteScore(row.avgScore)} · ${row.count} voti</div>
+        `;
+        staffVoteDetailList.append(item);
+      });
   }
 
   if (staffVoteMoreWrap) {
@@ -2420,7 +2464,7 @@ function renderPrizeEntries() {
 
   entries.forEach((vote) => {
     const details = [
-      getVoteCategoryLabel(vote.category),
+      getVoteCategorySummary(vote),
       getContestAgeLabel(vote.ageRange),
       getContestDistanceLabel(vote.distance),
       formatDateTime(vote.createdAt),
@@ -2458,7 +2502,7 @@ function renderPrizeSummary(entries) {
   const categoryStats = voteCategories
     .map((category) => ({
       label: category.label,
-      count: entries.filter((entry) => entry.category === category.value).length,
+      count: entries.filter((entry) => entry.categories.includes(category.value)).length,
     }))
     .filter((row) => row.count > 0)
     .sort((a, b) => b.count - a.count);
@@ -2512,7 +2556,7 @@ function drawPrizeWinner() {
   if (prizeWinnerMeta) {
     const details = [
       winner.email || "email non inserita",
-      getVoteCategoryLabel(winner.category),
+      getVoteCategorySummary(winner),
       getContestDistanceLabel(winner.distance),
     ];
     prizeWinnerMeta.textContent = details.join(" · ");
@@ -2591,9 +2635,11 @@ function getLeaderboard(category) {
       .map((row) => ({
         truck: trucks.find((truck) => truck.id === row.truckId),
         count: row.count,
+        totalScore: row.totalScore,
+        avgScore: row.avgScore,
       }))
       .filter((row) => row.truck)
-      .sort((a, b) => b.count - a.count || a.truck.name.localeCompare(b.truck.name));
+      .sort((a, b) => b.avgScore - a.avgScore || b.count - a.count || a.truck.name.localeCompare(b.truck.name));
   }
 
   return getLeaderboardFromVotes(category);
@@ -2604,22 +2650,31 @@ function getLeaderboardFromVotes(category) {
     .filter((vote) => !category || vote.category === category)
     .reduce((acc, vote) => {
       const key = `${vote.category}::${vote.truckId}`;
-      acc[key] = (acc[key] || 0) + 1;
+      if (!acc[key]) {
+        acc[key] = {
+          count: 0,
+          totalScore: 0,
+        };
+      }
+      acc[key].count += 1;
+      acc[key].totalScore += Number(vote.score) || 0;
       return acc;
     }, {});
 
   return Object.entries(counts)
-    .map(([key, count]) => {
-      const [voteCategory, truckId] = key.split("::");
-      return {
-        category: voteCategory,
-        truckId,
-        truck: trucks.find((truck) => truck.id === truckId),
-        count,
-      };
-    })
-    .filter((row) => row.truck)
-    .sort((a, b) => b.count - a.count || a.truck.name.localeCompare(b.truck.name));
+    .map(([key, stats]) => {
+        const [voteCategory, truckId] = key.split("::");
+        return {
+          category: voteCategory,
+          truckId,
+          truck: trucks.find((truck) => truck.id === truckId),
+          count: stats.count,
+          totalScore: stats.totalScore,
+          avgScore: stats.count ? stats.totalScore / stats.count : 0,
+        };
+      })
+      .filter((row) => row.truck)
+      .sort((a, b) => b.avgScore - a.avgScore || b.count - a.count || a.truck.name.localeCompare(b.truck.name));
 }
 
 function editTruck(id) {
@@ -3451,7 +3506,7 @@ function exportPrizeEntriesCsv() {
     return;
   }
 
-  const headers = ["ora", "nome", "email", "sesso", "eta", "provenienza", "categoria", "street_chef"];
+    const headers = ["ora", "nome", "email", "sesso", "eta", "provenienza", "valutazioni", "street_chef"];
   const rows = entries.map((entry) => {
     const truck = trucks.find((item) => item.id === entry.truckId);
     return [
@@ -3461,9 +3516,9 @@ function exportPrizeEntriesCsv() {
       getContestGenderLabel(entry.gender),
       getContestAgeLabel(entry.ageRange),
       getContestDistanceLabel(entry.distance),
-      getVoteCategoryLabel(entry.category),
-      truck ? truck.name : entry.truckId,
-    ];
+        getVoteCategorySummary(entry),
+        truck ? truck.name : entry.truckId,
+      ];
   });
 
   const csv = [headers, ...rows].map((row) => row.map(toCsvCell).join(",")).join("\n");
@@ -3658,10 +3713,26 @@ function getVoteTotal() {
 }
 
 function getPrizeEntries() {
-  return votes
+  const groupedEntries = votes
     .filter((vote) => vote.prizeOptIn)
-    .slice()
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .reduce((acc, vote) => {
+      const key = [vote.email || "", vote.truckId || "", vote.createdAt || "", vote.voter || ""].join("::");
+      if (!acc[key]) {
+        acc[key] = {
+          ...vote,
+          categories: [],
+          scores: {},
+        };
+      }
+
+      if (!acc[key].categories.includes(vote.category)) {
+        acc[key].categories.push(vote.category);
+      }
+      acc[key].scores[vote.category] = Number(vote.score) || 0;
+      return acc;
+    }, {});
+
+  return Object.values(groupedEntries).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 function getTopCountLabel(values) {
@@ -4415,10 +4486,19 @@ function formatReservationMessage(reservation) {
 
 function createWhatsAppUrl(reservation) {
   const phone = normalizePhone(reservation.phone);
-  const message =
-    `Ciao ${reservation.name}, abbiamo ricevuto la tua richiesta tavolo per Cosenza Super Street Food ` +
-    `(${getDayLabel(reservation.day, true)} ore ${reservation.slot}, ${reservation.guests} persone). ` +
-    `Stato: ${statusLabels[reservation.status]}. Codice ${reservation.id}.`;
+  const message = [
+    "Gentile,",
+    "",
+    "grazie per aver effettuato la richiesta di prenotazione del tuo tavolo per il Cosenza Super Street Food 2026!",
+    "",
+    "Ti ricordiamo che la prenotazione e soggetta a un contributo di 25 €, da corrispondere direttamente all'operatore che ti accompagnera al tavolo, a copertura dei costi di gestione del servizio.",
+    "",
+    "Il tavolo verra mantenuto riservato per un massimo di 20 minuti oltre l'orario indicato. Trascorso tale termine, la prenotazione potrebbe decadere e il tavolo essere riassegnato.",
+    "",
+    "Attenzione: per prenotazioni con orario successivo alle 21:00, non sara possibile garantire il mantenimento della prenotazione oltre l'orario concordato.",
+    "",
+    "Ti aspettiamo al CSSF26! 🍔🍺",
+  ].join("\n");
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
@@ -5003,6 +5083,7 @@ function mapVoteToRemote(vote) {
     gender: vote.gender || null,
     age_range: vote.ageRange || null,
     distance: vote.distance || null,
+    score: Number(vote.score) || 0,
   };
 }
 
@@ -5018,6 +5099,7 @@ function mapVoteFromRemote(row) {
     gender: row.gender || "",
     ageRange: row.age_range || row.ageRange || "",
     distance: row.distance || "",
+    score: Number(row.score) || 0,
   };
 }
 
@@ -5026,6 +5108,8 @@ function mapVoteLeaderboardFromRemote(row) {
     category: row.category || voteCategories[0].value,
     truckId: row.truck_id || row.truckId || "",
     count: Number(row.vote_count || row.count) || 0,
+    totalScore: Number(row.total_score) || 0,
+    avgScore: Number(row.avg_score) || 0,
   };
 }
 
@@ -5287,7 +5371,22 @@ function formatDateTime(value) {
 }
 
 function getVoteCategoryLabel(value) {
-  return voteCategories.find((category) => category.value === value)?.label || value;
+  return voteCategoryLabels[value] || value;
+}
+
+function getVoteCategorySummary(entry) {
+  const categories = Array.isArray(entry?.categories) && entry.categories.length ? entry.categories : [entry?.category].filter(Boolean);
+  return categories
+    .map((category) => {
+      const score = Number(entry?.scores?.[category] ?? (entry?.category === category ? entry?.score : 0)) || 0;
+      return `${getVoteCategoryLabel(category)}${score ? ` ${score}/5` : ""}`;
+    })
+    .join(" · ");
+}
+
+function formatVoteScore(value) {
+  const numericValue = Number(value) || 0;
+  return `${numericValue.toFixed(1).replace(".", ",")}/5`;
 }
 
 function escapeHtml(value) {
