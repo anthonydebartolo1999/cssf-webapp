@@ -1,7 +1,7 @@
 {
   "name": "Cosenza Super Street Food",
   "short_name": "CSSF",
-  "description": "Prenotazioni, programma e recensioni per Cosenza Super Street Food.",
+  "description": "Il piu' grande festival di street food della provincia di Cosenza. Tre serate di street chef, birra, musica live e un'atmosfera costruita per farsi ricordare. 26 - 27 - 28 GIUGNO 2026.",
   "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",

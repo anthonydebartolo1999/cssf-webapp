@@ -1361,6 +1361,7 @@ async function refreshReservationsFromRemote() {
     remoteReservationsSynced = true;
     saveReservations();
     render();
+    renderAnalyticsDashboard();
     return true;
   } catch {
     return false;
@@ -1451,7 +1452,7 @@ async function refreshTrucksFromRemote() {
 }
 
 function subscribeToTruckChanges() {
-  if (!supabaseClient || trucksRealtimeChannel) return;
+  if (!supabaseClient || trucksRealtimeChannel || !staffSession || !isStaffPage()) return;
 
   trucksRealtimeChannel = supabaseClient
     .channel("cssf-trucks-realtime")
@@ -1490,6 +1491,7 @@ async function refreshVotesFromRemote() {
     remoteVoteLeaderboardSynced = true;
     saveVotes();
     render();
+    renderAnalyticsDashboard();
     return true;
   } catch {
     return false;
@@ -1518,7 +1520,7 @@ async function refreshVoteLeaderboardFromRemote() {
 }
 
 function subscribeToVoteChanges() {
-  if (!supabaseClient || votesRealtimeChannel) return;
+  if (!supabaseClient || votesRealtimeChannel || !staffSession || !isStaffPage()) return;
 
   votesRealtimeChannel = supabaseClient
     .channel("cssf-votes-realtime")
@@ -1544,6 +1546,7 @@ async function refreshReviewsFromRemote() {
     reviews = data.map(mapReviewFromRemote);
     saveReviews();
     renderReviews();
+    renderAnalyticsDashboard();
     return true;
   } catch {
     return false;
@@ -1551,7 +1554,7 @@ async function refreshReviewsFromRemote() {
 }
 
 function subscribeToReviewChanges() {
-  if (!supabaseClient || reviewsRealtimeChannel) return;
+  if (!supabaseClient || reviewsRealtimeChannel || !staffSession || !isStaffPage()) return;
 
   reviewsRealtimeChannel = supabaseClient
     .channel("cssf-reviews-realtime")
@@ -1611,6 +1614,7 @@ async function refreshMomentsFromRemote() {
     remoteMomentsHasMore = moments.length < remoteMomentsTotal;
     saveMoments();
     renderMomentsAdmin();
+    renderAnalyticsDashboard();
     return true;
   } catch {
     return false;
@@ -1636,6 +1640,7 @@ async function loadMoreMomentsFromRemote() {
     remoteMomentsHasMore = moments.length < remoteMomentsTotal;
     saveMoments();
     renderMomentsAdmin();
+    renderAnalyticsDashboard();
     return true;
   } catch {
     return false;
@@ -3072,6 +3077,105 @@ function renderAnalyticsDashboard() {
   );
   renderClickStatsList("#clickStatsList", clickSectionStats, "Nessun click tracciato.");
   renderAnalyticsSummary(sectionStats, clickSectionStats, durationStats, sessions.size, sectionViews.length, clicks.length);
+  renderDatabaseHealthEstimate();
+}
+
+function renderDatabaseHealthEstimate() {
+  const element = document.querySelector("#databaseHealthPanel");
+  if (!element) return;
+
+  const estimate = getDatabaseHealthEstimate();
+  element.innerHTML = `
+    <div class="db-health-header">
+      <div>
+        <span class="db-health-label">Carico stimato</span>
+        <strong>${estimate.percentage}%</strong>
+      </div>
+      <span class="db-health-badge ${estimate.tone}">${escapeHtml(estimate.label)}</span>
+    </div>
+    <div class="stats-bar db-health-bar" aria-hidden="true"><i style="width: ${estimate.percentage}%"></i></div>
+    <div class="db-health-meta">${escapeHtml(estimate.description)}</div>
+    <div class="stats-list">
+      ${estimate.rows
+        .map(
+          (row) => `
+            <div class="stats-row">
+              <div class="stats-row-main">
+                <strong>${escapeHtml(row.label)}</strong>
+                <span>${escapeHtml(String(row.value))}</span>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function getDatabaseHealthEstimate() {
+  const recentWindowMs = 15 * 60 * 1000;
+  const now = Date.now();
+  const isRecent = (value) => {
+    if (!value) return false;
+    const timestamp = new Date(value).getTime();
+    return Number.isFinite(timestamp) && now - timestamp <= recentWindowMs;
+  };
+
+  const recentAnalyticsCount = analyticsEvents.filter((event) => isRecent(event.createdAt)).length;
+  const recentReservationsCount = reservations.filter((reservation) => isRecent(reservation.createdAt)).length;
+  const recentReviewsCount = reviews.filter((review) => isRecent(review.createdAt)).length;
+  const recentMomentsCount = moments.filter((moment) => isRecent(moment.createdAt)).length;
+  const pendingReservationsCount = reservations.filter((reservation) =>
+    reservation.status === "pending" || reservation.status === "waiting"
+  ).length;
+  const pendingMomentsCount = moments.filter((moment) => moment.status === "pending").length;
+
+  const weightedLoad =
+    recentAnalyticsCount * 1 +
+    recentReservationsCount * 8 +
+    recentReviewsCount * 5 +
+    recentMomentsCount * 6 +
+    pendingReservationsCount * 1 +
+    pendingMomentsCount * 2;
+  const percentage = Math.max(0, Math.min(100, Math.round((weightedLoad / 120) * 100)));
+
+  let label = "Bassa";
+  let tone = "low";
+  if (percentage >= 85) {
+    label = "Critica";
+    tone = "critical";
+  } else if (percentage >= 65) {
+    label = "Alta";
+    tone = "high";
+  } else if (percentage >= 40) {
+    label = "Attenzione";
+    tone = "medium";
+  }
+
+  const drivers = [
+    { label: "Eventi analytics", value: recentAnalyticsCount },
+    { label: "Nuove prenotazioni", value: recentReservationsCount },
+    { label: "Nuove recensioni", value: recentReviewsCount },
+    { label: "Nuovi moments", value: recentMomentsCount },
+  ].sort((left, right) => right.value - left.value);
+  const topDriver = drivers[0];
+  const description =
+    topDriver && topDriver.value > 0
+      ? `Picco guidato da ${topDriver.label.toLowerCase()} negli ultimi 15 minuti.`
+      : "Nessun picco recente rilevato negli ultimi 15 minuti.";
+
+  return {
+    percentage,
+    label,
+    tone,
+    description,
+    rows: [
+      { label: "Scritture stimate ultimi 15 min", value: weightedLoad },
+      { label: "Analytics ultimi 15 min", value: recentAnalyticsCount },
+      { label: "Prenotazioni pendenti/in attesa", value: pendingReservationsCount },
+      { label: "Moments in revisione", value: pendingMomentsCount },
+    ],
+  };
 }
 
 function renderAnalyticsSummary(sectionStats, clickSectionStats, durationStats, sessionCount, sectionViewCount, clickCount) {
