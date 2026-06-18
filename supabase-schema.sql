@@ -46,7 +46,7 @@ create index if not exists trucks_category_idx on public.trucks (category);
 create table if not exists public.votes (
   id text primary key,
   created_at timestamptz not null default now(),
-  category text not null check (category in ('best-street-chef', 'courtesy-award', 'tradition-award')),
+  category text not null check (category in ('sanizzo-award', 'tradition-award', 'creative-award')),
   truck_id text not null references public.trucks (id) on delete cascade,
   voter_name text not null default 'Anonimo'
 );
@@ -68,7 +68,7 @@ $$;
 
 alter table public.votes
 add constraint votes_category_check
-check (category in ('best-street-chef', 'courtesy-award', 'tradition-award'));
+check (category in ('sanizzo-award', 'tradition-award', 'creative-award'));
 
 alter table public.votes
 add column if not exists voter_name text not null default 'Anonimo',
@@ -340,7 +340,7 @@ on public.votes
 for insert
 to anon, authenticated
 with check (
-  category in ('best-street-chef', 'courtesy-award', 'tradition-award')
+  category in ('sanizzo-award', 'tradition-award', 'creative-award')
   and score between 1 and 5
   and char_length(trim(voter_name)) between 1 and 80
   and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'

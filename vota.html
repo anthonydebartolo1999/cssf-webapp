@@ -95,7 +95,7 @@
       </header>
       <main>
         <section class="vote-section" id="vota" aria-labelledby="vota-title">
-          <div class="view-hero"><span class="section-label">Contest 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli il tuo street chef e assegna due voti rapidi per decretare il Miglior Street Chef e il Premio Cortesia.</p></div>
+          <div class="view-hero"><span class="section-label">Contest 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli il tuo street chef e assegna tre voti rapidi per decretare lo Street Chef piu' SANIZZO, lo Street Chef piu' TRADIZIONALE e lo Street Chef CREATIVO.</p></div>
           <div class="vote-layout">
             <form class="vote-form" id="voteForm">
               <label>Street chef<select id="voteTruck" name="truckId"></select></label>
@@ -106,33 +106,48 @@
                 </div>
                 <div class="vote-score-grid">
                   <fieldset class="vote-score-card">
-                    <legend>Miglior Street Chef</legend>
-                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Miglior Street Chef da 1 a 5">
-                      <input id="bestStreetChef1" name="bestStreetChefScore" type="radio" value="1" required />
-                      <label for="bestStreetChef1" aria-label="1 su 5">1</label>
-                      <input id="bestStreetChef2" name="bestStreetChefScore" type="radio" value="2" />
-                      <label for="bestStreetChef2" aria-label="2 su 5">2</label>
-                      <input id="bestStreetChef3" name="bestStreetChefScore" type="radio" value="3" />
-                      <label for="bestStreetChef3" aria-label="3 su 5">3</label>
-                      <input id="bestStreetChef4" name="bestStreetChefScore" type="radio" value="4" />
-                      <label for="bestStreetChef4" aria-label="4 su 5">4</label>
-                      <input id="bestStreetChef5" name="bestStreetChefScore" type="radio" value="5" />
-                      <label for="bestStreetChef5" aria-label="5 su 5">5</label>
+                    <legend>Street Chef piu' SANIZZO</legend>
+                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Street Chef piu' SANIZZO da 1 a 5">
+                      <input id="sanizzoAward1" name="sanizzoScore" type="radio" value="1" required />
+                      <label for="sanizzoAward1" aria-label="1 su 5">1</label>
+                      <input id="sanizzoAward2" name="sanizzoScore" type="radio" value="2" />
+                      <label for="sanizzoAward2" aria-label="2 su 5">2</label>
+                      <input id="sanizzoAward3" name="sanizzoScore" type="radio" value="3" />
+                      <label for="sanizzoAward3" aria-label="3 su 5">3</label>
+                      <input id="sanizzoAward4" name="sanizzoScore" type="radio" value="4" />
+                      <label for="sanizzoAward4" aria-label="4 su 5">4</label>
+                      <input id="sanizzoAward5" name="sanizzoScore" type="radio" value="5" />
+                      <label for="sanizzoAward5" aria-label="5 su 5">5</label>
                     </div>
                   </fieldset>
                   <fieldset class="vote-score-card">
-                    <legend>Premio Cortesia</legend>
-                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Premio Cortesia da 1 a 5">
-                      <input id="courtesyAward1" name="courtesyScore" type="radio" value="1" required />
-                      <label for="courtesyAward1" aria-label="1 su 5">1</label>
-                      <input id="courtesyAward2" name="courtesyScore" type="radio" value="2" />
-                      <label for="courtesyAward2" aria-label="2 su 5">2</label>
-                      <input id="courtesyAward3" name="courtesyScore" type="radio" value="3" />
-                      <label for="courtesyAward3" aria-label="3 su 5">3</label>
-                      <input id="courtesyAward4" name="courtesyScore" type="radio" value="4" />
-                      <label for="courtesyAward4" aria-label="4 su 5">4</label>
-                      <input id="courtesyAward5" name="courtesyScore" type="radio" value="5" />
-                      <label for="courtesyAward5" aria-label="5 su 5">5</label>
+                    <legend>Street Chef piu' TRADIZIONALE</legend>
+                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Street Chef piu' TRADIZIONALE da 1 a 5">
+                      <input id="traditionalAward1" name="traditionalScore" type="radio" value="1" required />
+                      <label for="traditionalAward1" aria-label="1 su 5">1</label>
+                      <input id="traditionalAward2" name="traditionalScore" type="radio" value="2" />
+                      <label for="traditionalAward2" aria-label="2 su 5">2</label>
+                      <input id="traditionalAward3" name="traditionalScore" type="radio" value="3" />
+                      <label for="traditionalAward3" aria-label="3 su 5">3</label>
+                      <input id="traditionalAward4" name="traditionalScore" type="radio" value="4" />
+                      <label for="traditionalAward4" aria-label="4 su 5">4</label>
+                      <input id="traditionalAward5" name="traditionalScore" type="radio" value="5" />
+                      <label for="traditionalAward5" aria-label="5 su 5">5</label>
+                    </div>
+                  </fieldset>
+                  <fieldset class="vote-score-card">
+                    <legend>Street Chef CREATIVO</legend>
+                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Street Chef CREATIVO da 1 a 5">
+                      <input id="creativeAward1" name="creativeScore" type="radio" value="1" required />
+                      <label for="creativeAward1" aria-label="1 su 5">1</label>
+                      <input id="creativeAward2" name="creativeScore" type="radio" value="2" />
+                      <label for="creativeAward2" aria-label="2 su 5">2</label>
+                      <input id="creativeAward3" name="creativeScore" type="radio" value="3" />
+                      <label for="creativeAward3" aria-label="3 su 5">3</label>
+                      <input id="creativeAward4" name="creativeScore" type="radio" value="4" />
+                      <label for="creativeAward4" aria-label="4 su 5">4</label>
+                      <input id="creativeAward5" name="creativeScore" type="radio" value="5" />
+                      <label for="creativeAward5" aria-label="5 su 5">5</label>
                     </div>
                   </fieldset>
                 </div>

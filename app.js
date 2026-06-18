@@ -6,7 +6,7 @@ const VOTE_STORAGE_KEY = "cssf-votes-v1";
 const ANALYTICS_STORAGE_KEY = "cssf-analytics-v1";
 const ANALYTICS_CONSENT_KEY = "cssf-analytics-consent-v1";
 const PRIVACY_BANNER_SEEN_KEY = "cssf-privacy-banner-seen-v1";
-const TABLE_COUNT = 10;
+const TABLE_COUNT = 15;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
@@ -284,14 +284,15 @@ const truckStatusLabels = {
 };
 
 const voteCategories = [
-  { value: "best-street-chef", label: "Miglior Street Chef 2026" },
-  { value: "courtesy-award", label: "Premio Cortesia" },
+  { value: "sanizzo-award", label: "Street Chef piu' SANIZZO" },
+  { value: "tradition-award", label: "Street Chef piu' TRADIZIONALE" },
+  { value: "creative-award", label: "Street Chef CREATIVO" },
 ];
 
 const voteCategoryLabels = {
-  "best-street-chef": "Miglior Street Chef 2026",
-  "courtesy-award": "Premio Cortesia",
-  "tradition-award": "Premio Tradizione",
+  "sanizzo-award": "Street Chef piu' SANIZZO",
+  "tradition-award": "Street Chef piu' TRADIZIONALE",
+  "creative-award": "Street Chef CREATIVO",
 };
 
 const reviewLabels = {
@@ -839,8 +840,7 @@ async function handleBookingSubmit(event) {
   const guests = clampNumber(Number(formData.get("guests")), 1, 30);
   const day = String(formData.get("day"));
   const slot = String(formData.get("slot"));
-  const available = getAvailableSeats(day, slot);
-  const status = guests > available ? "waiting" : "pending";
+  const status = "pending";
 
   const reservation = {
     id: createReservationId(),
@@ -866,20 +866,12 @@ async function handleBookingSubmit(event) {
 
   reservations.unshift(reservation);
   saveReservations();
-  incrementReservationSlotUsage(day, slot, guests);
   bookingForm.reset();
   clearFormValidationState(bookingForm);
   bookingForm.guests.value = 4;
   render();
-  refreshReservationSlotUsageFromRemote();
   trackEvent("conversion", "prenotazione inviata", { section: "prenota", code: reservation.id });
-
-  const remainingSeats = status === "waiting" ? available : Math.max(0, available - guests);
-  const message =
-    status === "waiting"
-      ? "Turno pieno: richiesta inserita in lista attesa."
-      : `Richiesta registrata: restano ${remainingSeats} posti disponibili.`;
-  showToast(`${message} Codice ${reservation.id}`);
+  showToast(`Richiesta registrata correttamente. Codice ${reservation.id}`);
 }
 
 async function handleReviewSubmit(event) {
@@ -1101,8 +1093,9 @@ async function handleVoteSubmit(event) {
   const gender = String(formData.get("gender") || "");
   const ageRange = String(formData.get("ageRange") || "");
   const distance = String(formData.get("distance") || "");
-  const bestStreetChefScore = Number(formData.get("bestStreetChefScore"));
-  const courtesyScore = Number(formData.get("courtesyScore"));
+  const sanizzoScore = Number(formData.get("sanizzoScore"));
+  const traditionalScore = Number(formData.get("traditionalScore"));
+  const creativeScore = Number(formData.get("creativeScore"));
 
   const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -1111,13 +1104,18 @@ async function handleVoteSubmit(event) {
     return;
   }
 
-  if (!Number.isInteger(bestStreetChefScore) || bestStreetChefScore < 1 || bestStreetChefScore > 5) {
-    showToast("Assegna un punteggio a Miglior Street Chef.");
+  if (!Number.isInteger(sanizzoScore) || sanizzoScore < 1 || sanizzoScore > 5) {
+    showToast("Assegna un punteggio a Street Chef piu' SANIZZO.");
     return;
   }
 
-  if (!Number.isInteger(courtesyScore) || courtesyScore < 1 || courtesyScore > 5) {
-    showToast("Assegna un punteggio al Premio Cortesia.");
+  if (!Number.isInteger(traditionalScore) || traditionalScore < 1 || traditionalScore > 5) {
+    showToast("Assegna un punteggio a Street Chef piu' TRADIZIONALE.");
+    return;
+  }
+
+  if (!Number.isInteger(creativeScore) || creativeScore < 1 || creativeScore > 5) {
+    showToast("Assegna un punteggio a Street Chef CREATIVO.");
     return;
   }
 
@@ -1125,7 +1123,7 @@ async function handleVoteSubmit(event) {
     {
       id: createId("VOTE"),
       createdAt,
-      category: "best-street-chef",
+      category: "sanizzo-award",
       truckId,
       voter,
       prizeOptIn,
@@ -1133,12 +1131,12 @@ async function handleVoteSubmit(event) {
       gender,
       ageRange,
       distance,
-      score: bestStreetChefScore,
+      score: sanizzoScore,
     },
     {
       id: createId("VOTE"),
       createdAt,
-      category: "courtesy-award",
+      category: "tradition-award",
       truckId,
       voter,
       prizeOptIn,
@@ -1146,7 +1144,20 @@ async function handleVoteSubmit(event) {
       gender,
       ageRange,
       distance,
-      score: courtesyScore,
+      score: traditionalScore,
+    },
+    {
+      id: createId("VOTE"),
+      createdAt,
+      category: "creative-award",
+      truckId,
+      voter,
+      prizeOptIn,
+      email,
+      gender,
+      ageRange,
+      distance,
+      score: creativeScore,
     },
   ];
 
@@ -1159,7 +1170,7 @@ async function handleVoteSubmit(event) {
   votes.unshift(...submittedVotes);
   saveVotes();
   selectedTruckId = truckId;
-  activeLeaderboardCategory = "best-street-chef";
+  activeLeaderboardCategory = "sanizzo-award";
   remoteVoteLeaderboardSynced = false;
   voteForm.reset();
   clearFormValidationState(voteForm);
@@ -1167,10 +1178,11 @@ async function handleVoteSubmit(event) {
   render();
   trackEvent("conversion", "voto inviato", {
     section: "vota",
-    category: "contest-dual-score",
+    category: "contest-triple-score",
     truckId,
-    bestStreetChefScore,
-    courtesyScore,
+    sanizzoScore,
+    traditionalScore,
+    creativeScore,
   });
   showToast(`Voti registrati per ${truck.name}.`);
 }
@@ -1279,10 +1291,8 @@ async function setupSupabaseReservations() {
     return;
   }
 
-  if (!bookingForm && !slotsGrid && !availabilityReadout) return;
-
-  await refreshReservationSlotUsageFromRemote();
-  startReservationSlotUsagePolling();
+  if (!bookingForm && !availabilityReadout) return;
+  updateAvailabilityReadout();
 }
 
 async function setupSupabaseTrucks() {
@@ -4467,13 +4477,7 @@ function getFilteredReservations() {
 
 function updateAvailabilityReadout() {
   if (!bookingForm || !availabilityReadout) return;
-
-  const day = bookingForm.day.value;
-  const slot = bookingForm.slot.value;
-  const guests = Number(bookingForm.guests.value) || 0;
-  const available = getAvailableSeats(day, slot);
-  const status = guests > available ? "lista attesa" : "richiesta disponibile";
-  availabilityReadout.textContent = `Posti disponibili: ${available} - ${status}`;
+  availabilityReadout.textContent = `${TABLE_COUNT} tavoli disponibili da ${SEATS_PER_TABLE} posti ciascuno`;
 }
 
 function getUsedSeats(day, slot) {

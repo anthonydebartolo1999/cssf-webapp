@@ -116,30 +116,8 @@
               </div>
               <label>Note <textarea name="notes" rows="4" placeholder="Passeggino, compleanno, allergie..."></textarea></label>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a> e invio i dati per gestire la richiesta tavolo.</span></label>
-              <div class="form-footer"><button class="primary-action large" type="submit">Invia richiesta</button><strong id="availabilityReadout">Posti stimati: --</strong></div>
+              <div class="form-footer"><button class="primary-action large" type="submit">Invia richiesta</button><strong id="availabilityReadout">15 tavoli disponibili da 8 posti ciascuno</strong></div>
             </form>
-            <aside class="slots-panel"><div class="panel-heading compact"><div><span class="section-label">Tavoli limitati</span><h2>Prenotabili</h2></div></div><div class="slots-grid" id="slotsGrid"></div></aside>
-          </div>
-          <div class="booking-modal" id="bookingSlotModal" hidden>
-            <button class="booking-modal-backdrop" type="button" data-close-slot-modal aria-label="Chiudi dettaglio prenotazione"></button>
-            <section class="booking-modal-panel" role="dialog" aria-modal="true" aria-labelledby="slotModalTitle">
-              <div class="booking-modal-heading">
-                <div>
-                  <span class="section-label">Dettaglio turno</span>
-                  <h2 id="slotModalTitle">Prenota alle 20:30</h2>
-                </div>
-                <button class="icon-button" type="button" data-close-slot-modal aria-label="Chiudi">&times;</button>
-              </div>
-              <p id="slotModalMeta"></p>
-              <form id="slotQuickForm">
-                <label>Posti da prenotare <input id="slotGuestsInput" name="guests" type="number" min="1" max="30" value="4" /></label>
-                <strong id="slotModalAvailability"></strong>
-                <div class="form-footer">
-                  <button class="primary-action" type="submit">Prenota</button>
-                  <button class="ghost-link" type="button" data-close-slot-modal>Chiudi</button>
-                </div>
-              </form>
-            </section>
           </div>
         </section>
       </main>
