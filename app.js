@@ -286,13 +286,13 @@ const truckStatusLabels = {
 const voteCategories = [
   { value: "sanizzo-award", label: "Street Chef piu' SANIZZO" },
   { value: "tradition-award", label: "Street Chef piu' TRADIZIONALE" },
-  { value: "creative-award", label: "Street Chef CREATIVO" },
+  { value: "creative-award", label: "Street Chef piu' CREATIVO" },
 ];
 
 const voteCategoryLabels = {
   "sanizzo-award": "Street Chef piu' SANIZZO",
   "tradition-award": "Street Chef piu' TRADIZIONALE",
-  "creative-award": "Street Chef CREATIVO",
+  "creative-award": "Street Chef piu' CREATIVO",
 };
 
 const reviewLabels = {
@@ -1115,7 +1115,7 @@ async function handleVoteSubmit(event) {
   }
 
   if (!Number.isInteger(creativeScore) || creativeScore < 1 || creativeScore > 5) {
-    showToast("Assegna un punteggio a Street Chef CREATIVO.");
+    showToast("Assegna un punteggio a Street Chef piu' CREATIVO.");
     return;
   }
 
