@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta
       name="description"
-      content="Vota il tuo street chef preferito al contest ufficiale di Cosenza Super Street Food 2026 e partecipa all'estrazione."
+      content="Vota il tuo street chef preferito e aiutaci a leggere gusti, preferenze e profilo del pubblico di Cosenza Super Street Food 2026."
     />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#161412" />
@@ -13,10 +13,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="CSSF" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta property="og:title" content="Contest Ufficiale | Cosenza Super Street Food 2026" />
+    <meta property="og:title" content="Vota il tuo street chef | Cosenza Super Street Food 2026" />
     <meta
       property="og:description"
-      content="Vota il tuo street chef preferito e partecipa al contest ufficiale del festival."
+      content="Vota il tuo street chef preferito e condividi le tue preferenze sul festival."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.cosenzasuperstreetfood.it/vota.html" />
@@ -24,10 +24,10 @@
     <meta property="og:locale" content="it_IT" />
     <meta property="og:image" content="https://www.cosenzasuperstreetfood.it/Maglia%20ccsf2026.jpeg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Contest Ufficiale | Cosenza Super Street Food 2026" />
+    <meta name="twitter:title" content="Vota il tuo street chef | Cosenza Super Street Food 2026" />
     <meta
       name="twitter:description"
-      content="Partecipa al contest e vota il tuo street chef preferito."
+      content="Vota il tuo street chef preferito e lascia il tuo contributo al profilo del pubblico."
     />
     <meta name="twitter:image" content="https://www.cosenzasuperstreetfood.it/Maglia%20ccsf2026.jpeg" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -53,7 +53,7 @@
         <nav class="site-nav" id="primaryNav" aria-label="Navigazione principale">
           <a href="index.html" data-view-link="home">Home</a>
           <a href="mappa.html" data-view-link="mappa">Menu' Street Chef</a>
-          <a href="vota.html" data-view-link="vota">Contest</a>
+          <a href="vota.html" data-view-link="vota">Vota</a>
           <a href="programma.html" data-view-link="programma">Programma</a>
           <a href="recensioni.html" data-view-link="recensioni">Recensioni</a>
           <a href="partner.html" data-view-link="partner">Partner</a>
@@ -95,7 +95,7 @@
       </header>
       <main>
         <section class="vote-section" id="vota" aria-labelledby="vota-title">
-          <div class="view-hero"><span class="section-label">Contest 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli il tuo street chef e assegna tre voti rapidi per decretare lo Street Chef piu' SANIZZO, lo Street Chef piu' TRADIZIONALE e lo Street Chef piu' CREATIVO.</p></div>
+          <div class="view-hero"><span class="section-label">Vota 2026</span><h2 id="vota-title">Vota il tuo street chef preferito</h2><p>Scegli il tuo street chef e assegna tre voti rapidi per decretare lo Street Chef piu' SANIZZO, lo Street Chef piu' TRADIZIONALE e lo Street Chef piu' CREATIVO.</p></div>
           <div class="vote-layout">
             <form class="vote-form" id="voteForm">
               <label>Street chef<select id="voteTruck" name="truckId"></select></label>
@@ -106,8 +106,9 @@
                 </div>
                 <div class="vote-score-grid">
                   <fieldset class="vote-score-card">
-                    <legend>Street Chef piu' SANIZZO</legend>
-                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Street Chef piu' SANIZZO da 1 a 5">
+                    <div class="vote-score-card-title">⭐ Quanto hai trovato SANIZZO il piatto che hai assaggiato?</div>
+                    <div class="vote-score-card-panel">
+                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto hai trovato SANIZZO il piatto che hai assaggiato? Vota da 1 a 5">
                       <input id="sanizzoAward1" name="sanizzoScore" type="radio" value="1" required />
                       <label for="sanizzoAward1" aria-label="1 su 5">1</label>
                       <input id="sanizzoAward2" name="sanizzoScore" type="radio" value="2" />
@@ -116,13 +117,15 @@
                       <label for="sanizzoAward3" aria-label="3 su 5">3</label>
                       <input id="sanizzoAward4" name="sanizzoScore" type="radio" value="4" />
                       <label for="sanizzoAward4" aria-label="4 su 5">4</label>
-                      <input id="sanizzoAward5" name="sanizzoScore" type="radio" value="5" />
-                      <label for="sanizzoAward5" aria-label="5 su 5">5</label>
+                        <input id="sanizzoAward5" name="sanizzoScore" type="radio" value="5" />
+                        <label for="sanizzoAward5" aria-label="5 su 5">5</label>
+                      </div>
                     </div>
                   </fieldset>
                   <fieldset class="vote-score-card">
-                    <legend>Street Chef piu' TRADIZIONALE</legend>
-                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Street Chef piu' TRADIZIONALE da 1 a 5">
+                    <div class="vote-score-card-title">🏛️ Quanto hai trovato tradizionale il piatto che hai assaggiato?</div>
+                    <div class="vote-score-card-panel">
+                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto hai trovato tradizionale il piatto che hai assaggiato? Vota da 1 a 5">
                       <input id="traditionalAward1" name="traditionalScore" type="radio" value="1" required />
                       <label for="traditionalAward1" aria-label="1 su 5">1</label>
                       <input id="traditionalAward2" name="traditionalScore" type="radio" value="2" />
@@ -131,13 +134,15 @@
                       <label for="traditionalAward3" aria-label="3 su 5">3</label>
                       <input id="traditionalAward4" name="traditionalScore" type="radio" value="4" />
                       <label for="traditionalAward4" aria-label="4 su 5">4</label>
-                      <input id="traditionalAward5" name="traditionalScore" type="radio" value="5" />
-                      <label for="traditionalAward5" aria-label="5 su 5">5</label>
+                        <input id="traditionalAward5" name="traditionalScore" type="radio" value="5" />
+                        <label for="traditionalAward5" aria-label="5 su 5">5</label>
+                      </div>
                     </div>
                   </fieldset>
                   <fieldset class="vote-score-card">
-                    <legend>Street Chef piu' CREATIVO</legend>
-                    <div class="vote-score-dots" role="radiogroup" aria-label="Vota Street Chef piu' CREATIVO da 1 a 5">
+                    <div class="vote-score-card-title">🎨 Quanto hai trovato creativo e originale il piatto che hai assaggiato?</div>
+                    <div class="vote-score-card-panel">
+                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto hai trovato creativo e originale il piatto che hai assaggiato? Vota da 1 a 5">
                       <input id="creativeAward1" name="creativeScore" type="radio" value="1" required />
                       <label for="creativeAward1" aria-label="1 su 5">1</label>
                       <input id="creativeAward2" name="creativeScore" type="radio" value="2" />
@@ -146,31 +151,22 @@
                       <label for="creativeAward3" aria-label="3 su 5">3</label>
                       <input id="creativeAward4" name="creativeScore" type="radio" value="4" />
                       <label for="creativeAward4" aria-label="4 su 5">4</label>
-                      <input id="creativeAward5" name="creativeScore" type="radio" value="5" />
-                      <label for="creativeAward5" aria-label="5 su 5">5</label>
+                        <input id="creativeAward5" name="creativeScore" type="radio" value="5" />
+                        <label for="creativeAward5" aria-label="5 su 5">5</label>
+                      </div>
                     </div>
                   </fieldset>
                 </div>
               </section>
-              <label>Email<input name="email" type="email" placeholder="La tua email" required /></label>
-              <label class="privacy-check"><input id="prizeOptIn" name="prizeOptIn" type="checkbox" /><span>Opzionale: partecipa all'estrazione e prova a vincere una t-shirt personalizzata con il tuo nome.</span></label>
-              <div class="vote-extra-fields" id="voteExtraFields" hidden>
-                <label>Nome<input name="voter" type="text" placeholder="Il tuo nome" /></label>
-                <label>Sesso<select name="gender"><option value="">Seleziona</option><option value="female">Donna</option><option value="male">Uomo</option><option value="prefer-not">Preferisco non dirlo</option></select></label>
-                <label>Eta'<select name="ageRange"><option value="">Seleziona</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
-                <label>Provenienza<select name="distance"><option value="">Seleziona</option><option value="luzzi">Luzzi</option><option value="nearby-towns">Paesi limitrofi</option><option value="rende">Rende</option><option value="cosenza">Cosenza</option><option value="over-25km">+ di 25 km</option><option value="over-50km">+ di 50 km</option></select></label>
+              <label><span class="field-label-inline">Email<span class="field-required">*</span></span><input name="email" type="email" placeholder="La tua email" required /></label>
+              <div class="vote-extra-fields" id="voteExtraFields">
+                <label>Sesso <span class="field-optional">(opzionale)</span><select name="gender"><option value="">Seleziona</option><option value="female">Donna</option><option value="male">Uomo</option><option value="prefer-not">Preferisco non dirlo</option></select></label>
+                <label>Eta' <span class="field-optional">(opzionale)</span><select name="ageRange"><option value="">Seleziona</option><option value="under-18">Meno di 18</option><option value="18-24">18-24</option><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-plus">55+</option></select></label>
+                <label>Provenienza <span class="field-optional">(opzionale)</span><select name="distance"><option value="">Seleziona</option><option value="luzzi">Luzzi</option><option value="nearby-towns">Paesi limitrofi</option><option value="rende">Rende</option><option value="cosenza">Cosenza</option><option value="over-25km">+ di 25 km</option><option value="over-50km">+ di 50 km</option></select></label>
               </div>
               <label class="privacy-check"><input name="privacy" type="checkbox" required /><span>Ho letto l'<a href="privacy.html" target="_blank" rel="noreferrer">informativa privacy</a>.</span></label>
               <button class="primary-action" type="submit">Invia voto</button>
             </form>
-            <aside class="leaderboard-panel vote-prize-panel" aria-label="Premio contest">
-              <span class="section-label">Premio</span>
-              <h3>Maglia CSSF2026</h3>
-              <p>Partecipa all'estrazione del contest e prova a vincere la maglia ufficiale CSSF 2026.</p>
-              <div class="vote-prize-image-wrap">
-                <img src="Maglia ccsf2026.jpeg" alt="Maglia ufficiale CSSF2026" loading="lazy" />
-              </div>
-            </aside>
           </div>
         </section>
       </main>

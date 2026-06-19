@@ -34,7 +34,7 @@
           <a href="#moments">CSSF Moments</a>
           <a href="#statistiche">Statistiche</a>
           <a href="#voti">Classifica stand</a>
-          <a href="#estrazione">Estrazione contest</a>
+          <a href="#estrazione">Profili votanti</a>
         </nav>
         <div class="topbar-actions staff-topbar-actions">
           <button class="notification-bell" id="notificationPermissionButton" type="button" aria-label="Attiva notifiche staff" title="Attiva notifiche staff">&#128276;</button>
@@ -54,7 +54,7 @@
             <div>
               <span class="section-label">Area gestione</span>
               <h2 id="staff-title">CSSF Staff, tutto sotto controllo</h2>
-              <p>Una dashboard semplice per gestire prenotazioni, comunicazioni, statistiche, classifica stand ed estrazione contest.</p>
+              <p>Una dashboard semplice per gestire prenotazioni, comunicazioni, statistiche, classifica stand e profili dei votanti.</p>
             </div>
             <div class="staff-hero-status" aria-label="Stato gestionale">
               <span>Dashboard</span>
@@ -65,7 +65,7 @@
             <div class="login-copy">
               <span class="section-label">Accesso riservato</span>
               <h2>Entra nella gestione</h2>
-              <p>Accedi con l'account staff Supabase per leggere e gestire prenotazioni, voti, contatti contest e strumenti operativi.</p>
+              <p>Accedi con l'account staff Supabase per leggere e gestire prenotazioni, voti, contatti email dei votanti e strumenti operativi.</p>
             </div>
             <form id="adminLoginForm">
               <label>Email staff <input name="email" type="email" autocomplete="username" placeholder="staff@cosenza..." /></label>
@@ -190,7 +190,7 @@
                   <div class="staff-vote-category-detail">
                     <div class="staff-vote-category-head">
                       <div>
-                        <span class="section-label" id="staffVoteDetailLabel">Dettaglio premio</span>
+                        <span class="section-label" id="staffVoteDetailLabel">Dettaglio categoria</span>
                         <h3 id="staffVoteDetailTitle">Classifica categoria</h3>
                       </div>
                     </div>
@@ -205,36 +205,35 @@
             <section class="staff-work-area staff-area-prize" id="estrazione" aria-labelledby="staff-prize-title">
               <div class="staff-area-heading">
                 <div>
-                  <span class="section-label">Contest</span>
-                  <h2 id="staff-prize-title">Estrazione contest <span class="staff-count-badge gold" id="metricPrizeEntries">0</span></h2>
+                  <span class="section-label">Votanti</span>
+                  <h2 id="staff-prize-title">Profili votanti <span class="staff-count-badge gold" id="metricPrizeEntries">0</span></h2>
                 </div>
                 <div class="staff-actions compact">
-                  <button class="primary-action" id="drawPrizeWinnerButton" type="button">Estrai vincitore</button>
-                  <button class="ghost-link strong" id="exportPrizeCsvButton" type="button">Esporta partecipanti</button>
+                  <button class="ghost-link strong" id="exportPrizeCsvButton" type="button">Esporta contatti</button>
                 </div>
               </div>
               <div class="analytics-grid staff-prize-grid">
                 <article class="analytics-panel staff-prize-table-panel">
                   <div class="staff-prize-table-heading">
                     <div>
-                      <span class="section-label">Partecipanti</span>
-                      <h3>Persone che partecipano al contest</h3>
-                      <p class="staff-prize-table-meta"><strong id="prizeEntriesCount">0</strong> persone hanno votato per provare a vincere la maglia.</p>
+                      <span class="section-label">Contatti</span>
+                      <h3>Profili raccolti dai voti</h3>
+                      <p class="staff-prize-table-meta"><strong id="prizeEntriesCount">0</strong> profili unici disponibili per analisi e comunicazioni.</p>
                     </div>
                   </div>
                   <div class="table-wrap">
                     <table>
-                      <thead><tr><th>Partecipante</th><th>Contatto</th><th>Dettagli</th></tr></thead>
+                      <thead><tr><th>Contatto</th><th>Profilo</th><th>Attivita</th></tr></thead>
                       <tbody id="prizeEntriesTable"></tbody>
                     </table>
                   </div>
-                  <div class="empty-state" id="emptyPrizeEntries">Nessun partecipante all'estrazione registrato.</div>
+                  <div class="empty-state" id="emptyPrizeEntries">Nessun profilo votante registrato.</div>
                 </article>
                 <article class="analytics-panel staff-prize-control-panel">
                   <div id="prizeSummary"></div>
                   <div class="staff-prize-winner" id="prizeWinnerCard">
-                    <span class="section-label">Vincitore contest</span>
-                    <strong id="prizeWinnerName">In attesa di estrazione</strong>
+                    <span class="section-label">Ultimo profilo utile</span>
+                    <strong id="prizeWinnerName">Nessun profilo disponibile</strong>
                     <p id="prizeWinnerMeta"></p>
                   </div>
                 </article>

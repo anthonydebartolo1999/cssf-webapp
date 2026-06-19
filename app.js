@@ -12,7 +12,6 @@ const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
 const ADMIN_MOMENTS_PAGE_SIZE = 24;
 const MAX_STAFF_RESERVATIONS = 150;
-const MAX_STAFF_PRIZE_ENTRIES = 500;
 const REVIEW_FEED_BATCH_SIZE = 3;
 const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v173";
 const SERVICE_WORKER_VERSION = "20260618-staff-push-v173";
@@ -438,7 +437,6 @@ const truckGrid = document.querySelector("#truckGrid");
 const emptyTrucks = document.querySelector("#emptyTrucks");
 const voteForm = document.querySelector("#voteForm");
 const voteTruck = document.querySelector("#voteTruck");
-const prizeOptIn = document.querySelector("#prizeOptIn");
 const voteExtraFields = document.querySelector("#voteExtraFields");
 const leaderboardTabs = document.querySelector("#leaderboardTabs");
 const leaderboardList = document.querySelector("#leaderboardList");
@@ -595,7 +593,6 @@ bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
 bindEvent(voteForm, "input", handleFieldValidationStateChange);
 bindEvent(voteForm, "change", handleFieldValidationStateChange);
-bindEvent(prizeOptIn, "change", toggleVoteExtraFields);
 bindEvent(truckForm, "submit", handleTruckFormSubmit);
 bindEvent(resetTruckFormButton, "click", resetTruckForm);
 bindEvent(adminLoginForm, "submit", handleAdminLogin);
@@ -1087,8 +1084,8 @@ async function handleVoteSubmit(event) {
   }
 
   const createdAt = new Date().toISOString();
-  const voter = cleanText(formData.get("voter")) || "Anonimo";
-  const prizeOptIn = formData.get("prizeOptIn") === "on";
+  const voter = "Anonimo";
+  const prizeOptIn = false;
   const email = cleanText(formData.get("email"));
   const gender = String(formData.get("gender") || "");
   const ageRange = String(formData.get("ageRange") || "");
@@ -1188,15 +1185,10 @@ async function handleVoteSubmit(event) {
 }
 
 function toggleVoteExtraFields() {
-  if (!voteExtraFields || !prizeOptIn) return;
-
-  const isEnabled = prizeOptIn.checked;
-  voteExtraFields.hidden = !isEnabled;
+  if (!voteExtraFields) return;
+  voteExtraFields.hidden = false;
   voteExtraFields.querySelectorAll("input, select").forEach((field) => {
-    field.disabled = !isEnabled;
-    if (!isEnabled) {
-      field.value = "";
-    }
+    field.disabled = false;
   });
 }
 
@@ -1478,13 +1470,11 @@ async function refreshVotesFromRemote() {
   if (!supabaseClient) return false;
 
   try {
-    const [contestResponse, leaderboardResponse] = await Promise.all([
+    const [profilesResponse, leaderboardResponse] = await Promise.all([
       supabaseClient
         .from(SUPABASE_VOTES_TABLE)
         .select("*")
-        .eq("prize_opt_in", true)
-        .order("created_at", { ascending: false })
-        .limit(MAX_STAFF_PRIZE_ENTRIES),
+        .order("created_at", { ascending: false }),
       supabaseClient
         .from(SUPABASE_VOTE_LEADERBOARD_VIEW)
         .select("*")
@@ -1492,10 +1482,10 @@ async function refreshVotesFromRemote() {
         .order("vote_count", { ascending: false }),
     ]);
 
-    if (contestResponse.error || !Array.isArray(contestResponse.data)) return false;
+    if (profilesResponse.error || !Array.isArray(profilesResponse.data)) return false;
     if (leaderboardResponse.error || !Array.isArray(leaderboardResponse.data)) return false;
 
-    votes = contestResponse.data.map(mapVoteFromRemote);
+    votes = profilesResponse.data.map(mapVoteFromRemote);
     showAllStaffVoteRows = false;
     voteLeaderboardRows = leaderboardResponse.data.map(mapVoteLeaderboardFromRemote);
     remoteVoteLeaderboardSynced = true;
@@ -2466,75 +2456,74 @@ function renderStaffVotes() {
 function renderPrizeEntries() {
   if (!prizeEntriesTable || !emptyPrizeEntries || !prizeSummary) return;
 
-  const entries = getPrizeEntries();
+  const profiles = getVoterProfiles();
   prizeEntriesTable.innerHTML = "";
-  emptyPrizeEntries.classList.toggle("visible", entries.length === 0);
+  emptyPrizeEntries.classList.toggle("visible", profiles.length === 0);
   if (prizeEntriesCount) {
-    prizeEntriesCount.textContent = String(entries.length);
+    prizeEntriesCount.textContent = String(profiles.length);
   }
-  renderPrizeSummary(entries);
-  if (!entries.length) {
+  renderPrizeSummary(profiles);
+  if (!profiles.length) {
     resetPrizeWinnerCard();
   }
 
-  entries.forEach((vote) => {
-    const details = [
-      getVoteCategorySummary(vote),
-      getContestAgeLabel(vote.ageRange),
-      getContestDistanceLabel(vote.distance),
-      formatDateTime(vote.createdAt),
+  renderPrizeWinnerCard(profiles);
+
+  profiles.forEach((profile) => {
+    const profileDetails = [
+      getContestGenderLabel(profile.gender),
+      getContestAgeLabel(profile.ageRange),
+      getContestDistanceLabel(profile.distance),
     ]
       .filter((value) => value && value !== "-")
       .join(" · ");
 
+    const activityDetails = [
+      `${profile.voteCount} voti`,
+      `${profile.truckNames.length} stand`,
+      formatDateTime(profile.lastVoteAt),
+    ].join(" · ");
+
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td data-label="Partecipante">
-        <div class="customer-cell">
-          <strong>${escapeHtml(vote.voter || "Anonimo")}</strong>
-          <span>${escapeHtml(getContestGenderLabel(vote.gender))}</span>
-        </div>
-      </td>
       <td data-label="Contatto">
-        <div class="customer-cell compact">
-          <span>${escapeHtml(vote.email || "email non inserita")}</span>
+        <div class="customer-cell">
+          <strong>${escapeHtml(profile.email || "email non disponibile")}</strong>
+          <span>${escapeHtml(profile.truckNames.slice(0, 2).join(" · ") || "Nessuno stand associato")}</span>
         </div>
       </td>
-      <td data-label="Dettagli">${escapeHtml(details || "Nessun dettaglio disponibile")}</td>
+      <td data-label="Profilo">
+        <div class="customer-cell compact">
+          <span>${escapeHtml(profileDetails || "Solo email raccolta")}</span>
+        </div>
+      </td>
+      <td data-label="Attivita">${escapeHtml(activityDetails)}</td>
     `;
     prizeEntriesTable.append(row);
   });
 }
 
-function renderPrizeSummary(entries) {
+function renderPrizeSummary(profiles) {
   if (!prizeSummary) return;
 
-  if (!entries.length) {
-    prizeSummary.innerHTML = `<div class="empty-state visible">Nessun dato utile per l'estrazione.</div>`;
+  if (!profiles.length) {
+    prizeSummary.innerHTML = `<div class="empty-state visible">Nessun dato utile di profilazione disponibile.</div>`;
     return;
   }
 
-  const categoryStats = voteCategories
-    .map((category) => ({
-      label: category.label,
-      count: entries.filter((entry) => entry.categories.includes(category.value)).length,
-    }))
-    .filter((row) => row.count > 0)
-    .sort((a, b) => b.count - a.count);
-
-  const distanceStats = getTopCountLabel(
-    entries.map((entry) => getContestDistanceLabel(entry.distance)).filter((value) => value !== "-"),
-  );
-  const lastEntry = entries[0];
+  const contactableProfiles = profiles.filter((profile) => profile.email);
+  const completedProfiles = profiles.filter((profile) => profile.gender && profile.ageRange && profile.distance);
+  const distanceStats = getTopCountLabel(profiles.map((profile) => getContestDistanceLabel(profile.distance)).filter((value) => value !== "-"));
+  const ageStats = getTopCountLabel(profiles.map((profile) => getContestAgeLabel(profile.ageRange)).filter((value) => value !== "-"));
+  const lastProfile = profiles[0];
 
   const summaryRows = [
-    { label: "Partecipanti", value: String(entries.length) },
-    {
-      label: "Categoria top",
-      value: categoryStats[0] ? `${categoryStats[0].label} (${categoryStats[0].count})` : "Nessun dato",
-    },
-    { label: "Ultimo voto", value: lastEntry ? formatDateTime(lastEntry.createdAt) : "Nessun dato" },
+    { label: "Profili unici", value: String(profiles.length) },
+    { label: "Email contattabili", value: String(contactableProfiles.length) },
+    { label: "Profili completi", value: String(completedProfiles.length) },
+    { label: "Ultimo voto", value: lastProfile ? formatDateTime(lastProfile.lastVoteAt) : "Nessun dato" },
     { label: "Provenienza top", value: distanceStats ? `${distanceStats.label} (${distanceStats.count})` : "Nessun dato" },
+    { label: "Fascia eta top", value: ageStats ? `${ageStats.label} (${ageStats.count})` : "Nessun dato" },
   ];
 
     prizeSummary.innerHTML = `
@@ -2553,41 +2542,32 @@ function renderPrizeSummary(entries) {
     `;
 }
 
-function drawPrizeWinner() {
-  const entries = getPrizeEntries();
+function renderPrizeWinnerCard(profiles) {
+  const profile = profiles[0];
 
-  if (!entries.length) {
+  if (!profile) {
     resetPrizeWinnerCard();
-    showToast("Nessun partecipante disponibile per l'estrazione.");
     return;
   }
 
-  const winner = entries[Math.floor(Math.random() * entries.length)];
-
   if (prizeWinnerName) {
-    prizeWinnerName.textContent = winner.voter || "Anonimo";
+    prizeWinnerName.textContent = profile.email || "email non disponibile";
   }
 
   if (prizeWinnerMeta) {
     const details = [
-      winner.email || "email non inserita",
-      getVoteCategorySummary(winner),
-      getContestDistanceLabel(winner.distance),
-    ];
+      getContestGenderLabel(profile.gender),
+      getContestAgeLabel(profile.ageRange),
+      getContestDistanceLabel(profile.distance),
+      `${profile.voteCount} voti`,
+    ].filter((value) => value && value !== "-");
     prizeWinnerMeta.textContent = details.join(" · ");
   }
-
-  document.querySelector("#prizeWinnerCard")?.classList.add("is-highlighted");
-  window.setTimeout(() => {
-    document.querySelector("#prizeWinnerCard")?.classList.remove("is-highlighted");
-  }, 1600);
-
-  showToast(`Estratto: ${winner.voter || "Anonimo"}`);
 }
 
 function resetPrizeWinnerCard() {
   if (prizeWinnerName) {
-    prizeWinnerName.textContent = "In attesa di estrazione";
+    prizeWinnerName.textContent = "Nessun profilo disponibile";
   }
 
   if (prizeWinnerMeta) {
@@ -3613,26 +3593,25 @@ function exportAnalyticsCsv() {
 }
 
 function exportPrizeEntriesCsv() {
-  const entries = getPrizeEntries();
+  const profiles = getVoterProfiles();
 
-  if (!entries.length) {
-    showToast("Nessun partecipante da esportare.");
+  if (!profiles.length) {
+    showToast("Nessun contatto da esportare.");
     return;
   }
 
-    const headers = ["ora", "nome", "email", "sesso", "eta", "provenienza", "valutazioni", "street_chef"];
-  const rows = entries.map((entry) => {
-    const truck = trucks.find((item) => item.id === entry.truckId);
+  const headers = ["email", "sesso", "eta", "provenienza", "voti_totali", "stand_votati", "categorie_votate", "ultimo_voto"];
+  const rows = profiles.map((profile) => {
     return [
-      formatDateTime(entry.createdAt),
-      entry.voter || "Anonimo",
-      entry.email || "",
-      getContestGenderLabel(entry.gender),
-      getContestAgeLabel(entry.ageRange),
-      getContestDistanceLabel(entry.distance),
-        getVoteCategorySummary(entry),
-        truck ? truck.name : entry.truckId,
-      ];
+      profile.email || "",
+      getContestGenderLabel(profile.gender),
+      getContestAgeLabel(profile.ageRange),
+      getContestDistanceLabel(profile.distance),
+      String(profile.voteCount),
+      profile.truckNames.join(" | "),
+      profile.categories.map(getVoteCategoryLabel).join(" | "),
+      formatDateTime(profile.lastVoteAt),
+    ];
   });
 
   const csv = [headers, ...rows].map((row) => row.map(toCsvCell).join(",")).join("\n");
@@ -3640,12 +3619,12 @@ function exportPrizeEntriesCsv() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `cssf-estrazione-contest-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `cssf-profili-votanti-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.append(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  showToast("Partecipanti esportati.");
+  showToast("Contatti esportati.");
 }
 
 async function clearAnalyticsEvents() {
@@ -3815,7 +3794,7 @@ function updateMetrics() {
   if (metricBookings) metricBookings.textContent = String(active.length);
   if (metricTrucks) metricTrucks.textContent = String(trucks.length);
   if (metricVotes) metricVotes.textContent = String(getVoteTotal());
-  if (metricPrizeEntries) metricPrizeEntries.textContent = String(getPrizeEntries().length);
+  if (metricPrizeEntries) metricPrizeEntries.textContent = String(getVoterProfiles().length);
 }
 
 function getVoteTotal() {
@@ -3826,27 +3805,51 @@ function getVoteTotal() {
   return voteLeaderboardRows.reduce((sum, row) => sum + Number(row.count || 0), 0);
 }
 
-function getPrizeEntries() {
-  const groupedEntries = votes
-    .filter((vote) => vote.prizeOptIn)
-    .reduce((acc, vote) => {
-      const key = [vote.email || "", vote.truckId || "", vote.createdAt || "", vote.voter || ""].join("::");
-      if (!acc[key]) {
-        acc[key] = {
-          ...vote,
-          categories: [],
-          scores: {},
-        };
-      }
+function getVoterProfiles() {
+  const groupedProfiles = votes.reduce((acc, vote) => {
+    const email = cleanText(vote.email || "").toLowerCase();
+    const key = email || `vote:${vote.id}`;
+    const truck = trucks.find((item) => item.id === vote.truckId);
 
-      if (!acc[key].categories.includes(vote.category)) {
-        acc[key].categories.push(vote.category);
-      }
-      acc[key].scores[vote.category] = Number(vote.score) || 0;
-      return acc;
-    }, {});
+    if (!acc[key]) {
+      acc[key] = {
+        email,
+        gender: vote.gender || "",
+        ageRange: vote.ageRange || "",
+        distance: vote.distance || "",
+        voteCount: 0,
+        categories: [],
+        truckIds: [],
+        truckNames: [],
+        lastVoteAt: vote.createdAt || new Date().toISOString(),
+      };
+    }
 
-  return Object.values(groupedEntries).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    acc[key].voteCount += 1;
+    if (!acc[key].categories.includes(vote.category)) {
+      acc[key].categories.push(vote.category);
+    }
+    if (vote.truckId && !acc[key].truckIds.includes(vote.truckId)) {
+      acc[key].truckIds.push(vote.truckId);
+      acc[key].truckNames.push(truck?.name || vote.truckId);
+    }
+
+    if (!acc[key].gender && vote.gender) acc[key].gender = vote.gender;
+    if (!acc[key].ageRange && vote.ageRange) acc[key].ageRange = vote.ageRange;
+    if (!acc[key].distance && vote.distance) acc[key].distance = vote.distance;
+
+    if (new Date(vote.createdAt).getTime() > new Date(acc[key].lastVoteAt).getTime()) {
+      acc[key].lastVoteAt = vote.createdAt;
+      acc[key].email = email || acc[key].email;
+      if (vote.gender) acc[key].gender = vote.gender;
+      if (vote.ageRange) acc[key].ageRange = vote.ageRange;
+      if (vote.distance) acc[key].distance = vote.distance;
+    }
+
+    return acc;
+  }, {});
+
+  return Object.values(groupedProfiles).sort((a, b) => new Date(b.lastVoteAt).getTime() - new Date(a.lastVoteAt).getTime());
 }
 
 function getTopCountLabel(values) {
