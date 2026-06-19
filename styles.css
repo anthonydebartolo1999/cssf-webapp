@@ -8749,11 +8749,16 @@ body[data-page="home"] .home-map-card .primary-action {
     background: rgba(243, 182, 63, 0.12);
   }
 
-  .topbar.is-mobile-menu-open .mobile-menu-toggle span:nth-child(1),
-  .topbar.is-mobile-menu-open .mobile-menu-toggle span:nth-child(2),
+  .topbar.is-mobile-menu-open .mobile-menu-toggle span:nth-child(1) {
+    transform: translateY(5px) rotate(45deg);
+  }
+
+  .topbar.is-mobile-menu-open .mobile-menu-toggle span:nth-child(2) {
+    opacity: 0;
+  }
+
   .topbar.is-mobile-menu-open .mobile-menu-toggle span:nth-child(3) {
-    transform: none;
-    opacity: 1;
+    transform: translateY(-5px) rotate(-45deg);
   }
 
   body[data-page="home"] .app-shell {
@@ -9446,9 +9451,25 @@ body[data-page="vota"] .vote-form {
     grid-template-columns: 1fr;
   }
 
+  body[data-page="vota"] .vote-score-card-title {
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+
   body[data-page="vota"] .vote-score-card-panel {
     width: 100%;
     min-width: 0;
+    padding: 12px 10px 10px;
+  }
+
+  body[data-page="vota"] .vote-score-dots {
+    gap: 10px;
+  }
+
+  body[data-page="vota"] .vote-score-dots label {
+    width: 34px;
+    height: 34px;
   }
 }
 

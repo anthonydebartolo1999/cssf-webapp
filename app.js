@@ -604,7 +604,6 @@ bindEvent(exportAnalyticsButton, "click", exportAnalyticsCsv);
 bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
 bindEvent(clearReviewsButton, "click", clearReviewsRemote);
 bindEvent(exportPrizeCsvButton, "click", exportPrizeEntriesCsv);
-bindEvent(drawPrizeWinnerButton, "click", drawPrizeWinner);
 bindEvent(clearVotesButton, "click", clearVotesRemote);
 
 if (isStaffPage() && dayFilter && statusFilter) {
@@ -1291,7 +1290,15 @@ async function setupSupabaseTrucks() {
   if (!supabaseClient) return;
   if (!festivalMap && !selectedTruckCard && !truckGrid && !voteTruck && !leaderboardList && !staffVoteLeaderboard && !truckAdminTable) return;
 
-  await refreshTrucksFromRemote();
+  const synced = await refreshTrucksFromRemote();
+  if (!synced) {
+    trucks = cloneDefaultTrucks();
+    if (!trucks.some((truck) => truck.id === selectedTruckId)) {
+      selectedTruckId = trucks[0]?.id || "";
+    }
+    renderFestival();
+    renderVoteOptions();
+  }
   if (isStaffPage() && staffSession) {
     subscribeToTruckChanges();
   }
