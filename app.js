@@ -283,14 +283,20 @@ const truckStatusLabels = {
 };
 
 const voteCategories = [
-  { value: "sanizzo-award", label: "Street Chef piu' SANIZZO" },
+  { value: "sanizzo-award", label: "Street Chef piu' BUONO" },
   { value: "tradition-award", label: "Street Chef piu' TRADIZIONALE" },
   { value: "creative-award", label: "Street Chef piu' CREATIVO" },
 ];
 
 const voteCategoryLabels = {
-  "sanizzo-award": "Street Chef piu' SANIZZO",
+  "sanizzo-award": "Street Chef piu' BUONO",
   "tradition-award": "Street Chef piu' TRADIZIONALE",
+  "creative-award": "Street Chef piu' CREATIVO",
+};
+
+const adminVoteCategoryLabels = {
+  "sanizzo-award": "Street Chef piu' BUONO",
+  "tradition-award": "Street Chef piu' HOMEMADE",
   "creative-award": "Street Chef piu' CREATIVO",
 };
 
@@ -409,6 +415,7 @@ const adminReviewsInsights = document.querySelector("#adminReviewsInsights");
 const adminReviewsList = document.querySelector("#adminReviewsList");
 const adminEmptyReviews = document.querySelector("#adminEmptyReviews");
 const clearReviewsButton = document.querySelector("#clearReviewsButton");
+const exportReviewsButton = document.querySelector("#exportReviewsButton");
 const momentsForm = document.querySelector("#momentsForm");
 const momentImageInput = document.querySelector("#momentImage");
 const momentPreview = document.querySelector("#momentPreview");
@@ -454,6 +461,8 @@ const staffVotesTable = document.querySelector("#staffVotesTable");
 const emptyStaffVotes = document.querySelector("#emptyStaffVotes");
 const prizeEntriesTable = document.querySelector("#prizeEntriesTable");
 const emptyPrizeEntries = document.querySelector("#emptyPrizeEntries");
+const staffProfilesMoreWrap = document.querySelector("#staffProfilesMoreWrap");
+const staffProfilesMoreButton = document.querySelector("#staffProfilesMoreButton");
 const prizeSummary = document.querySelector("#prizeSummary");
 const exportPrizeCsvButton = document.querySelector("#exportPrizeCsvButton");
 const drawPrizeWinnerButton = document.querySelector("#drawPrizeWinnerButton");
@@ -522,6 +531,7 @@ let selectedTruckId = sessionStorage.getItem("cssf-selected-truck") || trucks[0]
 let activeLeaderboardCategory = voteCategories[0].value;
 let activeStaffVoteCategory = voteCategories[0].value;
 let showAllStaffVoteRows = false;
+let showAllPrizeProfiles = false;
 let sessionId = sessionStorage.getItem("cssf-session-id") || createId("SESSION");
 let supabaseClient = createSupabaseClient();
 let reservationsRealtimeChannel = null;
@@ -530,6 +540,7 @@ let votesRealtimeChannel = null;
 let reviewsRealtimeChannel = null;
 let visiblePublicReviewsCount = REVIEW_FEED_BATCH_SIZE;
 let visibleAdminReviewsCount = REVIEW_FEED_BATCH_SIZE;
+let showAllAdminReviews = false;
 let analyticsRealtimeChannel = null;
 let momentsRealtimeChannel = null;
 let staffSession = null;
@@ -592,6 +603,10 @@ bindEvent(staffVoteMoreButton, "click", () => {
   showAllStaffVoteRows = true;
   renderStaffVotes();
 });
+bindEvent(staffProfilesMoreButton, "click", () => {
+  showAllPrizeProfiles = !showAllPrizeProfiles;
+  renderPrizeEntries();
+});
 bindEvent(truckSearchInput, "input", renderFestival);
 bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
@@ -609,6 +624,7 @@ bindEvent(communicationForm, "submit", handleCommunicationSubmit);
 bindEvent(exportAnalyticsButton, "click", exportAnalyticsCsv);
 bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
 bindEvent(clearReviewsButton, "click", clearReviewsRemote);
+bindEvent(exportReviewsButton, "click", exportReviewsCsv);
 bindEvent(exportPrizeCsvButton, "click", exportPrizeEntriesCsv);
 bindEvent(clearVotesButton, "click", clearVotesRemote);
 
@@ -740,7 +756,7 @@ function setupMobileMenu() {
 
   primaryNav.querySelectorAll("a, button").forEach((item) => {
     item.addEventListener("click", () => {
-      if (window.innerWidth <= 780) {
+      if (window.innerWidth <= getMobileMenuBreakpoint()) {
         syncMobileMenuState(false);
       }
     });
@@ -762,6 +778,10 @@ function setupMobileMenu() {
   syncMobileMenuState(false);
 }
 
+function getMobileMenuBreakpoint() {
+  return document.body?.dataset.page === "gestione" ? 1180 : 780;
+}
+
 function toggleMobileMenu() {
   if (!mobileMenuToggle || !publicTopbar) return;
   const isOpen = publicTopbar.classList.contains("is-mobile-menu-open");
@@ -776,7 +796,7 @@ function syncMobileMenuState(isOpen) {
 }
 
 function handleViewportResize() {
-  if (window.innerWidth > 780) {
+  if (window.innerWidth > getMobileMenuBreakpoint()) {
     syncMobileMenuState(false);
     closeMapImageModal();
   }
@@ -1108,7 +1128,7 @@ async function handleVoteSubmit(event) {
   }
 
   if (!Number.isInteger(sanizzoScore) || sanizzoScore < 1 || sanizzoScore > 5) {
-    showToast("Assegna un punteggio a Street Chef piu' SANIZZO.");
+    showToast("Assegna un punteggio a Street Chef piu' BUONO.");
     return;
   }
 
@@ -2402,6 +2422,7 @@ function renderStaffVotes() {
   awardGrid.className = "staff-vote-awards-grid";
 
   voteCategories.forEach((category) => {
+    const adminCategoryLabel = adminVoteCategoryLabels[category.value] || category.label;
     const rows = getLeaderboard(category.value);
     const winner = rows[0] || null;
     const runnerUp = rows[1] || null;
@@ -2419,7 +2440,7 @@ function renderStaffVotes() {
     });
 
     card.innerHTML = `
-      <span class="staff-vote-award-label">${escapeHtml(category.label)}</span>
+      <span class="staff-vote-award-label">${escapeHtml(adminCategoryLabel)}</span>
       <strong>${escapeHtml(winner?.truck?.name || "Nessun voto")}</strong>
       <span class="staff-vote-award-meta">${winner ? `${escapeHtml(winner.truck.code)} - ${escapeHtml(categoryLabels[winner.truck.category] || winner.truck.category)}` : "In attesa di voti"}</span>
       <div class="staff-vote-award-count">
@@ -2438,11 +2459,12 @@ function renderStaffVotes() {
   staffVoteLeaderboard.append(awardGrid);
 
   const activeCategory = voteCategories.find((category) => category.value === activeStaffVoteCategory) || voteCategories[0];
+  const activeAdminCategoryLabel = adminVoteCategoryLabels[activeCategory.value] || activeCategory.label;
   const detailRows = getLeaderboard(activeCategory.value);
   const visibleRows = showAllStaffVoteRows ? detailRows : detailRows.slice(0, 5);
 
-  staffVoteDetailLabel.textContent = activeCategory.label;
-  staffVoteDetailTitle.textContent = `Voti ${activeCategory.label}`;
+  staffVoteDetailLabel.textContent = activeAdminCategoryLabel;
+  staffVoteDetailTitle.textContent = `Voti ${activeAdminCategoryLabel}`;
   staffVoteDetailList.innerHTML = "";
 
   if (!detailRows.length) {
@@ -2472,6 +2494,7 @@ function renderPrizeEntries() {
   if (!prizeEntriesTable || !emptyPrizeEntries) return;
 
   const profiles = getVoterProfiles();
+  const visibleProfiles = showAllPrizeProfiles ? profiles : profiles.slice(0, 5);
   prizeEntriesTable.innerHTML = "";
   emptyPrizeEntries.classList.toggle("visible", profiles.length === 0);
   renderPrizeSummary(profiles);
@@ -2481,7 +2504,7 @@ function renderPrizeEntries() {
 
   renderPrizeWinnerCard(profiles);
 
-  profiles.forEach((profile) => {
+  visibleProfiles.forEach((profile) => {
     const genderLabel = getContestGenderLabel(profile.gender);
     const ageLabel = getContestAgeLabel(profile.ageRange);
     const distanceLabel = getContestDistanceLabel(profile.distance);
@@ -2537,6 +2560,12 @@ function renderPrizeEntries() {
 
     prizeEntriesTable.append(card);
   });
+
+  if (staffProfilesMoreWrap && staffProfilesMoreButton) {
+    const hasMoreProfiles = profiles.length > 5;
+    staffProfilesMoreWrap.hidden = !hasMoreProfiles;
+    staffProfilesMoreButton.textContent = showAllPrizeProfiles ? "Mostra meno" : "Mostra tutto";
+  }
 }
 
 function renderPrizeSummary(profiles) {
@@ -4196,7 +4225,7 @@ function ensureReviewFeedControls(container, emptyState, isCompact) {
     button.dataset.reviewMoreButton = feedKey;
     button.addEventListener("click", () => {
       if (isCompact) {
-        visibleAdminReviewsCount += REVIEW_FEED_BATCH_SIZE;
+        showAllAdminReviews = !showAllAdminReviews;
       } else {
         visiblePublicReviewsCount += REVIEW_FEED_BATCH_SIZE;
       }
@@ -4358,14 +4387,23 @@ function renderReviewFeed(container, emptyState, isCompact = false) {
 
   container.innerHTML = "";
   emptyState.classList.toggle("visible", reviews.length === 0);
-  const visibleCount = isCompact ? visibleAdminReviewsCount : visiblePublicReviewsCount;
+  const compactDefaultCount = 2;
+  const visibleCount = isCompact
+    ? (showAllAdminReviews ? reviews.length : compactDefaultCount)
+    : visiblePublicReviewsCount;
   const visibleReviews = reviews.slice(0, visibleCount);
   const remainingReviews = Math.max(reviews.length - visibleReviews.length, 0);
   const reviewControls = ensureReviewFeedControls(container, emptyState, isCompact);
 
   if (reviewControls.wrap && reviewControls.button) {
-    reviewControls.wrap.hidden = reviews.length === 0 || remainingReviews === 0;
-    reviewControls.button.textContent = `Mostra altro (${remainingReviews})`;
+    if (isCompact) {
+      const hasMoreCompactReviews = reviews.length > compactDefaultCount;
+      reviewControls.wrap.hidden = reviews.length === 0 || !hasMoreCompactReviews;
+      reviewControls.button.textContent = showAllAdminReviews ? "Mostra meno" : "Mostra tutto";
+    } else {
+      reviewControls.wrap.hidden = reviews.length === 0 || remainingReviews === 0;
+      reviewControls.button.textContent = `Mostra altro (${remainingReviews})`;
+    }
   }
 
   visibleReviews.forEach((review) => {
@@ -4380,23 +4418,86 @@ function renderReviewFeed(container, emptyState, isCompact = false) {
       review.improvementArea ? `Migliorare: ${getReviewLabel("improvementArea", review.improvementArea)}` : "",
     ].filter(Boolean);
     const card = document.createElement("article");
-    card.className = `review-card${isCompact ? " review-card-compact" : ""}`;
-    card.innerHTML = `
-      <header>
-        <div>
-          <strong>${escapeHtml(review.title)}</strong>
-          <div class="review-meta">${formatDate(review.createdAt)}</div>
+    card.className = `review-card${isCompact ? " review-card-compact review-card-collapsible" : ""}`;
+
+    if (isCompact) {
+      card.innerHTML = `
+        <button class="review-card-toggle" type="button" aria-expanded="false">
+          <div class="review-card-toggle-main">
+            <strong>${escapeHtml(review.title)}</strong>
+            <div class="review-meta">${formatDate(review.createdAt)}</div>
+          </div>
+          <div class="review-card-toggle-side">
+            <div class="review-card-rating">
+              <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
+              <div class="review-rating-chip">${review.rating}/5</div>
+            </div>
+            <span class="review-card-chevron" aria-hidden="true">+</span>
+          </div>
+        </button>
+        <div class="review-card-details" hidden>
+          ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+          <p>${escapeHtml(review.body)}</p>
         </div>
-        <div class="review-card-rating">
-          <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
-          <div class="review-rating-chip">${review.rating}/5</div>
-        </div>
-      </header>
-      ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
-      <p>${escapeHtml(review.body)}</p>
-    `;
+      `;
+
+      const toggle = card.querySelector(".review-card-toggle");
+      const details = card.querySelector(".review-card-details");
+      toggle?.addEventListener("click", () => {
+        const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!isExpanded));
+        const chevron = toggle.querySelector(".review-card-chevron");
+        if (chevron) {
+          chevron.textContent = isExpanded ? "+" : "-";
+        }
+        if (details) {
+          details.hidden = isExpanded;
+        }
+        card.classList.toggle("is-open", !isExpanded);
+      });
+    } else {
+      card.innerHTML = `
+        <header>
+          <div>
+            <strong>${escapeHtml(review.title)}</strong>
+            <div class="review-meta">${formatDate(review.createdAt)}</div>
+          </div>
+          <div class="review-card-rating">
+            <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
+            <div class="review-rating-chip">${review.rating}/5</div>
+          </div>
+        </header>
+        ${tags.length ? `<div class="review-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+        <p>${escapeHtml(review.body)}</p>
+      `;
+    }
     container.append(card);
   });
+}
+
+function exportReviewsCsv() {
+  if (!reviews.length) {
+    showToast("Nessun feedback da esportare.");
+    return;
+  }
+
+  const rows = [
+    ["data", "titolo", "testo", "stelle", "eta", "sesso", "provenienza", "cosa_piace", "da_migliorare", "tornerebbe"],
+    ...reviews.map((review) => [
+      formatDate(review.createdAt),
+      review.title || "",
+      review.body || "",
+      String(review.rating || ""),
+      getReviewLabel("ageRange", review.ageRange),
+      getReviewLabel("gender", review.gender),
+      getReviewLabel("originArea", review.originArea),
+      getReviewLabel("favoriteAspect", review.favoriteAspect),
+      getReviewLabel("improvementArea", review.improvementArea),
+      getReviewLabel("wouldReturn", review.wouldReturn),
+    ]),
+  ];
+
+  downloadCsv(`cssf-feedback-${new Date().toISOString().slice(0, 10)}.csv`, rows);
 }
 
 function createStatusSelect(reservation) {

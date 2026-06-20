@@ -214,6 +214,9 @@
                     </div>
                     <div class="staff-voter-profiles" id="prizeEntriesTable"></div>
                     <div class="empty-state" id="emptyPrizeEntries">Nessun profilo votante registrato.</div>
+                    <div class="staff-actions staff-vote-more-actions staff-profiles-more-actions" id="staffProfilesMoreWrap" hidden>
+                      <button class="ghost-link strong" id="staffProfilesMoreButton" type="button">Mostra tutto</button>
+                    </div>
                   </article>
                 </div>
                 <div class="analytics-chart-grid analytics-chart-grid-simple staff-review-insights-grid">
@@ -228,14 +231,19 @@
                           <strong id="adminReviewAverage">--</strong>
                           <span id="adminReviewCount">0 recensioni</span>
                         </div>
-                        <button class="ghost-link" id="clearReviewsButton" type="button">Azzera feedback</button>
+                        <div class="staff-review-toolbar">
+                          <button class="ghost-link strong" id="exportReviewsButton" type="button">Esporta feedback</button>
+                          <button class="ghost-link" id="clearReviewsButton" type="button">Azzera feedback</button>
+                        </div>
                       </div>
                     </div>
                     <div class="reviews-insights admin-reviews-insights" id="adminReviewsInsights"></div>
                     <div class="staff-review-feed">
                       <div class="staff-review-feed-head">
-                        <span class="section-label">Feed recensioni</span>
-                        <h4>Ultimi feedback raccolti</h4>
+                        <div>
+                          <span class="section-label">Feed recensioni</span>
+                          <h4>Ultimi feedback raccolti</h4>
+                        </div>
                       </div>
                       <div class="reviews-list admin-reviews-list" id="adminReviewsList"></div>
                       <div class="empty-state" id="adminEmptyReviews">Ancora nessuna recensione.</div>
