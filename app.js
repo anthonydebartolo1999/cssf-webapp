@@ -438,6 +438,9 @@ const emptyTrucks = document.querySelector("#emptyTrucks");
 const voteForm = document.querySelector("#voteForm");
 const voteTruck = document.querySelector("#voteTruck");
 const voteExtraFields = document.querySelector("#voteExtraFields");
+const voteThanksModal = document.querySelector("#voteThanksModal");
+const voteThanksBackdrop = document.querySelector("#voteThanksBackdrop");
+const voteThanksClose = document.querySelector("#voteThanksClose");
 const leaderboardTabs = document.querySelector("#leaderboardTabs");
 const leaderboardList = document.querySelector("#leaderboardList");
 const staffVoteTabs = document.querySelector("#staffVoteTabs");
@@ -452,7 +455,6 @@ const emptyStaffVotes = document.querySelector("#emptyStaffVotes");
 const prizeEntriesTable = document.querySelector("#prizeEntriesTable");
 const emptyPrizeEntries = document.querySelector("#emptyPrizeEntries");
 const prizeSummary = document.querySelector("#prizeSummary");
-const prizeEntriesCount = document.querySelector("#prizeEntriesCount");
 const exportPrizeCsvButton = document.querySelector("#exportPrizeCsvButton");
 const drawPrizeWinnerButton = document.querySelector("#drawPrizeWinnerButton");
 const prizeWinnerName = document.querySelector("#prizeWinnerName");
@@ -595,6 +597,8 @@ bindEvent(categoryFilter, "change", renderFestival);
 bindEvent(voteForm, "submit", handleVoteSubmit);
 bindEvent(voteForm, "input", handleFieldValidationStateChange);
 bindEvent(voteForm, "change", handleFieldValidationStateChange);
+bindEvent(voteThanksBackdrop, "click", closeVoteThanksModal);
+bindEvent(voteThanksClose, "click", closeVoteThanksModal);
 bindEvent(truckForm, "submit", handleTruckFormSubmit);
 bindEvent(resetTruckFormButton, "click", resetTruckForm);
 bindEvent(adminLoginForm, "submit", handleAdminLogin);
@@ -1069,6 +1073,7 @@ async function handleDeleteMoment(moment) {
 
 async function handleVoteSubmit(event) {
   event.preventDefault();
+  closeVoteThanksModal();
 
   if (!validateFormFields(voteForm)) {
     showToast("Compila i campi obbligatori evidenziati in rosso.");
@@ -1183,6 +1188,7 @@ async function handleVoteSubmit(event) {
     creativeScore,
   });
   showToast(`Voti registrati per ${truck.name}.`);
+  openVoteThanksModal();
 }
 
 function toggleVoteExtraFields() {
@@ -2463,14 +2469,11 @@ function renderStaffVotes() {
 }
 
 function renderPrizeEntries() {
-  if (!prizeEntriesTable || !emptyPrizeEntries || !prizeSummary) return;
+  if (!prizeEntriesTable || !emptyPrizeEntries) return;
 
   const profiles = getVoterProfiles();
   prizeEntriesTable.innerHTML = "";
   emptyPrizeEntries.classList.toggle("visible", profiles.length === 0);
-  if (prizeEntriesCount) {
-    prizeEntriesCount.textContent = String(profiles.length);
-  }
   renderPrizeSummary(profiles);
   if (!profiles.length) {
     resetPrizeWinnerCard();
@@ -2479,36 +2482,60 @@ function renderPrizeEntries() {
   renderPrizeWinnerCard(profiles);
 
   profiles.forEach((profile) => {
-    const profileDetails = [
-      getContestGenderLabel(profile.gender),
-      getContestAgeLabel(profile.ageRange),
-      getContestDistanceLabel(profile.distance),
-    ]
-      .filter((value) => value && value !== "-")
-      .join(" · ");
+    const genderLabel = getContestGenderLabel(profile.gender);
+    const ageLabel = getContestAgeLabel(profile.ageRange);
+    const distanceLabel = getContestDistanceLabel(profile.distance);
 
-    const activityDetails = [
-      `${profile.voteCount} voti`,
-      `${profile.truckNames.length} stand`,
-      formatDateTime(profile.lastVoteAt),
-    ].join(" · ");
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td data-label="Contatto">
-        <div class="customer-cell">
+    const card = document.createElement("article");
+    card.className = "voter-profile-card";
+    card.innerHTML = `
+      <button class="voter-profile-toggle" type="button" aria-expanded="false">
+        <div class="voter-profile-main">
           <strong>${escapeHtml(profile.email || "email non disponibile")}</strong>
-          <span>${escapeHtml(profile.truckNames.slice(0, 2).join(" · ") || "Nessuno stand associato")}</span>
         </div>
-      </td>
-      <td data-label="Profilo">
-        <div class="customer-cell compact">
-          <span>${escapeHtml(profileDetails || "Solo email raccolta")}</span>
+        <span class="voter-profile-toggle-side">
+          <span class="voter-profile-chevron" aria-hidden="true">+</span>
+        </span>
+      </button>
+      <div class="voter-profile-details" hidden>
+        <div class="voter-profile-detail-list">
+          <div class="voter-profile-detail-row">
+            <span>Email</span>
+            <strong>${escapeHtml(profile.email || "email non disponibile")}</strong>
+          </div>
+          <div class="voter-profile-detail-row">
+            <span>Sesso</span>
+            <strong>${escapeHtml(genderLabel !== "-" ? genderLabel : "Non indicato")}</strong>
+          </div>
+          <div class="voter-profile-detail-row">
+            <span>Eta'</span>
+            <strong>${escapeHtml(ageLabel !== "-" ? ageLabel : "Non indicata")}</strong>
+          </div>
+          <div class="voter-profile-detail-row">
+            <span>Provenienza</span>
+            <strong>${escapeHtml(distanceLabel !== "-" ? distanceLabel : "Non indicata")}</strong>
+          </div>
         </div>
-      </td>
-      <td data-label="Attivita">${escapeHtml(activityDetails)}</td>
+      </div>
     `;
-    prizeEntriesTable.append(row);
+
+    const toggle = card.querySelector(".voter-profile-toggle");
+    const details = card.querySelector(".voter-profile-details");
+
+    toggle?.addEventListener("click", () => {
+      const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!isExpanded));
+      const chevron = toggle.querySelector(".voter-profile-chevron");
+      if (chevron) {
+        chevron.textContent = isExpanded ? "+" : "-";
+      }
+      if (details) {
+        details.hidden = isExpanded;
+      }
+      card.classList.toggle("is-open", !isExpanded);
+    });
+
+    prizeEntriesTable.append(card);
   });
 }
 
@@ -2552,6 +2579,8 @@ function renderPrizeSummary(profiles) {
 }
 
 function renderPrizeWinnerCard(profiles) {
+  if (!prizeWinnerName && !prizeWinnerMeta) return;
+
   const profile = profiles[0];
 
   if (!profile) {
@@ -3056,13 +3085,15 @@ function renderAnalyticsDashboard() {
   if (!document.querySelector("#durationTrendChart") && !document.querySelector("#clickStatsList")) return;
 
   const sessions = new Set(analyticsEvents.map((event) => event.sessionId));
+  const activeSessions = getActiveSessionCount();
   const clicks = analyticsEvents.filter((event) => event.type === "click");
   const sectionViews = analyticsEvents.filter((event) => event.type === "section_view");
   const sectionStats = getTopStats(sectionViews, "label");
   const clickSectionStats = getTopStats(clicks, "section");
   const durationStats = getSessionDurationStats();
   setTextContent("#metricAvgDuration", formatDuration(durationStats.averageMs));
-  setTextContent("#metricSessions", String(sessions.size));
+  setTextContent("#metricVisitors", String(sessions.size));
+  setTextContent("#metricActiveUsers", String(activeSessions));
   setTextContent("#metricSectionViews", String(sectionViews.length));
   setTextContent("#metricClicks", String(clicks.length));
   renderEventMix(sectionStats);
@@ -3077,6 +3108,23 @@ function renderAnalyticsDashboard() {
   renderClickStatsList("#clickStatsList", clickSectionStats, "Nessun click tracciato.");
   renderAnalyticsSummary(sectionStats, clickSectionStats, durationStats, sessions.size, sectionViews.length, clicks.length);
   renderDatabaseHealthEstimate();
+}
+
+function getActiveSessionCount() {
+  const activeWindowMs = 5 * 60 * 1000;
+  const now = Date.now();
+  const activeSessions = new Set();
+
+  analyticsEvents.forEach((event) => {
+    if (!event.sessionId || !event.createdAt) return;
+    const timestamp = new Date(event.createdAt).getTime();
+    if (!Number.isFinite(timestamp)) return;
+    if (now - timestamp <= activeWindowMs) {
+      activeSessions.add(event.sessionId);
+    }
+  });
+
+  return activeSessions.size;
 }
 
 function renderDatabaseHealthEstimate() {
@@ -3434,7 +3482,7 @@ function renderClickStatsList(selector, rows, emptyText) {
   const total = rows.reduce((sum, row) => sum + row.count, 0);
   const max = Math.max(...rows.map((row) => row.count), 1);
 
-  rows.slice(0, 6).forEach((row, index) => {
+  rows.slice(0, 3).forEach((row, index) => {
     const percentage = Math.max(8, Math.round((row.count / max) * 100));
     const share = total ? Math.round((row.count / total) * 100) : 0;
     const item = document.createElement("article");
@@ -4282,11 +4330,6 @@ function renderReviewInsights(container) {
   const topOrigin = getTopReviewStat("originArea");
 
   container.innerHTML = `
-    <div class="review-insight-card main">
-      <span>Media stelle</span>
-      <strong>${getAverageRating().toFixed(1)}</strong>
-      <small>${reviews.length} risposte raccolte</small>
-    </div>
     <div class="review-insight-card">
       <span>Cosa piace</span>
       <strong>${escapeHtml(topFavorite?.label || "In raccolta")}</strong>
@@ -5548,4 +5591,16 @@ function showToast(message) {
     toast.classList.remove("visible");
     window.setTimeout(() => toast.remove(), 220);
   }, 2800);
+}
+
+function openVoteThanksModal() {
+  if (!voteThanksModal) return;
+  voteThanksModal.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
+function closeVoteThanksModal() {
+  if (!voteThanksModal) return;
+  voteThanksModal.hidden = true;
+  document.body.classList.remove("modal-open");
 }

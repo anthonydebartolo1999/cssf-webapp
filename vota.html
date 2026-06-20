@@ -106,9 +106,9 @@
                 </div>
                 <div class="vote-score-grid">
                   <fieldset class="vote-score-card">
-                    <div class="vote-score-card-title">⭐ Quanto hai trovato SANIZZO il piatto che hai assaggiato?</div>
+                    <div class="vote-score-card-title">🍔 Quanto ti è piaciuto il piatto che hai assaggiato?</div>
                     <div class="vote-score-card-panel">
-                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto hai trovato SANIZZO il piatto che hai assaggiato? Vota da 1 a 5">
+                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto ti è piaciuto il piatto che hai assaggiato? Vota da 1 a 5">
                       <input id="sanizzoAward1" name="sanizzoScore" type="radio" value="1" required />
                       <label for="sanizzoAward1" aria-label="1 su 5">1</label>
                       <input id="sanizzoAward2" name="sanizzoScore" type="radio" value="2" />
@@ -123,9 +123,9 @@
                     </div>
                   </fieldset>
                   <fieldset class="vote-score-card">
-                    <div class="vote-score-card-title">🏛️ Quanto hai trovato tradizionale il piatto che hai assaggiato?</div>
+                    <div class="vote-score-card-title">🏠 Quanto il piatto che hai assaggiato ti ha fatto sentire a casa?</div>
                     <div class="vote-score-card-panel">
-                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto hai trovato tradizionale il piatto che hai assaggiato? Vota da 1 a 5">
+                      <div class="vote-score-dots" role="radiogroup" aria-label="Quanto il piatto che hai assaggiato ti ha fatto sentire a casa? Vota da 1 a 5">
                       <input id="traditionalAward1" name="traditionalScore" type="radio" value="1" required />
                       <label for="traditionalAward1" aria-label="1 su 5">1</label>
                       <input id="traditionalAward2" name="traditionalScore" type="radio" value="2" />
@@ -171,6 +171,23 @@
         </section>
       </main>
       <footer class="app-footer" aria-label="Crediti"><span>&copy; 2026 Cosenza Super Street Food</span><span><a href="privacy.html">Privacy</a></span><span>Designed &amp; Developed by ADB99</span></footer>
+    </div>
+    <div class="booking-modal" id="voteThanksModal" hidden>
+      <button class="booking-modal-backdrop" id="voteThanksBackdrop" type="button" aria-label="Chiudi messaggio di ringraziamento"></button>
+      <div class="booking-modal-panel" role="dialog" aria-modal="true" aria-labelledby="voteThanksTitle">
+        <div class="booking-modal-heading">
+          <div>
+            <span class="section-label">Grazie</span>
+            <h3 id="voteThanksTitle">Il tuo voto conta davvero</h3>
+          </div>
+          <button class="icon-button" id="voteThanksClose" type="button" aria-label="Chiudi">&times;</button>
+        </div>
+        <p>Se il festival ti e' piaciuto, puoi aiutarci a farlo crescere ancora entrando nel CSSF Supporters Club.</p>
+        <div class="vote-support-cta-actions">
+          <a class="primary-action" href="supporters.html">Sostieni il CSSF</a>
+          <a class="ghost-link" href="mappa.html">Torna al menu'</a>
+        </div>
+      </div>
     </div>
     <div class="consent-banner" id="consentBanner" hidden><div><strong>Aiutaci a migliorare</strong><p>Usiamo statistiche anonime, solo con consenso, per migliorare la web app dell'evento. Se vuoi puoi anche attivare le notifiche per ricevere aggiornamenti e comunicazioni evento. Leggi l'<a href="privacy.html">informativa privacy</a>.</p></div><div class="consent-actions"><button class="ghost-link" id="publicNotificationButton" type="button">Attiva notifiche</button><button class="ghost-link" id="rejectAnalyticsButton" type="button">Rifiuta</button><button class="primary-action" id="acceptAnalyticsButton" type="button">Accetta</button></div></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

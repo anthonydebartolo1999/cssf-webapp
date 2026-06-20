@@ -202,74 +202,53 @@
                 </article>
               </div>
             </section>
-            <section class="staff-work-area staff-area-prize" id="estrazione" aria-labelledby="staff-prize-title">
-              <div class="staff-area-heading">
-                <div>
-                  <span class="section-label">Votanti</span>
-                  <h2 id="staff-prize-title">Profili votanti <span class="staff-count-badge gold" id="metricPrizeEntries">0</span></h2>
-                </div>
-                <div class="staff-actions compact">
-                  <button class="ghost-link strong" id="exportPrizeCsvButton" type="button">Esporta contatti</button>
-                </div>
-              </div>
-              <div class="analytics-grid staff-prize-grid">
-                <article class="analytics-panel staff-prize-table-panel">
-                  <div class="staff-prize-table-heading">
-                    <div>
-                      <span class="section-label">Contatti</span>
-                      <h3>Profili raccolti dai voti</h3>
-                      <p class="staff-prize-table-meta"><strong id="prizeEntriesCount">0</strong> profili unici disponibili per analisi e comunicazioni.</p>
-                    </div>
-                  </div>
-                  <div class="table-wrap">
-                    <table>
-                      <thead><tr><th>Contatto</th><th>Profilo</th><th>Attivita</th></tr></thead>
-                      <tbody id="prizeEntriesTable"></tbody>
-                    </table>
-                  </div>
-                  <div class="empty-state" id="emptyPrizeEntries">Nessun profilo votante registrato.</div>
-                </article>
-                <article class="analytics-panel staff-prize-control-panel">
-                  <div id="prizeSummary"></div>
-                  <div class="staff-prize-winner" id="prizeWinnerCard">
-                    <span class="section-label">Ultimo profilo utile</span>
-                    <strong id="prizeWinnerName">Nessun profilo disponibile</strong>
-                    <p id="prizeWinnerMeta"></p>
-                  </div>
-                </article>
-              </div>
-              <div class="analytics-chart-grid analytics-chart-grid-simple staff-review-insights-grid">
-                <article class="analytics-panel staff-review-summary-panel">
-                  <div class="staff-review-summary-head">
-                    <div>
-                      <span class="section-label">Recensioni</span>
-                      <h3>Osservatorio feedback</h3>
-                    </div>
-                    <div class="staff-review-summary-actions">
-                      <div class="review-summary admin-review-summary">
-                        <strong id="adminReviewAverage">--</strong>
-                        <span id="adminReviewCount">0 recensioni</span>
+            <section class="staff-work-area staff-area-prize staff-area-prize-flat" id="estrazione" aria-labelledby="staff-prize-title">
+              <div class="staff-profiles-feedback-layout">
+                <div class="analytics-grid staff-prize-grid">
+                  <article class="analytics-panel staff-prize-table-panel staff-prize-panel-card">
+                    <div class="staff-prize-card-head">
+                      <div class="staff-prize-card-title">
+                        <h2 id="staff-prize-title">Profili votanti <span class="staff-count-badge gold" id="metricPrizeEntries">0</span></h2>
                       </div>
-                      <button class="ghost-link" id="clearReviewsButton" type="button">Azzera feedback</button>
+                      <button class="ghost-link strong" id="exportPrizeCsvButton" type="button">Esporta contatti</button>
                     </div>
-                  </div>
-                  <div class="reviews-insights admin-reviews-insights" id="adminReviewsInsights"></div>
-                  <div class="staff-review-feed">
-                    <div class="staff-review-feed-head">
-                      <span class="section-label">Feed recensioni</span>
-                      <h4>Ultimi feedback raccolti</h4>
+                    <div class="staff-voter-profiles" id="prizeEntriesTable"></div>
+                    <div class="empty-state" id="emptyPrizeEntries">Nessun profilo votante registrato.</div>
+                  </article>
+                </div>
+                <div class="analytics-chart-grid analytics-chart-grid-simple staff-review-insights-grid">
+                  <article class="analytics-panel staff-review-summary-panel">
+                    <div class="staff-review-summary-head">
+                      <div>
+                        <span class="section-label">Recensioni</span>
+                        <h3>Osservatorio feedback</h3>
+                      </div>
+                      <div class="staff-review-summary-actions">
+                        <div class="review-summary admin-review-summary">
+                          <strong id="adminReviewAverage">--</strong>
+                          <span id="adminReviewCount">0 recensioni</span>
+                        </div>
+                        <button class="ghost-link" id="clearReviewsButton" type="button">Azzera feedback</button>
+                      </div>
                     </div>
-                    <div class="reviews-list admin-reviews-list" id="adminReviewsList"></div>
-                    <div class="empty-state" id="adminEmptyReviews">Ancora nessuna recensione.</div>
-                  </div>
-                </article>
+                    <div class="reviews-insights admin-reviews-insights" id="adminReviewsInsights"></div>
+                    <div class="staff-review-feed">
+                      <div class="staff-review-feed-head">
+                        <span class="section-label">Feed recensioni</span>
+                        <h4>Ultimi feedback raccolti</h4>
+                      </div>
+                      <div class="reviews-list admin-reviews-list" id="adminReviewsList"></div>
+                      <div class="empty-state" id="adminEmptyReviews">Ancora nessuna recensione.</div>
+                    </div>
+                  </article>
+                </div>
               </div>
             </section>
             <section class="staff-work-area staff-area-stats" id="statistiche" aria-labelledby="staff-stats-title">
               <div class="staff-area-heading">
                 <div>
                   <span class="section-label">Statistiche</span>
-                  <h2 id="staff-stats-title">Sintesi web app <span class="staff-count-badge olive"><span id="metricSessions">0</span> sessioni</span></h2>
+                  <h2 id="staff-stats-title">Sintesi web app <span class="staff-count-badge olive"><span id="metricVisitors">0</span> entrate</span> <span class="staff-count-badge olive"><span id="metricActiveUsers">0</span> ora online</span></h2>
                 </div>
               </div>
               <div class="analytics-chart-grid analytics-chart-grid-simple">
