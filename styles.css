@@ -4744,17 +4744,20 @@ td {
 
 .toast {
   position: fixed;
-  right: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 50%;
+  top: 50%;
   z-index: 50;
   max-width: min(420px, calc(100% - 40px));
-  padding: 13px 16px;
-  border-radius: 8px;
+  padding: 16px 20px;
+  border-radius: 16px;
   background: var(--charcoal);
   color: white;
   box-shadow: var(--shadow);
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.4;
   opacity: 0;
-  transform: translateY(12px);
+  transform: translate(-50%, calc(-50% + 12px));
   pointer-events: none;
   transition:
     opacity 0.2s ease,
@@ -4763,7 +4766,7 @@ td {
 
 .toast.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, -50%);
 }
 
 .staff-app {
@@ -6591,10 +6594,10 @@ td {
   }
 
   .toast {
-    left: 8px;
-    right: 8px;
-    bottom: calc(12px + env(safe-area-inset-bottom));
-    max-width: none;
+    left: 50%;
+    top: 50%;
+    right: auto;
+    max-width: min(calc(100% - 24px), 360px);
   }
 
   .staff-app .app-shell {

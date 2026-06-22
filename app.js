@@ -6,6 +6,7 @@ const VOTE_STORAGE_KEY = "cssf-votes-v1";
 const ANALYTICS_STORAGE_KEY = "cssf-analytics-v1";
 const ANALYTICS_CONSENT_KEY = "cssf-analytics-consent-v1";
 const PRIVACY_BANNER_SEEN_KEY = "cssf-privacy-banner-seen-v1";
+const PUBLIC_PUSH_PROMPT_DISMISSED_KEY = "cssf-push-public-prompt-dismissed-v1";
 const TABLE_COUNT = 15;
 const SEATS_PER_TABLE = 8;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
@@ -13,8 +14,8 @@ const MAX_ANALYTICS_EVENTS = 2500;
 const ADMIN_MOMENTS_PAGE_SIZE = 24;
 const MAX_STAFF_RESERVATIONS = 150;
 const REVIEW_FEED_BATCH_SIZE = 3;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v173";
-const SERVICE_WORKER_VERSION = "20260618-staff-push-v173";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v174";
+const SERVICE_WORKER_VERSION = "20260622-countdown-fix-v174";
 const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
 const PUSH_SUBSCRIBE_ENDPOINT = "/api/push/subscribe";
 const PUSH_BROADCAST_ENDPOINT = "/api/push/broadcast";
@@ -36,6 +37,7 @@ const SUPABASE_RESERVATION_SLOT_USAGE_VIEW = "reservation_slot_usage";
 const MAX_MOMENT_FILE_SIZE = 2 * 1024 * 1024;
 
 const eventStart = new Date("2026-06-26T19:00:00+02:00");
+const eventEnd = new Date("2026-06-29T00:00:00+02:00");
 const countdownStart = new Date("2026-05-29T00:00:00+02:00");
 const eventDays = [
   { value: "2026-06-26", label: "Ven 26 giugno", longLabel: "Venerdi 26 giugno 2026" },
@@ -45,6 +47,7 @@ const eventDays = [
 
 const slots = ["20:30"];
 const activeStatuses = new Set(["confirmed", "pending"]);
+let lastCountdownProgressPhase = "";
 const statusLabels = {
   confirmed: "Confermata",
   pending: "Da confermare",
@@ -479,6 +482,7 @@ const adminLogoutButton = document.querySelector("#adminLogoutButton");
 const staffAuthStatus = document.querySelector("#staffAuthStatus");
 const notificationPermissionButton = document.querySelector("#notificationPermissionButton");
 const publicNotificationButton = document.querySelector("#publicNotificationButton");
+const skipPublicNotificationButton = document.querySelector("#skipPublicNotificationButton");
 const communicationForm = document.querySelector("#communicationForm");
 const communicationStatus = document.querySelector("#communicationStatus");
 const exportAnalyticsButton = document.querySelector("#exportAnalyticsButton");
@@ -526,6 +530,7 @@ let trucks = loadTrucks();
 let votes = loadVotes();
 let analyticsEvents = loadAnalyticsEvents();
 let capacityPerSlot = DEFAULT_CAPACITY_PER_SLOT;
+let countdownIntervalId = 0;
 let deferredInstallPrompt = null;
 let selectedTruckId = sessionStorage.getItem("cssf-selected-truck") || trucks[0]?.id || "";
 let activeLeaderboardCategory = voteCategories[0].value;
@@ -620,6 +625,7 @@ bindEvent(adminLoginForm, "submit", handleAdminLogin);
 bindEvent(adminLogoutButton, "click", handleAdminLogout);
 bindEvent(notificationPermissionButton, "click", requestStaffNotifications);
 bindEvent(publicNotificationButton, "click", requestPublicNotifications);
+bindEvent(skipPublicNotificationButton, "click", dismissPublicNotificationPrompt);
 bindEvent(communicationForm, "submit", handleCommunicationSubmit);
 bindEvent(exportAnalyticsButton, "click", exportAnalyticsCsv);
 bindEvent(clearAnalyticsButton, "click", clearAnalyticsEvents);
@@ -642,7 +648,9 @@ bindEvent(mapImageBackdrop, "click", closeMapImageModal);
 bindEvent(mapImageClose, "click", closeMapImageModal);
 bindEvent(window, "storage", handleSharedStorageUpdate);
 bindEvent(window, "pageshow", handlePageShow);
+bindEvent(window, "focus", handleWindowFocus);
 bindEvent(window, "resize", handleViewportResize);
+bindEvent(document, "visibilitychange", handleVisibilityChange);
 
 setupMoodButtons();
 setupSlotModal();
@@ -653,8 +661,7 @@ setupAppViews();
 setupMobileMenu();
 initializeStaffAuth();
 registerServiceWorker();
-updateCountdown();
-window.setInterval(updateCountdown, 1000);
+startCountdownTicker();
 renderLeaderboardTabs();
 renderStaffVoteTabs();
 render();
@@ -719,6 +726,7 @@ function handleFieldValidationStateChange(event) {
 }
 
 function handlePageShow(event) {
+  restartCountdownTicker();
   normalizeTruckFilters();
   render();
   renderReviews();
@@ -740,7 +748,7 @@ function handlePageShow(event) {
       refreshVoteLeaderboardFromRemote();
     }
     if (bookingForm || slotsGrid || availabilityReadout) {
-      refreshReservationSlotUsageFromRemote();
+      updateAvailabilityReadout();
     }
     if (isStaffPage() && staffSession) {
       refreshReservationsFromRemote();
@@ -748,6 +756,16 @@ function handlePageShow(event) {
       refreshAnalyticsFromRemote();
       refreshMomentsFromRemote();
     }
+  }
+}
+
+function handleWindowFocus() {
+  restartCountdownTicker();
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === "visible") {
+    restartCountdownTicker();
   }
 }
 
@@ -893,7 +911,7 @@ async function handleBookingSubmit(event) {
   bookingForm.guests.value = 4;
   render();
   trackEvent("conversion", "prenotazione inviata", { section: "prenota", code: reservation.id });
-  showToast(`Richiesta registrata correttamente. Codice ${reservation.id}`);
+  showToast("Richiesta inviata correttamente, ti contatteremo noi per la conferma");
 }
 
 async function handleReviewSubmit(event) {
@@ -1452,14 +1470,14 @@ function getSlotUsageKey(day, slot) {
 }
 
 function subscribeToReservationChanges() {
-  if (!supabaseClient || reservationsRealtimeChannel) return;
+  if (!supabaseClient || reservationsRealtimeChannel || !isStaffPage() || !staffSession) return;
 
   reservationsRealtimeChannel = supabaseClient
     .channel("cssf-reservations-realtime")
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: SUPABASE_RESERVATIONS_TABLE },
-      () => (isStaffPage() && staffSession ? refreshReservationsFromRemote() : refreshReservationSlotUsageFromRemote()),
+      () => refreshReservationsFromRemote(),
     )
     .subscribe();
 }
@@ -1757,20 +1775,20 @@ async function requestPublicNotifications() {
 }
 
 async function requestPushNotificationsForScope(scope) {
-  dismissConsentBannerPermanently();
-
   const isStaffScope = scope === STAFF_PUSH_SCOPE;
   const successMessage = isStaffScope ? "Notifiche staff attive." : "Notifiche evento attive.";
   const existingMessage = isStaffScope ? "Notifiche staff gia attive." : "Notifiche evento gia attive.";
 
   if (isIosDevice() && !isStandaloneMode()) {
     await refreshPushUi();
+    updateConsentBannerVisibility();
     showToast("Su iPhone installa prima la web app con Aggiungi a Home, poi attiva le notifiche dall'app.");
     return;
   }
 
   if (!supportsPushNotifications()) {
     await refreshPushUi();
+    updateConsentBannerVisibility();
     showToast("Questo browser non supporta le notifiche.");
     return;
   }
@@ -1778,10 +1796,15 @@ async function requestPushNotificationsForScope(scope) {
   if (Notification.permission === "granted") {
     try {
       const result = await ensurePushSubscription(scope);
+      if (!isStaffScope) {
+        setPersistentPreference(PUBLIC_PUSH_PROMPT_DISMISSED_KEY, "yes");
+      }
       await refreshPushUi();
+      updateConsentBannerVisibility();
       showToast(result === "existing" ? existingMessage : successMessage);
     } catch (error) {
       await refreshPushUi();
+      updateConsentBannerVisibility();
       showToast(error?.message || "Notifiche non attivabili ora.");
     }
     return;
@@ -1790,7 +1813,11 @@ async function requestPushNotificationsForScope(scope) {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
     setPushScopeState(scope, false);
+    if (!isStaffScope) {
+      setPersistentPreference(PUBLIC_PUSH_PROMPT_DISMISSED_KEY, "yes");
+    }
     await refreshPushUi();
+    updateConsentBannerVisibility();
     showToast(
       permission === "denied"
         ? "Notifiche bloccate: riattivale dalle impostazioni del browser."
@@ -1801,10 +1828,15 @@ async function requestPushNotificationsForScope(scope) {
 
   try {
     await ensurePushSubscription(scope);
+    if (!isStaffScope) {
+      setPersistentPreference(PUBLIC_PUSH_PROMPT_DISMISSED_KEY, "yes");
+    }
     await refreshPushUi();
+    updateConsentBannerVisibility();
     showToast(successMessage);
   } catch (error) {
     await refreshPushUi();
+    updateConsentBannerVisibility();
     showToast(error?.message || "Notifiche non attivabili ora.");
   }
 }
@@ -2052,6 +2084,40 @@ function dismissConsentBannerPermanently() {
   setPersistentPreference(PRIVACY_BANNER_SEEN_KEY, "yes");
   if (consentBanner) {
     consentBanner.hidden = true;
+  }
+}
+
+function hasDismissedPublicNotificationPrompt() {
+  return getPersistentPreference(PUBLIC_PUSH_PROMPT_DISMISSED_KEY) === "yes";
+}
+
+function dismissPublicNotificationPrompt() {
+  setPersistentPreference(PUBLIC_PUSH_PROMPT_DISMISSED_KEY, "yes");
+  updateConsentBannerVisibility();
+  showToast("Puoi attivare le notifiche piu tardi.");
+}
+
+function hasPendingPublicNotificationChoice() {
+  return (
+    Boolean(publicNotificationButton) &&
+    supportsPushNotifications() &&
+    Notification.permission === "default" &&
+    !hasDismissedPublicNotificationPrompt()
+  );
+}
+
+function updateConsentBannerVisibility() {
+  if (!consentBanner) return;
+
+  const analyticsResolved = Boolean(getAnalyticsConsent());
+  const notificationsResolved = !hasPendingPublicNotificationChoice();
+  const shouldHide = analyticsResolved && notificationsResolved;
+
+  consentBanner.hidden = shouldHide;
+  if (shouldHide) {
+    setPersistentPreference(PRIVACY_BANNER_SEEN_KEY, "yes");
+  } else {
+    removePersistentPreference(PRIVACY_BANNER_SEEN_KEY);
   }
 }
 
@@ -3009,9 +3075,7 @@ let trackedSections = new Set(JSON.parse(sessionStorage.getItem("cssf-tracked-se
 
 function setupAnalytics() {
   const consent = getAnalyticsConsent();
-  if (consentBanner) {
-    consentBanner.hidden = Boolean(consent) || getPersistentPreference(PRIVACY_BANNER_SEEN_KEY) === "yes";
-  }
+  updateConsentBannerVisibility();
 
   document.addEventListener(
     "click",
@@ -3041,7 +3105,7 @@ function setupAnalytics() {
 
 function setAnalyticsConsent(value) {
   setPersistentPreference(ANALYTICS_CONSENT_KEY, value);
-  dismissConsentBannerPermanently();
+  updateConsentBannerVisibility();
 
   if (value === "accepted") {
     startSectionAnalytics();
@@ -3062,9 +3126,8 @@ function getAnalyticsConsent() {
 function resetPrivacyPreferences() {
   removePersistentPreference(ANALYTICS_CONSENT_KEY);
   removePersistentPreference(PRIVACY_BANNER_SEEN_KEY);
-  if (consentBanner) {
-    consentBanner.hidden = false;
-  }
+  removePersistentPreference(PUBLIC_PUSH_PROMPT_DISMISSED_KEY);
+  updateConsentBannerVisibility();
   renderAnalyticsDashboard();
   showToast("Preferenze privacy riaperte.");
 }
@@ -3799,25 +3862,62 @@ async function clearVotesRemote() {
 
 function updateCountdown() {
   const now = new Date();
-  const distance = eventStart.getTime() - now.getTime();
-  const safeDistance = Math.max(0, distance);
+  const countdownHeading = document.querySelector("#countdownHeading");
+  const nowTime = now.getTime();
+  const startTime = eventStart.getTime();
+  const endTime = eventEnd.getTime();
+  const isBeforeEvent = nowTime < startTime;
+  const isDuringEvent = nowTime >= startTime && nowTime < endTime;
+  const referenceTime = isBeforeEvent ? startTime : isDuringEvent ? startTime : endTime;
+  const safeDistance = Math.abs(referenceTime - nowTime);
   const totalSeconds = Math.floor(safeDistance / 1000);
   const days = Math.floor(totalSeconds / 86400);
   const hours = Math.floor((totalSeconds % 86400) / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  const totalWindow = eventStart.getTime() - countdownStart.getTime();
-  const elapsed = now.getTime() - countdownStart.getTime();
-  const progress = clampNumber((elapsed / totalWindow) * 100, 0, 100);
+  const preEventWindow = startTime - countdownStart.getTime();
+  const duringEventWindow = endTime - startTime;
+  let progress = 100;
+  let progressPhase = "after";
+
+  if (isBeforeEvent) {
+    const elapsedBeforeEvent = nowTime - countdownStart.getTime();
+    progress = clampNumber((elapsedBeforeEvent / preEventWindow) * 100, 0, 100);
+    progressPhase = "before";
+  } else if (isDuringEvent) {
+    const elapsedDuringEvent = nowTime - startTime;
+    progress = clampNumber((elapsedDuringEvent / duringEventWindow) * 100, 0, 100);
+    progressPhase = "during";
+  }
+
+  if (countdownHeading) {
+    countdownHeading.textContent = isBeforeEvent
+      ? "La festa inizia tra"
+      : isDuringEvent
+        ? "La festa e' iniziata da"
+        : "La festa si e' conclusa da";
+  }
 
   setCountdownValue("#countdownDays", String(days));
   setCountdownValue("#countdownHours", String(hours).padStart(2, "0"));
   setCountdownValue("#countdownMinutes", String(minutes).padStart(2, "0"));
   setCountdownValue("#countdownSeconds", String(seconds).padStart(2, "0"));
-  setCountdownProgress(progress);
+  setCountdownProgress(progress, progressPhase);
 }
 
-function setCountdownProgress(progress) {
+function startCountdownTicker() {
+  updateCountdown();
+  if (countdownIntervalId) {
+    window.clearInterval(countdownIntervalId);
+  }
+  countdownIntervalId = window.setInterval(updateCountdown, 1000);
+}
+
+function restartCountdownTicker() {
+  startCountdownTicker();
+}
+
+function setCountdownProgress(progress, phase = "") {
   const fill = document.querySelector("#countdownProgressFill");
   const burger = document.querySelector("#countdownBurger");
   const flag = document.querySelector("#countdownFlag");
@@ -3833,6 +3933,12 @@ function setCountdownProgress(progress) {
   const trackWidth = Math.max(0, progressWidth - trackLeft - trackRight);
   const progressFillWidth = trackWidth * (progress / 100);
   const progressLeft = progressWidth ? trackLeft + progressFillWidth : 0;
+  const isPhaseChanged = Boolean(phase) && phase !== lastCountdownProgressPhase;
+
+  if (isPhaseChanged) {
+    fill.style.transition = "none";
+    burger.style.transition = "none";
+  }
 
   progressWrap?.style.setProperty("--burger-progress", value);
   progressWrap?.style.setProperty("--burger-progress-ratio", ratio);
@@ -3847,6 +3953,18 @@ function setCountdownProgress(progress) {
 
   if (flag) {
     flag.style.opacity = "1";
+  }
+
+  if (isPhaseChanged) {
+    void fill.offsetWidth;
+    requestAnimationFrame(() => {
+      fill.style.transition = "";
+      burger.style.transition = "";
+    });
+  }
+
+  if (phase) {
+    lastCountdownProgressPhase = phase;
   }
 }
 
@@ -4547,8 +4665,9 @@ function getReservationPriority(reservation) {
 function handleSharedStorageUpdate(event) {
   if (!event.key) return;
 
-  if (![ANALYTICS_CONSENT_KEY, PRIVACY_BANNER_SEEN_KEY].includes(event.key)) return;
+  if (![ANALYTICS_CONSENT_KEY, PRIVACY_BANNER_SEEN_KEY, PUBLIC_PUSH_PROMPT_DISMISSED_KEY].includes(event.key)) return;
 
+  updateConsentBannerVisibility();
   render();
   renderReviews();
   renderAdminAccess();
@@ -5691,7 +5810,7 @@ function showToast(message) {
   window.setTimeout(() => {
     toast.classList.remove("visible");
     window.setTimeout(() => toast.remove(), 220);
-  }, 2800);
+  }, 4600);
 }
 
 function openVoteThanksModal() {
