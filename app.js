@@ -839,13 +839,23 @@ function closeMapImageModal() {
 
 function withTimeout(promise, timeoutMs) {
   let timeoutId = null;
-
-  return Promise.race([
-    promise.finally(() => {
+  const normalizedPromise = Promise.resolve(promise).then(
+    (value) => {
       if (timeoutId) {
         window.clearTimeout(timeoutId);
       }
-    }),
+      return value;
+    },
+    (error) => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+      throw error;
+    },
+  );
+
+  return Promise.race([
+    normalizedPromise,
     new Promise((_, reject) => {
       timeoutId = window.setTimeout(() => reject(new Error("Timeout Supabase")), timeoutMs);
     }),
