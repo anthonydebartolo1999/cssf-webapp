@@ -856,6 +856,11 @@ function isSupabaseTimeoutError(error) {
   return (error?.message || "").toLowerCase().includes("timeout supabase");
 }
 
+function isReservationAlreadySavedError(error) {
+  const message = (error?.message || "").toLowerCase();
+  return error?.code === "23505" || message.includes("duplicate key") || message.includes("already exists");
+}
+
 async function cleanupLegacyCaches() {
   if (!("caches" in window)) return;
 
@@ -5077,6 +5082,10 @@ async function saveReservationRemote(reservation) {
         SUPABASE_WRITE_TIMEOUT_MS,
       );
       if (error) {
+        if (isReservationAlreadySavedError(error)) {
+          return true;
+        }
+
         lastReservationRemoteError = error.message || "Inserimento Supabase rifiutato.";
         console.warn("CSSF Supabase reservation insert failed:", error);
         return false;
@@ -5084,6 +5093,10 @@ async function saveReservationRemote(reservation) {
 
       return true;
     } catch (error) {
+      if (isReservationAlreadySavedError(error)) {
+        return true;
+      }
+
       lastReservationRemoteError = error?.message || "Supabase non raggiungibile.";
       console.warn("CSSF Supabase reservation insert failed:", error, { attempt });
 
