@@ -34,6 +34,7 @@ const SUPABASE_MOMENTS_TABLE = "moments";
 const SUPABASE_MOMENTS_BUCKET = "cssf-moments";
 const SUPABASE_VOTE_LEADERBOARD_VIEW = "vote_leaderboard";
 const SUPABASE_RESERVATION_SLOT_USAGE_VIEW = "reservation_slot_usage";
+const SUPABASE_WRITE_TIMEOUT_MS = 15000;
 const MAX_MOMENT_FILE_SIZE = 2 * 1024 * 1024;
 
 const eventStart = new Date("2026-06-26T19:00:00+02:00");
@@ -837,12 +838,22 @@ function closeMapImageModal() {
 }
 
 function withTimeout(promise, timeoutMs) {
+  let timeoutId = null;
+
   return Promise.race([
-    promise,
+    promise.finally(() => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    }),
     new Promise((_, reject) => {
-      window.setTimeout(() => reject(new Error("Timeout Supabase")), timeoutMs);
+      timeoutId = window.setTimeout(() => reject(new Error("Timeout Supabase")), timeoutMs);
     }),
   ]);
+}
+
+function isSupabaseTimeoutError(error) {
+  return (error?.message || "").toLowerCase().includes("timeout supabase");
 }
 
 async function cleanupLegacyCaches() {
@@ -5059,23 +5070,30 @@ async function saveReservationRemote(reservation) {
     return false;
   }
 
-  try {
-    const { error } = await withTimeout(
-      supabaseClient.from(SUPABASE_RESERVATIONS_TABLE).insert(mapReservationToRemote(reservation)),
-      8000,
-    );
-    if (error) {
-      lastReservationRemoteError = error.message || "Inserimento Supabase rifiutato.";
-      console.warn("CSSF Supabase reservation insert failed:", error);
-      return false;
-    }
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    try {
+      const { error } = await withTimeout(
+        supabaseClient.from(SUPABASE_RESERVATIONS_TABLE).insert(mapReservationToRemote(reservation)),
+        SUPABASE_WRITE_TIMEOUT_MS,
+      );
+      if (error) {
+        lastReservationRemoteError = error.message || "Inserimento Supabase rifiutato.";
+        console.warn("CSSF Supabase reservation insert failed:", error);
+        return false;
+      }
 
-    return !error;
-  } catch (error) {
-    lastReservationRemoteError = error?.message || "Supabase non raggiungibile.";
-    console.warn("CSSF Supabase reservation insert failed:", error);
-    return false;
+      return true;
+    } catch (error) {
+      lastReservationRemoteError = error?.message || "Supabase non raggiungibile.";
+      console.warn("CSSF Supabase reservation insert failed:", error, { attempt });
+
+      if (!isSupabaseTimeoutError(error) || attempt === 2) {
+        return false;
+      }
+    }
   }
+
+  return false;
 }
 
 async function updateReservationStatusRemote(reservation) {
