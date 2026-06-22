@@ -565,6 +565,7 @@ let reservationSlotUsageRefreshTimer = null;
 let serviceWorkerRegistrationPromise = null;
 let staffPushSubscribed = false;
 let activeBookingView = "pending";
+let expandedMobileReservationId = "";
 let remoteMomentsTotal = 0;
 let remoteMomentsHasMore = false;
 sessionStorage.setItem("cssf-session-id", sessionId);
@@ -4201,6 +4202,9 @@ function renderReservations() {
   if (!reservationsTable || !emptyState) return;
 
   const filtered = getFilteredReservations();
+  if (expandedMobileReservationId && !filtered.some((reservation) => reservation.id === expandedMobileReservationId)) {
+    expandedMobileReservationId = "";
+  }
   reservationsTable.innerHTML = "";
   emptyState.classList.toggle("visible", filtered.length === 0);
   updateBookingQuickViewSummary();
@@ -4209,6 +4213,8 @@ function renderReservations() {
     const row = document.createElement("tr");
     row.dataset.status = reservation.status;
     row.dataset.priority = getReservationPriority(reservation);
+    const isExpandedMobile = expandedMobileReservationId === reservation.id;
+    row.classList.toggle("is-mobile-expanded", isExpandedMobile);
     const dayCell = document.createElement("td");
     const customerCell = document.createElement("td");
     const guestsCell = document.createElement("td");
@@ -4238,8 +4244,23 @@ function renderReservations() {
     const noteMarkup = reservation.notes
         ? `<span class="note-line">${escapeHtml(reservation.notes)}</span>`
         : "";
-
-    dayCell.innerHTML = `<div class="day-cell">${escapeHtml(formatReservationDayShort(reservation.day))}</div>`;
+    dayCell.innerHTML = `
+      <div class="reservation-mobile-summary">
+        <div class="reservation-mobile-summary-main">
+          <strong>${escapeHtml(reservation.name)}</strong>
+          <span>${escapeHtml(formatReservationDayShort(reservation.day))} / ${escapeHtml(reservation.slot)}</span>
+          <span>${escapeHtml(`${reservation.guests} persone`)} / ${escapeHtml(formatReservationTablesShort(reservation.tables))}</span>
+        </div>
+        <button
+          class="reservation-mobile-toggle"
+          type="button"
+          aria-expanded="${isExpandedMobile ? "true" : "false"}"
+          aria-label="${isExpandedMobile ? "Chiudi dettagli prenotazione" : "Apri dettagli prenotazione"}"
+        >${isExpandedMobile ? "−" : "+"}</button>
+      </div>
+      <div class="reservation-mobile-status">${escapeHtml(statusLabels[reservation.status] || reservation.status)}</div>
+      <div class="day-cell">${escapeHtml(formatReservationDayShort(reservation.day))}</div>
+    `;
     customerCell.innerHTML = `
         <div class="customer-cell">
           <div class="customer-inline-row">
@@ -4258,6 +4279,10 @@ function renderReservations() {
     statusCell.append(createStatusSelect(reservation));
     actionsCell.append(createActions(reservation));
     row.append(dayCell, customerCell, guestsCell, tablesCell, statusCell, actionsCell);
+    dayCell.querySelector(".reservation-mobile-toggle")?.addEventListener("click", () => {
+      expandedMobileReservationId = expandedMobileReservationId === reservation.id ? "" : reservation.id;
+      renderReservations();
+    });
 
     reservationsTable.append(row);
   });
