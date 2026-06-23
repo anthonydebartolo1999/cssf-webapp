@@ -4803,7 +4803,7 @@ function getFilteredReservations() {
 
 function updateAvailabilityReadout() {
   if (!bookingForm || !availabilityReadout) return;
-  availabilityReadout.textContent = `${TABLE_COUNT} tavoli disponibili da ${SEATS_PER_TABLE} posti ciascuno`;
+  availabilityReadout.textContent = "";
 }
 
 function getUsedSeats(day, slot) {

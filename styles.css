@@ -1172,6 +1172,12 @@ h3 {
   margin: 8px 0 0;
 }
 
+.booking-hero-note {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
 body[data-page="prenota"] .view-hero h2 {
   font-size: clamp(1.55rem, 3.2vw, 2.35rem);
   line-height: 1.06;
