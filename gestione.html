@@ -19,7 +19,7 @@
     <link rel="manifest" href="manifest-staff.webmanifest?v=20260606-staff-v2" />
     <link rel="icon" href="icons/app-icon-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="icons/app-icon-192.png" />
-    <link rel="stylesheet" href="styles.css?v=20260622-mobile-bookings-v170" />
+    <link rel="stylesheet" href="styles.css?v=20260623-csv-export-v176" />
   </head>
   <body data-page="gestione" class="staff-app">
     <div class="app-shell">
@@ -108,6 +108,7 @@
                   <div class="empty-state" id="emptyState">Nessuna prenotazione trovata.</div>
                   <div class="staff-actions bookings-export-actions">
                     <button class="primary-action" id="exportCsvButton" type="button">Scarica report</button>
+                    <button class="ghost-link" id="clearReservationsButton" type="button">Azzera prenotazioni</button>
                     <div class="booking-toolbar">
                       <div class="booking-search-panel" id="bookingSearchPanel" hidden>
                         <label class="search-field" aria-label="Cerca prenotazioni">
@@ -288,6 +289,6 @@
     </div>
     <template id="reservationRowTemplate"><tr><td class="reservation-day-cell"></td><td class="reservation-customer-cell"></td><td class="reservation-guests-cell"></td><td class="reservation-tables-cell"></td><td class="reservation-status-cell"></td><td class="reservation-actions-cell"></td></tr></template>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js?v=20260622-mobile-bookings-v175"></script>
+    <script src="app.js?v=20260623-csv-export-v176"></script>
   </body>
 </html>

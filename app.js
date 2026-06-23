@@ -14,8 +14,8 @@ const MAX_ANALYTICS_EVENTS = 2500;
 const ADMIN_MOMENTS_PAGE_SIZE = 24;
 const MAX_STAFF_RESERVATIONS = 150;
 const REVIEW_FEED_BATCH_SIZE = 3;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v175";
-const SERVICE_WORKER_VERSION = "20260622-mobile-bookings-v175";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v176";
+const SERVICE_WORKER_VERSION = "20260623-csv-export-v176";
 const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
 const PUSH_SUBSCRIBE_ENDPOINT = "/api/push/subscribe";
 const PUSH_BROADCAST_ENDPOINT = "/api/push/broadcast";
@@ -406,6 +406,7 @@ const slotModalMeta = document.querySelector("#slotModalMeta");
 const slotGuestsInput = document.querySelector("#slotGuestsInput");
 const slotModalAvailability = document.querySelector("#slotModalAvailability");
 const exportCsvButton = document.querySelector("#exportCsvButton");
+const clearReservationsButton = document.querySelector("#clearReservationsButton");
 const copyReportButton = document.querySelector("#copyReportButton");
 const reviewForm = document.querySelector("#reviewForm");
 const reviewsList = document.querySelector("#reviewsList");
@@ -597,6 +598,7 @@ bindEvent(capacityInput, "change", handleCapacityChange);
 bindEvent(slotQuickForm, "submit", handleSlotQuickSubmit);
 bindEvent(slotGuestsInput, "input", updateSlotModalAvailability);
 bindEvent(exportCsvButton, "click", exportCsv);
+bindEvent(clearReservationsButton, "click", clearReservationsRemote);
 bindEvent(copyReportButton, "click", copyReport);
 bindEvent(reviewForm, "submit", handleReviewSubmit);
 bindEvent(reviewForm, "input", handleFieldValidationStateChange);
@@ -2951,6 +2953,9 @@ function renderAdminAccess() {
   if (exportCsvButton) {
     exportCsvButton.disabled = !unlocked;
   }
+  if (clearReservationsButton) {
+    clearReservationsButton.disabled = !unlocked;
+  }
   if (clearVotesButton) {
     clearVotesButton.disabled = !unlocked;
   }
@@ -3755,16 +3760,7 @@ function exportAnalyticsCsv() {
     JSON.stringify(event.details || {}),
   ]);
 
-  const csv = [headers, ...rows].map((row) => row.map(toCsvCell).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `analytics-cosenza-super-street-food-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  downloadCsv(`analytics-cosenza-super-street-food-${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
   showToast("Analytics esportati.");
 }
 
@@ -3790,16 +3786,7 @@ function exportPrizeEntriesCsv() {
     ];
   });
 
-  const csv = [headers, ...rows].map((row) => row.map(toCsvCell).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `cssf-profili-votanti-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  downloadCsv(`cssf-profili-votanti-${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
   showToast("Contatti esportati.");
 }
 
@@ -3829,6 +3816,35 @@ async function clearAnalyticsEvents() {
   sessionStorage.removeItem("cssf-tracked-sections");
   renderAnalyticsDashboard();
   showToast("Analytics svuotati.");
+}
+
+async function clearReservationsRemote() {
+  const confirmed = window.confirm("Azzera tutte le prenotazioni salvate? Questa azione elimina tutte le prenotazioni da Supabase.");
+  if (!confirmed) return;
+
+  if (!supabaseClient || !staffSession) {
+    showToast("Accedi con Supabase per azzerare le prenotazioni.");
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient.from(SUPABASE_RESERVATIONS_TABLE).delete().neq("id", "");
+    if (error) {
+      showToast(`Supabase non ha cancellato le prenotazioni: ${error.message || "policy non valida"}.`);
+      return;
+    }
+
+    reservations = [];
+    knownRemoteReservationIds = new Set();
+    reservationSlotUsage = new Map();
+    expandedMobileReservationId = "";
+    saveReservations();
+    render();
+    updateAvailabilityReadout();
+    showToast("Prenotazioni azzerate.");
+  } catch {
+    showToast("Supabase non raggiungibile: prenotazioni non cancellate.");
+  }
 }
 
 async function clearReviewsRemote() {
@@ -4835,45 +4851,38 @@ function suggestTables(guests) {
 function exportCsv() {
   const headers = [
     "codice",
-    "creata_il",
+    "data_creazione",
     "nome",
     "telefono",
     "email",
     "giorno",
     "turno",
     "persone",
+    "numero_tavoli",
+    "descrizione_tavoli",
     "area",
     "arrivo",
-    "tavoli",
     "stato",
     "note",
   ];
   const rows = reservations.map((item) => [
     item.id,
-    item.createdAt,
-    item.name,
-    item.phone,
-    item.email,
+    formatDateTime(item.createdAt),
+    item.name || "-",
+    item.phone || "-",
+    item.email || "-",
     getDayLabel(item.day, true),
-    item.slot,
-    item.guests,
-    item.area,
-    item.arrival,
-    item.tables,
-    statusLabels[item.status],
-    item.notes,
+    item.slot || "-",
+    item.guests || "-",
+    getReservationTableCount(item),
+    formatReservationTablesShort(item.tables),
+    item.area || "-",
+    item.arrival || "-",
+    statusLabels[item.status] || item.status || "-",
+    item.notes || "-",
   ]);
 
-  const csv = [headers, ...rows].map((row) => row.map(toCsvCell).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `prenotazioni-cosenza-super-street-food-${new Date().toISOString().slice(0, 10)}.csv`;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  downloadCsv(`prenotazioni-cosenza-super-street-food-${new Date().toISOString().slice(0, 10)}.csv`, [headers, ...rows]);
   showToast("CSV esportato.");
 }
 
@@ -5799,7 +5808,30 @@ function wait(ms) {
 }
 
 function toCsvCell(value) {
-  return `"${String(value ?? "").replace(/"/g, '""')}"`;
+  return String(value ?? "")
+    .replace(/"/g, "")
+    .replace(/\r?\n|\r/g, " ")
+    .replace(/;/g, ",")
+    .trim();
+}
+
+function downloadCsv(filename, rows) {
+  const csv = "\uFEFFsep=;\n" + rows.map((row) => row.map(toCsvCell).join(";")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function getReservationTableCount(reservation) {
+  const guests = clampNumber(Number(reservation?.guests) || 0, 0, 999);
+  if (!guests) return "";
+  return Math.ceil(guests / SEATS_PER_TABLE);
 }
 
 function formatDate(value) {
