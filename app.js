@@ -4934,11 +4934,9 @@ function createWhatsAppUrl(reservation) {
     "",
     "grazie per aver effettuato la richiesta di prenotazione del tuo tavolo per il Cosenza Super Street Food 2026!",
     "",
-    "Ti ricordiamo che la prenotazione e soggetta a un contributo di 25 €, da corrispondere direttamente all'operatore che ti accompagnera al tavolo, a copertura dei costi di gestione del servizio.",
+    "Ti ricordiamo che la prenotazione e soggetta a un contributo di 25 € (a tavolo), da corrispondere direttamente all'operatore che ti accompagnera al tavolo, a copertura dei costi di gestione del servizio.",
     "",
     "Il tavolo verra mantenuto riservato per un massimo di 20 minuti oltre l'orario indicato. Trascorso tale termine, la prenotazione potrebbe decadere e il tavolo essere riassegnato.",
-    "",
-    "Attenzione: per prenotazioni con orario successivo alle 21:00, non sara possibile garantire il mantenimento della prenotazione oltre l'orario concordato.",
     "",
     "Ti aspettiamo al CSSF26! 🍔🍺",
   ].join("\n");
