@@ -8,7 +8,7 @@ const ANALYTICS_CONSENT_KEY = "cssf-analytics-consent-v1";
 const PRIVACY_BANNER_SEEN_KEY = "cssf-privacy-banner-seen-v1";
 const PUBLIC_PUSH_PROMPT_DISMISSED_KEY = "cssf-push-public-prompt-dismissed-v1";
 const TABLE_COUNT = 15;
-const SEATS_PER_TABLE = 8;
+const SEATS_PER_TABLE = 10;
 const DEFAULT_CAPACITY_PER_SLOT = TABLE_COUNT * SEATS_PER_TABLE;
 const MAX_ANALYTICS_EVENTS = 2500;
 const ADMIN_MOMENTS_PAGE_SIZE = 24;
@@ -396,6 +396,7 @@ const bookingPendingCount = document.querySelector("#bookingPendingCount");
 const bookingTodayCount = document.querySelector("#bookingTodayCount");
 const bookingAllCount = document.querySelector("#bookingAllCount");
 const bookingTodayLabel = document.querySelector("#bookingTodayLabel");
+const bookingCapacitySummary = document.querySelector("#bookingCapacitySummary");
 const capacityInput = document.querySelector("#capacityInput");
 const availabilityReadout = document.querySelector("#availabilityReadout");
 const slotsGrid = document.querySelector("#slotsGrid");
@@ -4224,6 +4225,7 @@ function renderReservations() {
   reservationsTable.innerHTML = "";
   emptyState.classList.toggle("visible", filtered.length === 0);
   updateBookingQuickViewSummary();
+  renderBookingCapacitySummary();
 
   filtered.forEach((reservation) => {
     const row = document.createElement("tr");
@@ -4265,7 +4267,7 @@ function renderReservations() {
         <div class="reservation-mobile-summary-main">
           <strong>${escapeHtml(reservation.name)}</strong>
           <span>${escapeHtml(formatReservationDayShort(reservation.day))} / ${escapeHtml(reservation.slot)}</span>
-          <span>${escapeHtml(`${reservation.guests} persone`)} / ${escapeHtml(formatReservationTablesShort(reservation.tables))}</span>
+          <span>${escapeHtml(`${reservation.guests} persone`)} / ${escapeHtml(getReservationTableSummary(reservation))}</span>
         </div>
         <button
           class="reservation-mobile-toggle"
@@ -4291,7 +4293,7 @@ function renderReservations() {
         </div>
       `;
     guestsCell.textContent = String(reservation.guests);
-    tablesCell.textContent = formatReservationTablesShort(reservation.tables);
+    tablesCell.textContent = getReservationTableSummary(reservation);
     statusCell.append(createStatusSelect(reservation));
     actionsCell.append(createActions(reservation));
     row.append(dayCell, customerCell, guestsCell, tablesCell, statusCell, actionsCell);
@@ -4385,6 +4387,27 @@ function updateBookingQuickViewSummary() {
   bookingQuickViews?.querySelectorAll("[data-booking-view]").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.bookingView === activeBookingView);
   });
+}
+
+function renderBookingCapacitySummary() {
+  if (!bookingCapacitySummary) return;
+
+  const summaryItems = eventDays.map((day) => {
+    const confirmedReservations = reservations.filter((item) => item.day === day.value && item.status === "confirmed");
+    const confirmedCount = confirmedReservations.length;
+    const usedSeats = confirmedReservations.reduce((sum, item) => sum + (Number(item.guests) || 0), 0);
+    const remainingSeats = Math.max(0, capacityPerSlot - usedSeats);
+
+    return `
+      <div class="booking-capacity-chip">
+        <strong>${escapeHtml(day.label)}</strong>
+        <span>${remainingSeats}/${capacityPerSlot} posti liberi</span>
+        <small>${confirmedCount} confermate</small>
+      </div>
+    `;
+  });
+
+  bookingCapacitySummary.innerHTML = summaryItems.join("");
 }
 
 function renderReviews() {
@@ -4875,7 +4898,7 @@ function exportCsv() {
     item.slot || "-",
     item.guests || "-",
     getReservationTableCount(item),
-    formatReservationTablesShort(item.tables),
+    getReservationTableSummary(item),
     item.area || "-",
     item.arrival || "-",
     statusLabels[item.status] || item.status || "-",
@@ -4920,7 +4943,7 @@ function formatReservationMessage(reservation) {
     `Cosenza Super Street Food - prenotazione ${reservation.id}`,
     reservation.name,
     `${getDayLabel(reservation.day, true)} alle ${reservation.slot}`,
-    `${reservation.guests} persone - ${reservation.tables}`,
+    `${reservation.guests} persone - ${getReservationTableSummary(reservation)}`,
     `Area: ${reservation.area || "Indifferente"}`,
     `Arrivo: ${reservation.arrival || "Non indicato"}`,
     `Stato: ${statusLabels[reservation.status]}`,
@@ -4929,16 +4952,29 @@ function formatReservationMessage(reservation) {
 
 function createWhatsAppUrl(reservation) {
   const phone = normalizePhone(reservation.phone);
+  const reservationName = cleanText(reservation.name) || "cliente";
+  const reservationDateTime = formatReservationWhatsAppDateTime(reservation.day, reservation.slot);
+  const reservationTableSummary = getReservationWhatsAppTableSummary(reservation.guests);
   const message = [
-    "Gentile,",
+    `Gentile ${reservationName},`,
     "",
     "grazie per aver effettuato la richiesta di prenotazione del tuo tavolo per il Cosenza Super Street Food 2026!",
     "",
-    "Ti ricordiamo che la prenotazione e soggetta a un contributo di 25 € (a tavolo), da corrispondere direttamente all'operatore che ti accompagnera al tavolo, a copertura dei costi di gestione del servizio.",
+    "Data e orario prenotati:",
+    reservationDateTime,
+    reservationTableSummary,
     "",
-    "Il tavolo verra mantenuto riservato per un massimo di 20 minuti oltre l'orario indicato. Trascorso tale termine, la prenotazione potrebbe decadere e il tavolo essere riassegnato.",
+    "Ti ricordiamo che la prenotazione prevede un contributo di €20,00 per ogni tavolo prenotato, da corrispondere direttamente all'operatore incaricato della consegna, a copertura dei costi di gestione del servizio di prenotazione.",
     "",
-    "Ti aspettiamo al CSSF26! 🍔🍺",
+    "Il tavolo verra riservato fino a 20 minuti oltre l'orario indicato. Trascorso tale termine, la prenotazione potra decadere e il tavolo essere riassegnato.",
+    "",
+    "Ricordiamo inoltre che, durante l'evento, tutti i tavoli sono liberi e gratuiti, ad eccezione di quelli prenotabili tramite l'apposito servizio di prenotazione, che rappresentano circa il 10% del totale dei tavoli disponibili.",
+    "",
+    "Mostra questo messaggio all'operatore al momento del ritiro del tavolo.",
+    "",
+    "Ti aspettiamo al Cosenza Super Street Food 2026!",
+    "",
+    "Lo Staff CSSF26",
   ].join("\n");
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -5721,6 +5757,32 @@ function formatReservationTablesShort(value) {
   return normalized
     .replace(/^(\d+)\s+tavol[oi]\s+da\s+/i, "$1 da ")
     .replace(/^(\d+)\s+tav\.\s+da\s+/i, "$1 da ");
+}
+
+function getReservationTableSummary(reservation) {
+  return suggestTables(Number(reservation?.guests) || 1);
+}
+
+function formatReservationWhatsAppDateTime(day, slot) {
+  const date = day ? new Date(`${day}T12:00:00`) : null;
+  if (!date || Number.isNaN(date.getTime())) {
+    return `${day || "-"}, ore ${slot || "-"}.`;
+  }
+
+  const formattedDay = new Intl.DateTimeFormat("it-IT", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+  }).format(date);
+
+  const capitalizedDay = formattedDay.charAt(0).toUpperCase() + formattedDay.slice(1);
+  return `${capitalizedDay}, ore ${slot || "-"}.`;
+}
+
+function getReservationWhatsAppTableSummary(guests) {
+  const tableCount = Math.max(1, Math.ceil((Number(guests) || 1) / SEATS_PER_TABLE));
+  const tableLabel = tableCount === 1 ? "tavolo" : "tavoli";
+  return `${tableCount} ${tableLabel} per ${SEATS_PER_TABLE} persone`;
 }
 
 function normalizePhone(phone) {
