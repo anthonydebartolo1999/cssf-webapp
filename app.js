@@ -37,9 +37,9 @@ const SUPABASE_RESERVATION_SLOT_USAGE_VIEW = "reservation_slot_usage";
 const SUPABASE_WRITE_TIMEOUT_MS = 15000;
 const MAX_MOMENT_FILE_SIZE = 2 * 1024 * 1024;
 
-const eventStart = new Date("2026-06-26T19:00:00+02:00");
-const eventEnd = new Date("2026-06-29T00:00:00+02:00");
-const countdownStart = new Date("2026-05-29T00:00:00+02:00");
+const eventStart = new Date("2027-06-18T19:00:00+02:00");
+const eventEnd = new Date("2027-06-21T00:00:00+02:00");
+const countdownStart = new Date("2027-05-18T00:00:00+02:00");
 const eventDays = [
   { value: "2026-06-26", label: "Ven 26 giugno", longLabel: "Venerdi 26 giugno 2026" },
   { value: "2026-06-27", label: "Sab 27 giugno", longLabel: "Sabato 27 giugno 2026" },
