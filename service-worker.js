@@ -1,4 +1,4 @@
-const CACHE_NAME = "cssf-pwa-v175";
+const CACHE_NAME = "cssf-pwa-v177";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -14,8 +14,8 @@ const PRECACHE_URLS = [
   "./staff.html",
   "./manifest.webmanifest?v=20260605-icon2",
   "./manifest-staff.webmanifest?v=20260606-staff-v2",
-  "./styles.css?v=20260622-mobile-bookings-v170",
-  "./app.js?v=20260622-mobile-bookings-v175",
+  "./styles.css?v=20260630-review-fixes-v177",
+  "./app.js?v=20260630-review-fixes-v177",
   "./icons/app-icon-192.png",
   "./icons/app-icon-512.png",
   "./icons/logo-photoroom.png?v=20260605-logo",

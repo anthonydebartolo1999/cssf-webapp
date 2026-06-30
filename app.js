@@ -14,8 +14,8 @@ const MAX_ANALYTICS_EVENTS = 2500;
 const ADMIN_MOMENTS_PAGE_SIZE = 24;
 const MAX_STAFF_RESERVATIONS = 150;
 const REVIEW_FEED_BATCH_SIZE = 3;
-const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v176";
-const SERVICE_WORKER_VERSION = "20260623-csv-export-v176";
+const ACTIVE_PWA_CACHE_NAME = "cssf-pwa-v177";
+const SERVICE_WORKER_VERSION = "20260630-review-fixes-v177";
 const PUSH_PUBLIC_KEY_ENDPOINT = "/api/push/public-key";
 const PUSH_SUBSCRIBE_ENDPOINT = "/api/push/subscribe";
 const PUSH_BROADCAST_ENDPOINT = "/api/push/broadcast";
@@ -960,7 +960,7 @@ async function handleReviewSubmit(event) {
 
   const formData = new FormData(reviewForm);
   const reviewBody = cleanText(formData.get("body"));
-  const reviewerType = cleanText(formData.get("reviewerType")) || "cliente";
+  const reviewerType = normalizeReviewerType(formData.get("reviewerType"));
   const review = {
     id: createId("REV"),
     createdAt: new Date().toISOString(),
@@ -5307,7 +5307,7 @@ function mapReviewFromRemote(row) {
   return {
     id: row.id,
     createdAt: row.created_at || new Date().toISOString(),
-    reviewer: row.reviewer || "Ospite",
+    reviewer: normalizeReviewerType(row.reviewer),
     rating: clampNumber(Number(row.rating), 1, 5),
     ageRange: row.age_range || row.ageRange || "",
     gender: row.gender || "",
@@ -5651,6 +5651,10 @@ function getAverageRating() {
 }
 
 function getReviewLabel(group, value) {
+  if (group === "reviewer") {
+    return reviewLabels.reviewer[normalizeReviewerType(value)] || "";
+  }
+
   return reviewLabels[group]?.[value] || "";
 }
 
@@ -5798,6 +5802,20 @@ function createReviewTitle(body) {
   if (!normalized) return "Recensione CSSF";
   if (normalized.length <= 72) return normalized;
   return `${normalized.slice(0, 69).trimEnd()}...`;
+}
+
+function normalizeReviewerType(value) {
+  const normalized = cleanText(value).toLowerCase();
+
+  if (normalized === "cliente" || normalized === "sponsor" || normalized === "espositore") {
+    return normalized;
+  }
+
+  if (normalized === "ospite" || !normalized) {
+    return "ospite";
+  }
+
+  return "ospite";
 }
 
 function getFileExtension(file) {
