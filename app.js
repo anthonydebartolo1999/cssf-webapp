@@ -305,6 +305,12 @@ const adminVoteCategoryLabels = {
 };
 
 const reviewLabels = {
+  reviewer: {
+    cliente: "Cliente",
+    sponsor: "Sponsor",
+    espositore: "Espositore",
+    ospite: "Ospite",
+  },
   ageRange: {
     "under-18": "Meno di 18",
     "18-24": "18-24",
@@ -954,16 +960,17 @@ async function handleReviewSubmit(event) {
 
   const formData = new FormData(reviewForm);
   const reviewBody = cleanText(formData.get("body"));
+  const reviewerType = cleanText(formData.get("reviewerType")) || "cliente";
   const review = {
     id: createId("REV"),
     createdAt: new Date().toISOString(),
-    reviewer: "Ospite",
+    reviewer: reviewerType,
     rating: clampNumber(Number(formData.get("rating")), 1, 5),
     ageRange: cleanText(formData.get("ageRange")),
     gender: cleanText(formData.get("gender")),
     originArea: cleanText(formData.get("originArea")),
-    favoriteAspect: cleanText(formData.get("favoriteAspect")),
-    improvementArea: cleanText(formData.get("improvementArea")),
+    favoriteAspect: "",
+    improvementArea: "",
     title: createReviewTitle(reviewBody),
     body: reviewBody,
   };
@@ -2574,6 +2581,7 @@ function renderStaffVotes() {
           <div class="staff-vote-detail-main">
             <strong>${escapeHtml(row.truck.name)}</strong>
             <span>${escapeHtml(row.truck.code)} - ${escapeHtml(categoryLabels[row.truck.category] || row.truck.category)} - ${escapeHtml(row.truck.zone)}</span>
+            <small class="staff-vote-detail-debug">Media reale ${escapeHtml(formatPreciseVoteScore(row.avgScore))} · Totale punti ${escapeHtml(String(row.totalScore))}</small>
           </div>
           <div class="vote-count">${formatVoteScore(row.avgScore)} · ${row.count} voti</div>
         `;
@@ -4561,21 +4569,15 @@ function renderReviewInsights(container) {
     return;
   }
 
-  const topImprovement = getTopReviewStat("improvementArea");
-  const topFavorite = getTopReviewStat("favoriteAspect");
+  const topReviewerType = getTopReviewStat("reviewer");
   const topAge = getTopReviewStat("ageRange");
   const topOrigin = getTopReviewStat("originArea");
 
   container.innerHTML = `
     <div class="review-insight-card">
-      <span>Cosa piace</span>
-      <strong>${escapeHtml(topFavorite?.label || "In raccolta")}</strong>
-      <small>${topFavorite ? `${topFavorite.count} risposte` : "Ancora pochi dati"}</small>
-    </div>
-    <div class="review-insight-card">
-      <span>Da migliorare</span>
-      <strong>${escapeHtml(topImprovement?.label || "In raccolta")}</strong>
-      <small>${topImprovement ? `${topImprovement.count} risposte` : "Ancora pochi dati"}</small>
+      <span>Tipo utente piu' presente</span>
+      <strong>${escapeHtml(topReviewerType?.label || "In raccolta")}</strong>
+      <small>${topReviewerType ? `${topReviewerType.count} risposte` : "Ancora pochi dati"}</small>
     </div>
     <div class="review-insight-card">
       <span>Pubblico piu' presente</span>
@@ -4618,12 +4620,11 @@ function renderReviewFeed(container, emptyState, isCompact = false) {
     const stars = Array.from({ length: 5 }, (_, index) =>
       `<span class="${index < review.rating ? "is-filled" : ""}">&#9733;</span>`
     ).join("");
+    const reviewerLabel = getReviewLabel("reviewer", review.reviewer) || "Utente";
     const tags = [
       getReviewLabel("ageRange", review.ageRange),
       getReviewLabel("gender", review.gender),
       getReviewLabel("originArea", review.originArea),
-      review.favoriteAspect ? `Top: ${getReviewLabel("favoriteAspect", review.favoriteAspect)}` : "",
-      review.improvementArea ? `Migliorare: ${getReviewLabel("improvementArea", review.improvementArea)}` : "",
     ].filter(Boolean);
     const card = document.createElement("article");
     card.className = `review-card${isCompact ? " review-card-compact review-card-collapsible" : ""}`;
@@ -4632,8 +4633,8 @@ function renderReviewFeed(container, emptyState, isCompact = false) {
       card.innerHTML = `
         <button class="review-card-toggle" type="button" aria-expanded="false">
           <div class="review-card-toggle-main">
-            <strong>${escapeHtml(review.title)}</strong>
-            <div class="review-meta">${formatDate(review.createdAt)}</div>
+            <strong>${escapeHtml(reviewerLabel)}</strong>
+            <div class="review-meta">${escapeHtml(`${formatDate(review.createdAt)} · ${review.rating}/5`)}</div>
           </div>
           <div class="review-card-toggle-side">
             <div class="review-card-rating">
@@ -4667,8 +4668,8 @@ function renderReviewFeed(container, emptyState, isCompact = false) {
       card.innerHTML = `
         <header>
           <div>
-            <strong>${escapeHtml(review.title)}</strong>
-            <div class="review-meta">${formatDate(review.createdAt)}</div>
+            <strong>${escapeHtml(reviewerLabel)}</strong>
+            <div class="review-meta">${escapeHtml(`${formatDate(review.createdAt)} · ${review.rating}/5`)}</div>
           </div>
           <div class="review-card-rating">
             <div class="review-stars" aria-label="${review.rating} stelle">${stars}</div>
@@ -4690,18 +4691,15 @@ function exportReviewsCsv() {
   }
 
   const rows = [
-    ["data", "titolo", "testo", "stelle", "eta", "sesso", "provenienza", "cosa_piace", "da_migliorare", "tornerebbe"],
+    ["data", "utente", "testo", "stelle", "eta", "sesso", "provenienza"],
     ...reviews.map((review) => [
       formatDate(review.createdAt),
-      review.title || "",
+      getReviewLabel("reviewer", review.reviewer),
       review.body || "",
       String(review.rating || ""),
       getReviewLabel("ageRange", review.ageRange),
       getReviewLabel("gender", review.gender),
       getReviewLabel("originArea", review.originArea),
-      getReviewLabel("favoriteAspect", review.favoriteAspect),
-      getReviewLabel("improvementArea", review.improvementArea),
-      getReviewLabel("wouldReturn", review.wouldReturn),
     ]),
   ];
 
@@ -5928,6 +5926,11 @@ function getVoteCategorySummary(entry) {
 function formatVoteScore(value) {
   const numericValue = Number(value) || 0;
   return `${numericValue.toFixed(1).replace(".", ",")}/5`;
+}
+
+function formatPreciseVoteScore(value) {
+  const numericValue = Number(value) || 0;
+  return `${numericValue.toFixed(2).replace(".", ",")}/5`;
 }
 
 function escapeHtml(value) {

@@ -5130,6 +5130,15 @@ td {
   line-height: 1.2;
 }
 
+.staff-vote-detail-debug {
+  display: block;
+  margin-top: 5px;
+  color: #6f6259;
+  font-size: 0.74rem;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
 .staff-vote-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
